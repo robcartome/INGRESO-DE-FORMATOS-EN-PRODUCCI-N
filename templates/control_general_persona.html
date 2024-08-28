@@ -70,7 +70,7 @@
                 <input type="file" id="carnetSaludTrabajador" class="form-control-file" name="carnetSaludTrabajador" accept="image/*" required>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" style="background-color: #FF8C00;">Agregar</button>
+        <button type="submit" class="btn btn-warning btn-block" style="background-color: #FF8C00;">Agregar</button>
         
     </form>
     
@@ -79,38 +79,48 @@
     <div class="row mt-5" id="trabajadorInfo">
         {% for trabajador in trabajadores %}
         <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
+            <div class="card shadow-sm h-100">
+                <!-- Contenido de la tarjeta -->
+                <div class="card-body d-flex flex-column">
+                    <!-- Título con el nombre completo del trabajador -->
                     <h5 class="card-title">{{ trabajador.apellidos }} {{ trabajador.nombres }}</h5>
-                    <p class="card-text">
+                    <!-- Información del trabajador -->
+                    <p class="card-text mb-3">
                         <strong>DNI:</strong> {{ trabajador.dni }}<br>
                         <strong>Área:</strong> {{ trabajador.area }}<br>
                         <strong>Cargo:</strong> {{ trabajador.cargo }}<br>
-                        <strong>Fecha de Nacimiento:</strong> {{ trabajador.fecha_nacimiento}}<br>
-                        <strong>Fecha de Ingreso:</strong> {{ trabajador.fecha_ingreso }} <br>
-                        <strong>Celular:</strong> {{ trabajador.celular }} <br>
-                        <strong>Celular de emergencia:</strong> {{ trabajador.celular_emergencia }} <br>
+                        <strong>Fecha de Nacimiento:</strong> {{ trabajador.fecha_nacimiento }}<br>
+                        <strong>Fecha de Ingreso:</strong> {{ trabajador.fecha_ingreso }}<br>
+                        <strong>Celular:</strong> {{ trabajador.celular }}<br>
+                        <strong>Celular de Emergencia:</strong> {{ trabajador.celular_emergencia }}<br>
                     </p>
-                    <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editTrabajadorModal" 
-                            data-id="{{ trabajador.idtrabajador }}" data-dni="{{ trabajador.dni }}" 
-                            data-nombres="{{ trabajador.nombres }}" data-apellidos="{{ trabajador.apellidos }}" 
-                            data-fechanacimiento="{{ trabajador.fecha_nacimiento }}" 
-                            data-direccion="{{ trabajador.direccion }}" data-celular="{{ trabajador.celular }}" 
-                            data-celularemergencia="{{ trabajador.celular_emergencia }}" 
-                            data-fechaingreso="{{ trabajador.fecha_ingreso }}" data-area="{{ trabajador.area }}" 
-                            data-cargo="{{ trabajador.cargo }}" data-genero="{{ trabajador.fk_idsexo }}">
-                        Editar
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="eliminarTrabajador('{{ trabajador.idtrabajador }}')">
-                        Eliminar
-                    </button>
-                    <a href="{{ url_for('control_general.download_formato', trabajador_id=trabajador.idtrabajador) }}" 
-                        class="btn btn-primary btn-block" 
-                        style="background-color: #FF8C00; margin-top: 20px;">
-                        Descargar Formato
-                    </a>
+                    <!-- Botones de acción -->
+                    <div class="mt-auto">
+                        <button type="button" class="btn btn-warning btn-sm btn-block mb-2" data-toggle="modal" data-target="#editTrabajadorModal"
+                                data-id="{{ trabajador.idtrabajador }}" data-dni="{{ trabajador.dni }}"
+                                data-nombres="{{ trabajador.nombres }}" data-apellidos="{{ trabajador.apellidos }}"
+                                data-fechanacimiento="{{ trabajador.fecha_nacimiento }}" data-direccion="{{ trabajador.direccion }}"
+                                data-celular="{{ trabajador.celular }}" data-celularemergencia="{{ trabajador.celular_emergencia }}"
+                                data-fechaingreso="{{ trabajador.fecha_ingreso }}" data-area="{{ trabajador.area }}"
+                                data-cargo="{{ trabajador.cargo }}" data-genero="{{ trabajador.fk_idsexo }}">
+                            Editar
+                        </button>
+                        <a href="{{ url_for('control_general.download_formato', trabajador_id=trabajador.idtrabajador) }}"
+                        class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FF8C00;">
+                            Descargar Formato
+                        </a>
+                        <button type="button" class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #ff0000;" onclick="eliminarTrabajador('{{ trabajador.idtrabajador }}')">
+                            Eliminar
+                        </button>
+                        
+                    </div>
                 </div>
-                <img src="data:image/jpeg;base64,{{ trabajador.carnet_salud }}" class="card-img-bottom img-fluid" alt="Carnet de Salud">
+                <!-- Imagen del carnet de salud -->
+                {% if trabajador.carnet_salud %}
+                <img src="data:image/jpeg;base64,{{ trabajador.carnet_salud }}" class="card-img-bottom img-fluid mt-2" alt="Carnet de Salud">
+                {% else %}
+                <img src="static/img/placeholder.png" class="card-img-bottom img-fluid mt-2" alt="Carnet de Salud No Disponible">
+                {% endif %}
             </div>
         </div>
         {% endfor %}

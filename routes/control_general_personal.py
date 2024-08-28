@@ -9,6 +9,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
 
 controlGeneral = Blueprint('control_general', __name__)
 
@@ -184,6 +185,15 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
         apellido_trabajador = trabajador['apellidos']
         fecha_nacimiento_trabajador = trabajador['fecha_nacimiento'].strftime('%d/%m/%Y')
         sexo_trabajador = 'Femenino' if trabajador['fk_idsexo'] == 1 else 'Masculino' 
+        direccion = trabajador['direccion']
+        celular = trabajador['celular']
+        celularEmergencia = trabajador['celular_emergencia']
+        dni = trabajador['dni']
+        fechaIngreso = trabajador['fecha_ingreso'].strftime('%d/%m/%Y')
+        area = trabajador['area']
+        cargo = trabajador['cargo']
+        carnet_salud_data = detalle_control_general['carnet_salud']
+
         # Crear un buffer en memoria
         pdf_buffer = io.BytesIO()
 
@@ -299,6 +309,8 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
         elements.append(personal_table)
         elements.append(Spacer(1, 20))
 
+
+
         # Crear tabla con nombres y apellidos
         header_nombre_apellido_table = [[
             Paragraph("NOMBRES:", header_nombre_apellido_style), 
@@ -316,23 +328,104 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
         ]))
         elements.append(table_nombre_apellido)
 
-        # Crear tabla con nombres y apellidos
-        header_nombre_apellido_table = [[
+
+
+        # Crear tabla con fecha de nacimiento y sexo 
+        header_fecha_nacimiento_table = [[
             Paragraph("FECHA DE NACIMIENTO:", header_nombre_apellido_style), 
             Paragraph("SEXO:", header_nombre_apellido_style)
         ]]
-        header_nombre_apellido_table.append([
+        header_fecha_nacimiento_table.append([
             Paragraph(fecha_nacimiento_trabajador, normal_style),
             Paragraph(sexo_trabajador, normal_style)
         ])
-        table_nombre_apellido = Table(header_nombre_apellido_table, colWidths=[3.9 * inch, 3.9 * inch])
-        table_nombre_apellido.setStyle(TableStyle([
+        table_fecha_sexo = Table(header_fecha_nacimiento_table, colWidths=[3.9 * inch, 3.9 * inch])
+        table_fecha_sexo.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ]))
-        elements.append(table_nombre_apellido)
+        elements.append(table_fecha_sexo)
+
+
+        # Crear tabla con dirección, celular y celular de emergencia
+        header_direc_telefono_table = [[
+            Paragraph("DIRECCIÓN:", header_nombre_apellido_style), 
+            Paragraph("TELEFONO/CELULAR:", header_nombre_apellido_style),
+            Paragraph("CELULAR DE EMERGENCIA:", header_nombre_apellido_style)
+        ]]
+        header_direc_telefono_table.append([
+            Paragraph(direccion, normal_style),
+            Paragraph(celular, normal_style),
+            Paragraph(celularEmergencia, normal_style)
+        ])
+        table_direc_telefono = Table(header_direc_telefono_table, colWidths=[3.9 * inch, 1.95 * inch, 1.95 * inch])
+        table_direc_telefono.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(table_direc_telefono)
+
+
+        # Crear tabla con dni y fecha de ingreso
+        header_dni_fecha_ingreso_table = [[
+            Paragraph("DNI:", header_nombre_apellido_style), 
+            Paragraph("FECHA DE INGRESO:", header_nombre_apellido_style)
+        ]]
+        header_dni_fecha_ingreso_table.append([
+            Paragraph(dni, normal_style),
+            Paragraph(fechaIngreso, normal_style)
+        ])
+        table_dni_fecha_ingreso = Table(header_dni_fecha_ingreso_table, colWidths=[3.9 * inch, 3.9 * inch])
+        table_dni_fecha_ingreso.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(table_dni_fecha_ingreso)
+
+
+
+        # Crear tabla con area y cargo
+        header_area_cargo_table = [[
+            Paragraph("ÁREA:", header_nombre_apellido_style), 
+            Paragraph("CARGO:", header_nombre_apellido_style)
+        ]]
+        header_area_cargo_table.append([
+            Paragraph(area, normal_style),
+            Paragraph(cargo, normal_style)
+        ])
+        table_area_cargo = Table(header_area_cargo_table, colWidths=[3.9 * inch, 3.9 * inch])
+        table_area_cargo.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(table_area_cargo)
+
         elements.append(Spacer(1, 20))
+
+        # Crear la sección del carnet de salud
+        if carnet_salud_data:
+            # Convertir los datos binarios en un flujo de bytes
+            carnet_image_stream = io.BytesIO(carnet_salud_data)
+            
+            # Agregar la imagen al PDF usando el flujo de bytes directamente
+            carnet_image_element = Image(carnet_image_stream, width=5 * inch, height=3 * inch)  # Ajusta el tamaño según sea necesario
+            elements.append(carnet_image_element)
+        else:
+            # Mostrar el marcador de posición si no hay carnet de salud
+            carnet_placeholder = Table(
+                [['Pegar Carnet de Salud Vigente']],
+                colWidths=[5 * inch], rowHeights=[3 * inch]
+            )
+            carnet_placeholder.setStyle(TableStyle([
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            elements.append(carnet_placeholder)
 
         # Construir el PDF
         doc.build(elements)
@@ -352,6 +445,7 @@ def download_formato():
 
     # Realizar la consulta para obtener detalles del trabajador utilizando el ID
     detalle_trabajador = execute_query(f"SELECT * FROM trabajadores WHERE idtrabajador = {trabajador_id}")
+    
 
     # Verificar si se obtuvieron resultados
     if not detalle_trabajador:
@@ -360,8 +454,14 @@ def download_formato():
     # Obtener el primer resultado de la lista de detalles del trabajador
     trabajador = detalle_trabajador[0]
 
-    # Realizar la consulta para obtener el control general del trabajador (ajustar la consulta según sea necesario)
-    detalle_control_general = execute_query(f"SELECT * FROM trabajadores WHERE idtrabajador = {trabajador_id}")
+    # Realizar la consulta para obtener el control general del trabajador
+    detalle_control_general = execute_query(f"SELECT * FROM controles_generales_personal WHERE fk_idtrabajador = {trabajador_id}")
+
+    # Asegurarse de que se obtuvieron resultados y acceder correctamente a los datos
+    if detalle_control_general:
+        detalle_control_general = detalle_control_general[0]  # Acceder al primer elemento
+    else:
+        return jsonify({'status': 'error', 'message': 'No se encontró información de control general.'}), 404
 
     # Generar el PDF con la información del trabajador
     pdf_buffer = generar_pdf_formato_generales_personal(trabajador, detalle_control_general)
