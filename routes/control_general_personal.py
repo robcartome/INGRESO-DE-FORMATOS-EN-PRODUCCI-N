@@ -2,11 +2,13 @@ from flask import Blueprint, render_template, request, jsonify, make_response, s
 from connection.database import execute_query
 import psycopg2
 import base64
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer, Frame, PageTemplate
 import io
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_JUSTIFY
+from reportlab.lib import colors
 
 controlGeneral = Blueprint('control_general', __name__)
 
@@ -175,8 +177,13 @@ def delete_trabajador():
         return jsonify({'status': 'error', 'message': 'Hubo un error al eliminar el trabajador.'}), 500
     
 
-def generar_pdf_formato_generales_personal():
+def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
     try:
+        # Usar los datos del trabajador correctamente, asumiendo que 'trabajador' es un diccionario o RealDictRow
+        nombre_trabajador = trabajador['nombres']
+        apellido_trabajador = trabajador['apellidos']
+        fecha_nacimiento_trabajador = trabajador['fecha_nacimiento'].strftime('%d/%m/%Y')
+        sexo_trabajador = 'Femenino' if trabajador['fk_idsexo'] == 1 else 'Masculino' 
         # Crear un buffer en memoria
         pdf_buffer = io.BytesIO()
 
@@ -186,77 +193,178 @@ def generar_pdf_formato_generales_personal():
         # Lista de elementos para el PDF
         elements = []
 
-        # Estilos
+        # Estilos para el texto
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(name='Title', fontSize=16, spaceAfter=10, alignment=1)
-        subtitle_style = ParagraphStyle(name='Subtitle', fontSize=14, spaceAfter=10, alignment=1)
-        normal_style = ParagraphStyle(name='Normal', parent=styles['Normal'], fontSize=12)
+        header_style = ParagraphStyle(
+            'header_style',
+            parent=styles['Title'],
+            fontSize=16,
+            spaceAfter=12,
+            alignment=1  # Centrado
+        )
+        normal_style = ParagraphStyle(name='Normal', parent=styles['Normal'], fontSize=10)
+        personal_text_style = ParagraphStyle(
+            'personal_text_style',
+            fontName='Helvetica-Bold',  # Fuente en negrita
+            fontSize=14,                # Tamaño de fuente 16
+            alignment=1,                # Centrado
+            spaceAfter=10               # Espacio después del párrafo (opcional)
+        )
+        header_nombre_apellido_style = ParagraphStyle(
+            'header_nombre_apellido_style',
+            fontName='Helvetica-Bold',
+            fontSize=10,
+            alignment=0
+        )
+
+
+        # Encabezado
+        header = [Paragraph("MANUAL DE BUENAS PRÁCTICAS DE MANUFACTURA", header_style)]
+        table_header = [[header[0]]]
 
         # Información del encabezado
-        data_header = [
-            ['CAPÍTULO V: FORMATOS', 'CONTROL GENERAL DEL PERSONAL'],
-            ['Edición: 01', 'Revisión: 0', 'Fecha de Aprobación: Febrero 2023', 'Código: TI-BPM-F07-CGP']
-        ]
-        table_header = Table(data_header, colWidths=[120, 120, 160, 120])
+        table_header.append([
+            Paragraph('CAPÍTULO V: FORMATOS', normal_style),
+            Paragraph('CONTROL GENERAL DEL PERSONAL', normal_style)
+        ])
+        table_header.append([
+            Paragraph('Edición: 01', normal_style),
+            Paragraph('Revisión: 0', normal_style),
+            Paragraph('Fecha de Aprobación: Febrero 2023', normal_style),
+            Paragraph('Código: TI-BPM-F07-CGP', normal_style)
+        ])
 
-        table_header.setStyle(TableStyle([
-            ('SPAN', (0, 0), (1, 0)),
-            ('SPAN', (2, 1), (3, 1)),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('BACKGROUND', (0, 0), (-1, 0), colors.red),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        # Definir la tabla y los estilos
+        table = Table(table_header, colWidths=[1.3 * inch, 1 * inch, 2.5 * inch, 1.8 * inch])
+        table.setStyle(TableStyle([
+            ('SPAN', (0, 0), (-1, 0)),  
+            ('BACKGROUND', (0, 0), (-1, 0), colors.white),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('SPAN', (0, 1), (0, 1)),  
+            ('SPAN', (1, 1), (-1, 1)),  
+            ('ALIGN', (0, 1), (0, 1), 'LEFT'),  
+            ('ALIGN', (1, 1), (-1, 1), 'CENTER'),  
+            ('VALIGN', (1, 1), (-1, 1), 'MIDDLE'),
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 1), (-1, 1), 12),
+            ('BACKGROUND', (0, 1), (-1, 1), colors.white),
+            ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
+            ('BOTTOMPADDING', (0, 1), (-1, 1), 8),
+            ('ALIGN', (0, 2), (-1, 2), 'CENTER'),
+            ('FONTNAME', (0, 2), (-1, 2), 'Helvetica'),
+            ('FONTSIZE', (0, 2), (-1, 2), 10),
+            ('BACKGROUND', (0, 2), (-1, 2), colors.white),
+            ('TEXTCOLOR', (0, 2), (-1, 2), colors.black),
+            ('BOTTOMPADDING', (0, 2), (-1, 2), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ]))
 
-        elements.append(table_header)
+        # Cargar la imagen y ajustar el tamaño
+        image_path = 'static/img/logo.png'  # Reemplaza con la ruta de tu imagen
+        imagen = Image(image_path, width=1 * inch, height=0.5 * inch)
 
-        # Datos del personal
-        data_personal = [
-            ['NOMBRES:', '', 'APELLIDOS:', ''],
-            ['FECHA DE NACIMIENTO:', '', 'SEXO:', ''],
-            ['DIRECCIÓN:', '', 'TELÉFONO/CELULAR:', '', 'CELULAR DE EMERGENCIA:', ''],
-            ['DNI:', '', 'FECHA DE INGRESO:', ''],
-            ['ÁREA:', '', 'CARGO:', '']
-        ]
-        
-        table_personal = Table(data_personal, colWidths=[80, 140, 80, 140, 80, 140])
-        table_personal.setStyle(TableStyle([
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-            ('SPAN', (0, 2), (1, 2)),
-            ('SPAN', (3, 2), (4, 2)),
-            ('SPAN', (0, 4), (1, 4)),
-            ('SPAN', (3, 4), (4, 4)),
+        # Crear una tabla con la imagen y la tabla de contenido
+        combined_table = Table([[imagen, table]], colWidths=[1.2 * inch, 6.6 * inch])
+        combined_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+            ('VALIGN', (1, 0), (1, 0), 'TOP'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
         ]))
-        elements.append(Paragraph("1. DATOS DEL PERSONAL", style_normal))
-        elements.append(table_personal)
 
-        # Espacio para el carnet de salud
-        elements.append(Paragraph("\n\nPegar Carnet de Salud Vigente", style_normal))
+        elements.append(combined_table)
+        elements.append(Spacer(1, 20))
 
-        # Crear el documento PDF
-        pdf.build(elements)
+        # Crear y agregar tabla de datos del personal
+        personal_text = Paragraph('1. DATOS DEL PERSONAL', personal_text_style)
+        personal_table = Table([[personal_text]], colWidths=[7.8 * inch])
+        personal_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'), 
+            ('VALIGN', (0, 0), (0, 0), 'MIDDLE'),
+            ('BACKGROUND', (0, 0), (0, 0), colors.white),
+            ('TEXTCOLOR', (0, 0), (0, 0), colors.black),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(personal_table)
+        elements.append(Spacer(1, 20))
 
-        # Configurar la respuesta HTTP
-        response = make_response(buffer.getvalue())
-        response.headers['Content-Disposition'] = 'attachment; filename=formato_control_general.pdf'
-        response.mimetype = 'application/pdf'
-        
-        buffer.close()
-        
-        return response
+        # Crear tabla con nombres y apellidos
+        header_nombre_apellido_table = [[
+            Paragraph("NOMBRES:", header_nombre_apellido_style), 
+            Paragraph("APELLIDOS:", header_nombre_apellido_style)
+        ]]
+        header_nombre_apellido_table.append([
+            Paragraph(nombre_trabajador, normal_style),
+            Paragraph(apellido_trabajador, normal_style)
+        ])
+        table_nombre_apellido = Table(header_nombre_apellido_table, colWidths=[3.9 * inch, 3.9 * inch])
+        table_nombre_apellido.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(table_nombre_apellido)
+
+        # Crear tabla con nombres y apellidos
+        header_nombre_apellido_table = [[
+            Paragraph("FECHA DE NACIMIENTO:", header_nombre_apellido_style), 
+            Paragraph("SEXO:", header_nombre_apellido_style)
+        ]]
+        header_nombre_apellido_table.append([
+            Paragraph(fecha_nacimiento_trabajador, normal_style),
+            Paragraph(sexo_trabajador, normal_style)
+        ])
+        table_nombre_apellido = Table(header_nombre_apellido_table, colWidths=[3.9 * inch, 3.9 * inch])
+        table_nombre_apellido.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(table_nombre_apellido)
+        elements.append(Spacer(1, 20))
+
+        # Construir el PDF
+        doc.build(elements)
+
+        # Regresar el buffer del PDF
+        pdf_buffer.seek(0)
+        return pdf_buffer
 
     except Exception as e:
         print(f"Error al generar el PDF: {e}")
         return jsonify({'status': 'error', 'message': 'Error al generar el PDF.'}), 500
-    
+
 @controlGeneral.route('/download_formato', methods=['GET'])
 def download_formato():
+    # Obtener el id del trabajador de los argumentos de la URL
+    trabajador_id = request.args.get('trabajador_id')
 
-    detalle_trabajador = execute_query("SELECT * FROM trabajadores")
+    # Realizar la consulta para obtener detalles del trabajador utilizando el ID
+    detalle_trabajador = execute_query(f"SELECT * FROM trabajadores WHERE idtrabajador = {trabajador_id}")
 
-    detalle_control_general = execute_query("SELECT * FROM trabajadores")
+    # Verificar si se obtuvieron resultados
+    if not detalle_trabajador:
+        return jsonify({'status': 'error', 'message': 'No se encontró el trabajador.'}), 404
 
-    pdf_buffer = generar_pdf_formato_generales_personal(detalle_trabajador,detalle_control_general)
+    # Obtener el primer resultado de la lista de detalles del trabajador
+    trabajador = detalle_trabajador[0]
+
+    # Realizar la consulta para obtener el control general del trabajador (ajustar la consulta según sea necesario)
+    detalle_control_general = execute_query(f"SELECT * FROM trabajadores WHERE idtrabajador = {trabajador_id}")
+
+    # Generar el PDF con la información del trabajador
+    pdf_buffer = generar_pdf_formato_generales_personal(trabajador, detalle_control_general)
 
     return send_file(pdf_buffer, as_attachment=True, download_name="reporte_cotizar_utiles.pdf", mimetype='application/pdf')
+

@@ -71,9 +71,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block" style="background-color: #FF8C00;">Agregar</button>
-        <a href="{{ url_for('control_general.download_formato') }}" class="btn btn-primary btn-block" style="background-color: #FF8C00; margin-top: 20px;">
-            Descargar Formato
-        </a>
+        
     </form>
     
 
@@ -106,6 +104,11 @@
                     <button type="button" class="btn btn-danger" onclick="eliminarTrabajador('{{ trabajador.idtrabajador }}')">
                         Eliminar
                     </button>
+                    <a href="{{ url_for('control_general.download_formato', trabajador_id=trabajador.idtrabajador) }}" 
+                        class="btn btn-primary btn-block" 
+                        style="background-color: #FF8C00; margin-top: 20px;">
+                        Descargar Formato
+                    </a>
                 </div>
                 <img src="data:image/jpeg;base64,{{ trabajador.carnet_salud }}" class="card-img-bottom img-fluid" alt="Carnet de Salud">
             </div>
