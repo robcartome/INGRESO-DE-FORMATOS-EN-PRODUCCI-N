@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Dashboard{% endblock %}</title>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <!-- CSS de Select2 y tema Bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.3.2/dist/select2-bootstrap4.min.css" rel="stylesheet">
+        <link rel="icon" href="{{ url_for('static', filename='img/icono_principal.png') }}" type="image/x-icon">
+        <!-- Añadir jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+
+<body>
+    <!-- Header con Navbar fija en la parte superior -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top" style="background-color: #000000;">
+        <a class="navbar-brand" href="{{ url_for('home.principal') }}">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="120" height="40">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <img src="{{ url_for('static', filename='img/navigation.png') }}" alt="Toggle navigation" width="30" height="30">
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarContent">
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="poesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #FF4500;">
+                        POES
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="poesDropdown">
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('lavado_Manos.lavado_Manos') }}">
+                            <img src="{{ url_for('static', filename='img/lavado_manos.png') }}" alt="Lavado de manos" width="20" height="20" class="mr-2">
+                            Lavado de manos
+                        </a>
+                        <a class="dropdown-item" href="{{ url_for('home.principal') }}">Formato 2 POES</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="bpmDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #FF4500;">
+                        BPM
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="bpmDropdown">
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('control_general.control_general') }}">
+                            <img src="{{ url_for('static', filename='img/personal.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
+                            Control general del personal
+                        </a>
+                        <a class="dropdown-item" href="{{ url_for('home.principal') }}">Formato 2 BPM</a>
+                    </div>
+                </li>
+            </ul>
+            
+            <form class="form-inline my-2 my-lg-0 ml-auto">
+                <div class="input-group">
+                    <input class="form-control" type="search" placeholder="Buscar" aria-label="Buscar">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit" style="background-color: #FF8C00;">Buscar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </nav>
+    
+    
+    
+    
+    
+
+    <div class="container-fluid mt-4" style="padding-top: 70px;"> <!-- Agregar padding-top para evitar superposición con la navbar -->
+        {% block content %}
+        
+        {% endblock %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Código para SweetAlert en el perfil
+            $('.mostrar_reporte').on('click', function(e) {
+                e.preventDefault(); // Prevenir que el enlace realice su acción por defecto
+
+                Swal.fire({
+                    title: "Lo descubriste",
+                    width: 600,
+                    padding: "3em",
+                    color: "#ffffff",
+                    background: "#fff url({{ url_for('static', filename='img/trees.gif') }})",
+                    backdrop: `
+                        rgba(0,0,123,0.4)
+                        url("{{ url_for('static', filename='img/nyan-cat.gif') }}")
+                        left top
+                        no-repeat
+                    `
+                });
+            });
+        });
+    </script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- JS de Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</body>
+</html>
