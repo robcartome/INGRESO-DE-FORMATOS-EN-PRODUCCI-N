@@ -4,61 +4,63 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h1 class="mb-4">Formato de control general del personal</h1>
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Control general del personal</h1>
+    
+    <!-- Formulario de Registro de Trabajador -->
     <form id="formControlGeneralPersona" method="POST" action="{{ url_for('control_general.control_general') }}" enctype="multipart/form-data">
-        <div class="form-row">
+        <div class="form-row mb-3">
             <div class="form-group col-md-6">
-                <label for="dniTrabajador">DNI:</label>
+                <label for="dniTrabajador" style="color: #FF8C00;">DNI:</label>
                 <input type="number" id="dniTrabajador" class="form-control" name="dniTrabajador" placeholder="DNI" required>
             </div>
             <div class="form-group col-md-6">
-                <label for="nombresTrabajador">Nombres:</label>
+                <label for="nombresTrabajador" style="color: #FF8C00;">Nombres:</label>
                 <input type="text" id="nombresTrabajador" class="form-control" name="nombresTrabajador" placeholder="Nombres del Trabajador" required>
             </div>
         </div>
-        <div class="form-row">
+        <div class="form-row mb-3">
             <div class="form-group col-md-6">
-                <label for="apellidosTrabajador">Apellidos:</label>
+                <label for="apellidosTrabajador" style="color: #FF8C00;">Apellidos:</label>
                 <input type="text" id="apellidosTrabajador" class="form-control" name="apellidosTrabajador" placeholder="Apellidos del Trabajador">
             </div>
             <div class="form-group col-md-6">
-                <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+                <label for="fechaNacimiento" style="color: #FF8C00;">Fecha de Nacimiento:</label>
                 <input type="date" id="fechaNacimiento" class="form-control" name="fechaNacimiento">
             </div>
         </div>
-        <div class="form-row">
+        <div class="form-row mb-3">
             <div class="form-group col-md-6">
-                <label for="direccionTrabajador">Dirección:</label>
+                <label for="direccionTrabajador" style="color: #FF8C00;">Dirección:</label>
                 <input type="text" id="direccionTrabajador" class="form-control" name="direccionTrabajador" placeholder="Dirección del Trabajador">
             </div>
             <div class="form-group col-md-6">
-                <label for="celularTrabajador">Celular:</label>
+                <label for="celularTrabajador" style="color: #FF8C00;">Celular:</label>
                 <input type="number" id="celularTrabajador" class="form-control" name="celularTrabajador" placeholder="Celular del Trabajador">
             </div>
         </div>
-        <div class="form-row">
+        <div class="form-row mb-3">
             <div class="form-group col-md-6">
-                <label for="celularEmergenciaTrabajador">Celular de emergencia:</label>
+                <label for="celularEmergenciaTrabajador" style="color: #FF8C00;">Celular de emergencia:</label>
                 <input type="number" id="celularEmergenciaTrabajador" class="form-control" name="celularEmergenciaTrabajador" placeholder="Celular de emergencia del Trabajador">
             </div>
             <div class="form-group col-md-6">
-                <label for="fechaIngreso">Fecha de ingreso:</label>
+                <label for="fechaIngreso" style="color: #FF8C00;">Fecha de ingreso:</label>
                 <input type="date" id="fechaIngreso" class="form-control" name="fechaIngreso" placeholder="Fecha de ingreso del Trabajador">
             </div>
         </div>
-        <div class="form-row">
+        <div class="form-row mb-3">
             <div class="form-group col-md-6">
-                <label for="areaTrabajador">Área:</label>
+                <label for="areaTrabajador" style="color: #FF8C00;">Área:</label>
                 <input type="text" id="areaTrabajador" class="form-control" name="areaTrabajador" placeholder="Área del Trabajador" value="Producción">
             </div>
             <div class="form-group col-md-6">
-                <label for="cargoTrabajador">Cargo:</label>
+                <label for="cargoTrabajador" style="color: #FF8C00;">Cargo:</label>
                 <input type="text" id="cargoTrabajador" class="form-control" name="cargoTrabajador" placeholder="Cargo del Trabajador">
             </div>
         </div>
-        <div class="form-row">
+        <div class="form-row mb-3">
             <div class="form-group col-md-6">
-                <label for="genero_seleccionar">Género:</label>
+                <label for="genero_seleccionar" style="color: #FF8C00;">Género:</label>
                 <select id="genero_seleccionar" class="form-control" name="genero_seleccionar" required>
                     {% for g in genero %}
                         <option value="{{ g.idsexo }}">{{ g.detalle_sexo }}</option>
@@ -66,25 +68,20 @@
                 </select>
             </div>
             <div class="form-group col-md-6">
-                <label for="carnetSaludTrabajador">Carnet de salud:</label>
+                <label for="carnetSaludTrabajador" style="color: #FF8C00;">Carnet de salud:</label>
                 <input type="file" id="carnetSaludTrabajador" class="form-control-file" name="carnetSaludTrabajador" accept="image/*" required>
             </div>
         </div>
-        <button type="submit" class="btn btn-warning btn-block" style="background-color: #FF8C00;">Agregar</button>
-        
+        <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;"><i class="fas fa-user-plus"></i> Agregar</button>
     </form>
-    
 
     <!-- Sección de Información del Trabajador -->
     <div class="row mt-5" id="trabajadorInfo">
         {% for trabajador in trabajadores %}
         <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-            <div class="card shadow-sm h-100">
-                <!-- Contenido de la tarjeta -->
-                <div class="card-body d-flex flex-column">
-                    <!-- Título con el nombre completo del trabajador -->
-                    <h5 class="card-title">{{ trabajador.apellidos }} {{ trabajador.nombres }}</h5>
-                    <!-- Información del trabajador -->
+            <div class="card shadow-sm h-100" style="border: 1px solid #FF8C00;">
+                <div class="card-body d-flex flex-column" style="background-color: #FFDAB9;">
+                    <h5 class="card-title" style="color: #FF8C00;">{{ trabajador.apellidos }} {{ trabajador.nombres }}</h5>
                     <p class="card-text mb-3">
                         <strong>DNI:</strong> {{ trabajador.dni }}<br>
                         <strong>Área:</strong> {{ trabajador.area }}<br>
@@ -94,28 +91,25 @@
                         <strong>Celular:</strong> {{ trabajador.celular }}<br>
                         <strong>Celular de Emergencia:</strong> {{ trabajador.celular_emergencia }}<br>
                     </p>
-                    <!-- Botones de acción -->
                     <div class="mt-auto">
-                        <button type="button" class="btn btn-warning btn-sm btn-block mb-2" data-toggle="modal" data-target="#editTrabajadorModal"
+                        <button type="button" class="btn btn-outline-warning btn-sm btn-block mb-2" data-toggle="modal" data-target="#editTrabajadorModal"
                                 data-id="{{ trabajador.idtrabajador }}" data-dni="{{ trabajador.dni }}"
                                 data-nombres="{{ trabajador.nombres }}" data-apellidos="{{ trabajador.apellidos }}"
                                 data-fechanacimiento="{{ trabajador.fecha_nacimiento }}" data-direccion="{{ trabajador.direccion }}"
                                 data-celular="{{ trabajador.celular }}" data-celularemergencia="{{ trabajador.celular_emergencia }}"
                                 data-fechaingreso="{{ trabajador.fecha_ingreso }}" data-area="{{ trabajador.area }}"
                                 data-cargo="{{ trabajador.cargo }}" data-genero="{{ trabajador.fk_idsexo }}">
-                            Editar
+                            <i class="fas fa-edit"></i> Editar
                         </button>
                         <a href="{{ url_for('control_general.download_formato', trabajador_id=trabajador.idtrabajador) }}"
-                        class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FF8C00;">
-                            Descargar Formato
+                           class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FFC107; color: white;">
+                            <i class="fas fa-download"></i> Descargar Formato
                         </a>
-                        <button type="button" class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #ff0000;" onclick="eliminarTrabajador('{{ trabajador.idtrabajador }}')">
-                            Eliminar
+                        <button type="button" class="btn btn-danger btn-sm btn-block mb-2" onclick="eliminarTrabajador('{{ trabajador.idtrabajador }}')">
+                            <i class="fas fa-trash-alt"></i> Eliminar
                         </button>
-                        
                     </div>
                 </div>
-                <!-- Imagen del carnet de salud -->
                 {% if trabajador.carnet_salud %}
                 <img src="data:image/jpeg;base64,{{ trabajador.carnet_salud }}" class="card-img-bottom img-fluid mt-2" alt="Carnet de Salud">
                 {% else %}
@@ -218,6 +212,9 @@
         </div>
     </div>
 </div>
+
+<!-- Incluir íconos de Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
 <script src="{{ url_for('static', filename='js/control_general_persona.js') }}"></script>
 {% endblock %}

@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS public.Formatos (
 	idFormatos SERIAL PRIMARY KEY,
 	Mes VARCHAR(10),
 	Anio VARCHAR(4),
+	estado VARCHAR(15),
 	fk_idTipoFormato INT REFERENCES public.TiposFormatos(idTipoFormato) NOT NULL
 );
 
@@ -44,7 +45,7 @@ CREATE TABLE IF NOT EXISTS public.Formatos (
 CREATE TABLE IF NOT EXISTS public.LavadosManos (
 	idMano SERIAL PRIMARY KEY,
 	Fecha DATE NOT NULL,
-	Hora DATE NOT NULL,
+	Hora TIME NOT NULL,
 	fk_idTrabajador INT REFERENCES public.Trabajadores(idTrabajador) NOT NULL,
 	fk_idFormatos INT REFERENCES public.Formatos(idFormatos) NOT NULL
 );
@@ -88,3 +89,5 @@ CREATE TABLE IF NOT EXISTS public.Proveedores (
 	fk_idRepresentanteLegal INT REFERENCES public.Representantes_legales(idRepresentanteLegal) NOT NULL,
 	fk_idDomicilioLegal INT REFERENCES public.Domicilios_legales(idDomicilioLegal) NOT NULL
 );
+
+ALTER TABLE lavadosmanos ALTER COLUMN hora TYPE TIME;
