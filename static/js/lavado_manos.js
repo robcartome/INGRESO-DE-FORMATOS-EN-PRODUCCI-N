@@ -100,12 +100,34 @@ function verDetalleHistorial(idFormatos) {
     $.get('/lavado_Manos/obtener_detalle_lavado/' + idFormatos, function(response) {
         if (response.status === 'success') {
             // Construye el contenido del modal con los detalles obtenidos
-            const detalles = `
-                <p><strong>Fecha:</strong> ${response.detalle.fecha}</p>
-                <p><strong>Hora:</strong> ${response.detalle.hora}</p>
-                <p><strong>Trabajador:</strong> ${response.detalle.fk_idtrabajador}</p>
-                <p><strong>ID Formato:</strong> ${response.detalle.fk_idformatos}</p>
+            let detalles = `
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Trabajador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
             `;
+
+            // Iterar a través de los detalles y agregarlos a la tabla
+            response.detalles.forEach(function(detalle) {
+                detalles += `
+                    <tr>
+                        <td>${detalle.fecha}</td>
+                        <td>${detalle.hora}</td>
+                        <td>${detalle.nombre_formateado}</td>
+                    </tr>
+                `;
+            });
+
+            detalles += `
+                    </tbody>
+                </table>
+            `;
+
             // Inserta los detalles en el contenido del modal
             $('#detalleContenido').html(detalles);
             // Muestra el modal con los detalles del registro

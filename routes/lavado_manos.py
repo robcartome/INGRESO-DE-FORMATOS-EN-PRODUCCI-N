@@ -117,7 +117,7 @@ def finalizar_lavado_manos():
 def obtener_detalle_lavado(id_formatos):
     try:
         # Ejecutar la consulta SQL para obtener los detalles
-        query = "SELECT * FROM lavadosmanos WHERE idmano = %s"
+        query = "SELECT * FROM v_lavados_manos WHERE idformatos = %s"
         detalles = execute_query(query, (id_formatos,))
 
         # Verificar si se encontraron resultados
@@ -125,12 +125,12 @@ def obtener_detalle_lavado(id_formatos):
             return jsonify({'status': 'error', 'message': 'No se encontraron detalles para el registro.'}), 404
 
         # Convertir los objetos datetime a string para JSON serialization
-        detalle = detalles[0]
-        detalle['fecha'] = detalle['fecha'].strftime('%Y-%m-%d')  # Formato de fecha
-        detalle['hora'] = detalle['hora'].strftime('%H:%M:%S')    # Formato de hora
+        for detalle in detalles:
+            detalle['fecha'] = detalle['fecha'].strftime('%Y-%m-%d')  # Formato de fecha
+            detalle['hora'] = detalle['hora'].strftime('%H:%M:%S')    # Formato de hora
 
         # Enviar los detalles de vuelta al frontend
-        return jsonify({'status': 'success', 'detalle': detalle}), 200
+        return jsonify({'status': 'success', 'detalles': detalles}), 200
 
     except Exception as e:
         print(f"Error al obtener los detalles: {e}")

@@ -73,20 +73,24 @@ WHERE
 
 CREATE OR REPLACE VIEW v_historial_lavado_manos AS
 SELECT
-    EXTRACT(DAY FROM lv.fecha) AS dia,  -- Extrae solo el día de la fecha
     TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
     f.anio,
     f.fk_idtipoformato,
     f.estado,
 	f.idformatos
 FROM
-    lavadosmanos lv
-JOIN
-    formatos f ON f.idformatos = lv.idmano
+    formatos f
 WHERE 
 	f.fk_idtipoformato = 2 AND estado = 'CERRADO'
 ORDER BY
-    lv.fecha DESC;
+	f.idformatos DESC;
+
+DROP VIEW v_historial_lavado_manos
 
 SELECT * FROM v_lavados_manos WHERE idformatos=11
 
+SELECT * FROM v_historial_lavado_manos
+
+SELECT * FROM lavadosmanos WHERE fk_idtrabajador = 5
+
+SELECT * FROM trabajadores
