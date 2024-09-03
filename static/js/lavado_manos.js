@@ -53,7 +53,7 @@ function generarFormatoLavadoManos() {
                 showConfirmButton: false,
                 timer: 500
             }).then(() => {
-                cargarDetalle(currentSolicitudIdUtil, false);
+                location.reload();
             });
         } else {
             Swal.fire({
@@ -64,6 +64,70 @@ function generarFormatoLavadoManos() {
         }
     });
 }
+
+function finalarRegistroLavado(){
+    $.post('/lavado_Manos/finalizar_lavado_manos', function(response){
+        if (response.status === 'success'){
+            Swal.fire({
+                icon: 'success',
+                title: 'Se finalizo',
+                text: 'Se finalizo correctamente el formato de lavado de manos.',
+                showConfirmButton: false,
+                timer: 500
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al generar un formato de lavado de manos. Por favor, inténtelo nuevamente.',
+            });
+        }
+    });
+}
+
+function historialLavadoManos(){
+    $.get('/lavado_Manos/historialLavadoManos', function(data){
+        var tableBody = $('#historialLavadoManosBody');
+        tableBody.empty();
+    });
+}
+
+
+function verDetalleHistorial(idFormatos) {
+    // Realiza una solicitud GET para obtener los detalles del registro
+    $.get('/lavado_Manos/obtener_detalle_lavado/' + idFormatos, function(response) {
+        if (response.status === 'success') {
+            // Construye el contenido del modal con los detalles obtenidos
+            const detalles = `
+                <p><strong>Fecha:</strong> ${response.detalle.fecha}</p>
+                <p><strong>Hora:</strong> ${response.detalle.hora}</p>
+                <p><strong>Trabajador:</strong> ${response.detalle.fk_idtrabajador}</p>
+                <p><strong>ID Formato:</strong> ${response.detalle.fk_idformatos}</p>
+            `;
+            // Inserta los detalles en el contenido del modal
+            $('#detalleContenido').html(detalles);
+            // Muestra el modal con los detalles del registro
+            $('#detalleLavadoManos').modal('show');
+        } else {
+            // Muestra un mensaje de error si no se pudieron obtener los detalles
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron obtener los detalles del registro. Por favor, inténtelo nuevamente.',
+            });
+        }
+    }).fail(function() {
+        // Muestra un mensaje de error en caso de fallo en la solicitud
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error al intentar obtener los detalles. Por favor, inténtelo nuevamente.',
+        });
+    });
+}
+
 
 // <- Para entregarUtil.html ->
 $(document).ready(function() {

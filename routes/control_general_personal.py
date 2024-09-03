@@ -2,14 +2,13 @@ from flask import Blueprint, render_template, request, jsonify, make_response, s
 from connection.database import execute_query
 import psycopg2
 import base64
-import io
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer
-from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image, Spacer, Frame, PageTemplate, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.lib.enums import TA_JUSTIFY
-from reportlab.lib import colors
-from reportlab.lib.utils import ImageReader
+import io
+
 
 controlGeneral = Blueprint('control_general', __name__)
 
@@ -292,7 +291,7 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
         ]))
 
         elements.append(combined_table)
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 6))
 
         # Crear y agregar tabla de datos del personal
         personal_text = Paragraph('1. DATOS DEL PERSONAL', personal_text_style)
@@ -307,9 +306,7 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ]))
         elements.append(personal_table)
-        elements.append(Spacer(1, 20))
-
-
+        elements.append(Spacer(1, 6))
 
         # Crear tabla con nombres y apellidos
         header_nombre_apellido_table = [[
@@ -385,8 +382,6 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
         ]))
         elements.append(table_dni_fecha_ingreso)
 
-
-
         # Crear tabla con area y cargo
         header_area_cargo_table = [[
             Paragraph("ÁREA:", header_nombre_apellido_style), 
@@ -404,16 +399,27 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
         ]))
         elements.append(table_area_cargo)
 
-        elements.append(Spacer(1, 20))
+        # Agrupar la imagen y su marco con KeepTogether para evitar saltos de página
+        carnet_section = []
+
+        # Añadir un espacio antes de la imagen
+        carnet_section.append(Spacer(1, 33))
 
         # Crear la sección del carnet de salud
         if carnet_salud_data:
             # Convertir los datos binarios en un flujo de bytes
             carnet_image_stream = io.BytesIO(carnet_salud_data)
-            
+
             # Agregar la imagen al PDF usando el flujo de bytes directamente
-            carnet_image_element = Image(carnet_image_stream, width=5 * inch, height=3 * inch)  # Ajusta el tamaño según sea necesario
-            elements.append(carnet_image_element)
+            carnet_image_element = Image(carnet_image_stream, width=5 * inch, height=3 * inch)
+            # Crear un marco alrededor de la imagen
+            carnet_table = Table([[carnet_image_element]], colWidths=[5 * inch], rowHeights=[3 * inch])
+            carnet_table.setStyle(TableStyle([
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            carnet_section.append(carnet_table)
         else:
             # Mostrar el marcador de posición si no hay carnet de salud
             carnet_placeholder = Table(
@@ -425,7 +431,39 @@ def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ]))
-            elements.append(carnet_placeholder)
+            carnet_section.append(carnet_placeholder)
+
+        # Añadir la sección agrupada con KeepTogether para evitar salto de página
+        elements.append(KeepTogether(carnet_section))
+
+        # Definir el pie de página
+        def add_footer(canvas, doc):
+            canvas.saveState()
+            width, height = letter
+            canvas.setFont('Helvetica', 8)
+            canvas.setFillColor(colors.black)
+
+            # Línea en el pie de página
+            canvas.line(0.75 * inch, 0.75 * inch, width - 0.75 * inch, 0.75 * inch)
+
+            # Texto en el pie de página
+            footer_text = "Se prohíbe la reproducción total o parcial del presente documento sin la autorización de la GG"
+            text_width = canvas.stringWidth(footer_text, 'Helvetica', 8)
+            canvas.drawString((width - text_width) / 2, 0.5 * inch, footer_text)
+            canvas.restoreState()
+
+        # Agregar el template con el pie de página
+        doc.addPageTemplates([
+            PageTemplate(id='footer', frames=[
+                Frame(
+                    doc.leftMargin,
+                    doc.bottomMargin + 1.5 * inch, 
+                    doc.width, 
+                    doc.height - 1.5 * inch, 
+                    id='main'
+                )
+            ], onPage=add_footer)
+        ])
 
         # Construir el PDF
         doc.build(elements)
@@ -466,5 +504,5 @@ def download_formato():
     # Generar el PDF con la información del trabajador
     pdf_buffer = generar_pdf_formato_generales_personal(trabajador, detalle_control_general)
 
-    return send_file(pdf_buffer, as_attachment=True, download_name="reporte_cotizar_utiles.pdf", mimetype='application/pdf')
+    return send_file(pdf_buffer, as_attachment=True, download_name="Formato_Control_General_Personal.pdf", mimetype='application/pdf')
 

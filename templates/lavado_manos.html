@@ -8,50 +8,52 @@
     <h1 class="mb-4 text-center" style="color: #FF8C00;">Lavado de Manos</h1>
     
     <!-- Botón de Generar Formato -->
-    {% if formatos['estado'] == 'CREADO' %}
+    {% if not formatos %}
         <button type="button" class="btn btn-sm d-block w-100 mb-4" 
                 style="background-color: #FF7043; color: white;" 
                 onclick="generarFormatoLavadoManos()">
-            <i class="fas fa-file-alt"></i> Generar Formato
+            <i class="fas fa-file-alt"></i> GENERAR FORMATO
         </button>
     {% endif %}
-    
-    <!-- Formulario de Registro -->
-    <form id="formControlGeneralPersona" method="POST" action="{{ url_for('lavado_Manos.lavado_Manos') }}" enctype="multipart/form-data">
-        <div class="form-row mb-3">
-            <div class="form-group col-lg-6 col-md-12">
-                <label for="fechaLavado" class="font-weight-bold" style="color: #FF8C00;">Fecha:</label>
-                <input type="date" id="fechaLavado" class="form-control" name="fechaLavado" required>
+    {% if formatos %}
+        <!-- Formulario de Registro -->
+        <form id="formControlGeneralPersona" method="POST" action="{{ url_for('lavado_Manos.lavado_Manos') }}" enctype="multipart/form-data">
+            <div class="form-row mb-3">
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="fechaLavado" class="font-weight-bold" style="color: #FF8C00;">Fecha:</label>
+                    <input type="date" id="fechaLavado" class="form-control" name="fechaLavado" required>
+                </div>
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="horaLavado" class="font-weight-bold" style="color: #FF8C00;">Hora:</label>
+                    <input type="time" id="horaLavado" class="form-control" name="horaLavado" required>
+                </div>
             </div>
-            <div class="form-group col-lg-6 col-md-12">
-                <label for="horaLavado" class="font-weight-bold" style="color: #FF8C00;">Hora:</label>
-                <input type="time" id="horaLavado" class="form-control" name="horaLavado" required>
+            <div class="form-row mb-4">
+                <div class="form-group col-12">
+                    <label for="selectTrabajador" class="font-weight-bold" style="color: #FF8C00;">Colaborador:</label>
+                    <select id="selectTrabajador" class="form-control" name="selectTrabajador">
+                        <option value="">Seleccione el colaborador a registrar</option>
+                        {% for t in trabajadores %}
+                            <option value="{{ t.idtrabajador }}">{{ t.nombres }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-        </div>
+            <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;"><i class="fas fa-plus-circle"></i> AGREGAR REGISTRO</button>
+        </form>
+        
+        <!-- Botones de Historial y Finalizar Registro -->
         <div class="form-row mb-4">
-            <div class="form-group col-12">
-                <label for="selectTrabajador" class="font-weight-bold" style="color: #FF8C00;">Colaborador:</label>
-                <select id="selectTrabajador" class="form-control" name="selectTrabajador">
-                    <option value="">Seleccione el colaborador a registrar</option>
-                    {% for t in trabajadores %}
-                        <option value="{{ t.idtrabajador }}">{{ t.nombres }}</option>
-                    {% endfor %}
-                </select>
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;" data-toggle="modal" data-target="#historialLavadoManos">
+                    <i class="fas fa-history"></i> HISTORIAL
+                </button>
+            </div>
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalarRegistroLavado()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
             </div>
         </div>
-        <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;"><i class="fas fa-plus-circle"></i> AGREGAR REGISTRO</button>
-    </form>
-    
-    <!-- Botones de Historial y Finalizar Registro -->
-    <div class="form-row mb-4">
-        <div class="form-group col-lg-6 col-md-6">
-            <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;"><i class="fas fa-history"></i> HISTORIAL</button>
-        </div>
-        <div class="form-group col-lg-6 col-md-6">
-            <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
-        </div>
-    </div>
-    
+    {% endif %}
     <!-- Registro de Lavado de Manos en Formato de Tarjetas -->
     <div class="container-fluid mt-4">
         <h3 class="text-center" style="color: #FF8C00;">Registro de Lavado de Manos</h3>
@@ -71,7 +73,90 @@
             {% endfor %}
         </div>
     </div>
+
+    <!-- Modal para mostrar el historial de los registros de los formatos de lavado de manos -->
+    <div class="modal fade" id="historialLavadoManos" tabindex="-1" role="dialog" aria-labelledby="historialLavadoManosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg resizable-modal" role="document">
+            <div class="modal-content">
+                <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="labelHistorialLavadoMano">Historial del lavado de manos</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead style="background-color: #FFC107; color: black;">
+                                <tr>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Ver</th>
+                                    <th class="text-center">Descargar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if historialLavadoMano %}
+                                    {% for hl in historialLavadoMano %}
+                                        <tr>   
+                                            <td class="text-center">{{ hl.dia }} de {{ hl.mes }} del {{ hl.anio }} </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ hl.idformatos }})" style="background-color: #FFC107;">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('lavado_Manos.download_formato', formato_id=hl.idformatos) }}"
+                                                    class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FFC107; color: white;">
+                                                    <i class="fas fa-download"></i> Descargar Formato
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay registros disponibles.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar los detalles del registro de lavado de manos -->
+    <div class="modal fade" id="detalleLavadoManos" tabindex="-1" role="dialog" aria-labelledby="detalleLavadoManosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="detalleLavadoManosLabel">Detalle del Lavado de Manos</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleContenido">
+                        <!-- Aquí se mostrarán los detalles obtenidos de la consulta -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- CSS para hacer el modal resizable -->
+<style>
+    .resizable-modal {
+        resize: both; 
+        overflow: auto; 
+        max-width: 90%; 
+        max-height: 90vh; 
+        min-width: 300px;
+        min-height: 200px;
+    }
+</style>
 
 <!-- Incluir íconos de Font Awesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
