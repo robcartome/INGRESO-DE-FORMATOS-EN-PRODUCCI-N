@@ -151,6 +151,63 @@ function verDetalleHistorial(idFormatos) {
 }
 
 
+
+function registrarMedidasCorrectivas(idmano) {
+    Swal.fire({
+        title: 'Registrar Medida Correctiva',
+        input: 'textarea',
+        inputLabel: 'Describe la medida correctiva',
+        inputPlaceholder: 'Escribe aquí la medida correctiva...',
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: (medidaCorrectiva) => {
+            if (!medidaCorrectiva) {
+                Swal.showValidationMessage('Por favor, ingresa una medida correctiva');
+                return false;
+            }
+            return medidaCorrectiva;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const medidaCorrectiva = result.value;
+            $.ajax({
+                url: '/lavado_Manos/registrar_medidas_correctivas',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    idmano: idmano,
+                    medida_correctiva: medidaCorrectiva
+                }),
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire(
+                            'Guardado',
+                            'La medida correctiva ha sido registrada con éxito.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error',
+                            response.message || 'Hubo un error al registrar la medida correctiva. Por favor, inténtelo nuevamente.',
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire(
+                        'Error',
+                        'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                        'error'
+                    );
+                }
+            });
+        }
+    });
+}
+
 // <- Para entregarUtil.html ->
 $(document).ready(function() {
     $('#selectTrabajador').select2({
