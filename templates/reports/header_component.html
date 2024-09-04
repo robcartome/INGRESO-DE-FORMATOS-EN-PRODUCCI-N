@@ -4,16 +4,16 @@
             <!-- <img src="{{ logo_path }}" alt="Logo" style="width: 50pt;"> Reemplazar con la ruta del logo -->
             <img src="data:image/png;base64,{{ logo_base64 }}" alt="Logo" width="86">
         </td>
-        <td class="s1 text-center" colspan="10">MANUAL DE PROCEDIMIENTOS OPERACIONALES DE SANEAMIENTO</td>
+        <td class="s1 text-center" colspan="10">{{ title_manual }}</td>
     </tr>
     <tr>
         <td class="s1 text-center" colspan="2">CAPÍTULO V: FORMATOS</td>
-        <td class="s1 text-center" colspan="9">REPORTE DE LAVADO DE MANOS</td>
+        <td class="s1 text-center" colspan="9">{{ title_report }}</td>
     </tr>
     <tr>
         <td colspan="2">Edición: 01</td>
         <td colspan="2" class="w-15 s3 text-center">Revisión: 0</td>
         <td colspan="3" class="w-50 s3 text-center">Fecha de Aprobación: Febrero 2023</td>
-        <td colspan="3" class="w-50 s3 text-center">Código: TI-POES-F03-RLM</td>
+        <td colspan="3" class="w-50 s3 text-center">Código: {{ format_code_report }}</td>
     </tr>
 </table>
