@@ -2,52 +2,30 @@
 
 CREATE OR REPLACE VIEW v_lavados_manos AS
 SELECT
-    lv.idmano,
-    lv.hora,
-    lv.fecha,
+    dlv.idmano,
+    dlv.hora,
+    dlv.fecha,
     CONCAT(
         SUBSTRING(t.nombres FROM 1 FOR POSITION(' ' IN t.nombres) - 1), 
         ' ', 
         SUBSTRING(t.apellidos FROM 1 FOR 1), 
         '.'
     ) AS nombre_formateado,
-    f.idformatos,
-	f.fk_idtipoformato,
-	f.estado
+    lv.idlavadomano,
+	lv.fk_idtipoformatos,
+	lv.estado
 FROM 
-    lavadosmanos lv
+    detalle_lavados_manos dlv
 JOIN 
-    trabajadores t ON t.idtrabajador = lv.fk_idtrabajador
+    trabajadores t ON t.idtrabajador = dlv.fk_idtrabajador
 JOIN
-    formatos f ON f.idformatos = lv.fk_idformatos
+    lavadosmanos lv ON lv.idlavadomano = dlv.fk_idlavadomano
 ORDER BY 
-    lv.fecha DESC;
+    dlv.fecha DESC;
+	
 
 SELECT * FROM v_lavados_manos
-SELECT estado FROM formatos WHERE fk_idtipoformato = 2 AND estado = 'CERRADO'
-SELECT * FROM v_lavados_manos WHERE estado = 'CERRADO' ORDER BY idmano DESC
 	
-SELECT idtrabajador, CONCAT(nombres, ' ', apellidos) AS nombres FROM trabajadores
-
-SELECT * FROM public.formatos
-
-SELECT estado FROM formatos WHERE fk_idtipoformato = 2 AND estado = 'CREADO'
-	
-SELECT * FROM public.tiposformatos
-
-SELECT * FROM public.formatos
-
-SELECT idtipoformato FROM tiposformatos WHERE nombreformato = 'REPORTE DE LAVADO DE MANOS'
-
-SELECT * FROM formatos WHERE fk_idtipoformato = 2 AND estado = 'CREADO'
-
-SELECT * FROM public.lavadosmanos
-
-INSERT INTO lavadosmanos (fecha, hora, fk_idtrabajador, fk_idformatos) 
-                    VALUES ('2024-08-29', '15:39', 5, 2);
-
-SELECT * FROM public.formatos
-
 SELECT 
     idformatos,
     TO_CHAR(TO_DATE(mes || ' ' || anio, 'MM YYYY'), 'TMMonth') AS mes,
@@ -75,22 +53,43 @@ CREATE OR REPLACE VIEW v_historial_lavado_manos AS
 SELECT
     TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
     f.anio,
-    f.fk_idtipoformato,
+    f.fk_idtipoformatos,
     f.estado,
-	f.idformatos
+	f.idlavadomano
 FROM
-    formatos f
+    lavadosmanos f
 WHERE 
-	f.fk_idtipoformato = 2 AND estado = 'CERRADO'
+	f.fk_idtipoformatos = 2 AND estado = 'CERRADO'
 ORDER BY
-	f.idformatos DESC;
+	f.idlavadomano DESC;
 
-DROP VIEW v_historial_lavado_manos
+SELECT * FROM public.detalle_lavados_manos
 
-SELECT * FROM v_lavados_manos WHERE idformatos=11
+SELECT * FROM public.controles_generales_personal
 
-SELECT * FROM v_historial_lavado_manos
+SELECT * FROM public.tiposformatos
 
-SELECT * FROM lavadosmanos WHERE fk_idtrabajador = 5
+SELECT * FROM public.controles_generales_personal
 
 SELECT * FROM trabajadores
+
+SELECT * FROM kardex;
+
+CREATE OR REPLACE VIEW v_kardex AS
+SELECT
+	kr.idkardex,
+	TO_CHAR(TO_DATE(kr.mes || ' ' || kr.anio, 'MM YYYY'), 'TMMonth') AS mes,
+	kr.anio,
+	kr.estado,
+	pr.descripcion_producto
+FROM
+	kardex kr
+JOIN
+	productos pr ON pr.idproducto = kr.fk_idproducto
+ORDER BY
+	kr.idkardex
+DESC;
+
+SELECT * FROM v_kardex WHERE estado = 'CREADO'
+SELECT * FROM public.detalles_kardex
+

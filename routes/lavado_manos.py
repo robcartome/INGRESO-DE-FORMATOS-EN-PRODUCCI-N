@@ -9,6 +9,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 import io
 from collections import defaultdict
+from datetime import time, date
 
 ########## PARA LAVADO_MANOS.HTML ###################################################################################
 
@@ -25,7 +26,7 @@ def lavado_Manos():
             query_trabajadores = "SELECT idtrabajador, CONCAT(nombres, ' ', apellidos) AS nombres FROM trabajadores"
             trabajadores = execute_query(query_trabajadores)
 
-            query_formatos = "SELECT estado FROM formatos WHERE fk_idtipoformato = 2 AND estado = 'CREADO'"
+            query_formatos = "SELECT estado FROM lavadosmanos WHERE fk_idtipoformatos = 2 AND estado = 'CREADO'"
             formatos = execute_query(query_formatos)
 
             query_historialLavadoMano = "SELECT * FROM v_historial_lavado_manos"
@@ -44,7 +45,7 @@ def lavado_Manos():
             selectTrabajador = request.form.get('selectTrabajador')
 
             # Verificar si hay un formato 'CREADO' para el tipo de formato 2
-            query_formatos = "SELECT idformatos FROM formatos WHERE fk_idtipoformato = 2 AND estado = 'CREADO'"
+            query_formatos = "SELECT idlavadomano FROM lavadosmanos WHERE fk_idtipoformatos = 2 AND estado = 'CREADO'"
             formato = execute_query(query_formatos)
 
             if not formato:
@@ -53,11 +54,11 @@ def lavado_Manos():
             try:
                 # Insertar lavado de manos
                 query_insertar_trabajador = """ 
-                    INSERT INTO lavadosmanos (fecha, hora, fk_idtrabajador, fk_idformatos) 
+                    INSERT INTO detalle_lavados_manos (fecha, hora, fk_idtrabajador, fk_idlavadomano) 
                     VALUES (%s, %s, %s, %s);
                 """
                 
-                execute_query(query_insertar_trabajador, (fechaLavado, horaLavado, selectTrabajador, formato[0]['idformatos']))
+                execute_query(query_insertar_trabajador, (fechaLavado, horaLavado, selectTrabajador, formato[0]['idlavadomano']))
             except Exception as e:
                 # Convertir el mensaje de error a string
                 return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -79,7 +80,7 @@ def generar_formato_lavado():
 
         # Eliminar el registro relacionado en controles_generales_personal
         query_generar_formato = """
-            INSERT INTO formatos(mes,anio,fk_idtipoformato,estado) VALUES  (%s,%s,%s,%s);
+            INSERT INTO lavadosmanos(mes,anio,fk_idtipoformatos,estado) VALUES  (%s,%s,%s,%s);
         """
         execute_query(query_generar_formato, (mes_actual,anio_actual,2,'CREADO'))
 
@@ -93,7 +94,7 @@ def generar_formato_lavado():
 def finalizar_lavado_manos():
     try:
         # Consulta para obtener el id del formato en estado 'CREADO'
-        query_formatos = "SELECT idformatos FROM formatos WHERE fk_idtipoformato = 2 AND estado = 'CREADO'"
+        query_formatos = "SELECT idlavadomano FROM lavadosmanos WHERE fk_idtipoformatos = 2 AND estado = 'CREADO'"
         formato = execute_query(query_formatos)
 
         # Verificar si se obtuvo un resultado
@@ -101,10 +102,10 @@ def finalizar_lavado_manos():
             return jsonify({'status': 'error', 'message': 'No se encontró un formato en estado "CREADO".'}), 400
 
         # Asegurarse de acceder correctamente al ID del formato
-        id_formatos = formato[0][0] if isinstance(formato[0], (list, tuple)) else formato[0]['idformatos']
+        id_formatos = formato[0][0] if isinstance(formato[0], (list, tuple)) else formato[0]['idlavadomano']
 
         # Actualizar el estado del formato a 'CERRADO'
-        query_update_lavado = "UPDATE formatos SET estado = 'CERRADO' WHERE idformatos = %s"
+        query_update_lavado = "UPDATE lavadosmanos SET estado = 'CERRADO' WHERE idlavadomano = %s"
         execute_query(query_update_lavado, (id_formatos,))
 
         return jsonify({'status': 'success', 'message': 'Se cerró el formato de lavado de manos.'}), 200
@@ -117,7 +118,7 @@ def finalizar_lavado_manos():
 def obtener_detalle_lavado(id_formatos):
     try:
         # Ejecutar la consulta SQL para obtener los detalles
-        query = "SELECT * FROM v_lavados_manos WHERE idformatos = %s"
+        query = "SELECT * FROM v_lavados_manos WHERE idlavadomano = %s"
         detalles = execute_query(query, (id_formatos,))
 
         # Verificar si se encontraron resultados
@@ -135,7 +136,27 @@ def obtener_detalle_lavado(id_formatos):
     except Exception as e:
         print(f"Error al obtener los detalles: {e}")
         return jsonify({'status': 'error', 'message': 'Hubo un error al obtener los detalles.'}), 500
-    
+
+@lavadoMano.route('/registrar_medidas_correctivas', methods=['POST'])
+def registrar_medidas_correctivas():
+    try:
+        data = request.get_json()
+        idmano = data.get('idmano')
+        medida_correctiva = data.get('medida_correctiva')
+        
+        # Verifica que los parámetros necesarios estén presentes
+        if not idmano or not medida_correctiva:
+            return jsonify({'status': 'error', 'message': 'Faltan parámetros necesarios.'}), 400
+
+        # Ejecutar la consulta SQL para actualizar la medida correctiva
+        query = "UPDATE detalle_lavados_manos SET medida_correctiva = %s WHERE idmano = %s"
+        execute_query(query, (medida_correctiva, idmano))
+
+        return jsonify({'status': 'success'}), 200
+
+    except Exception as e:
+        print(f"Error al registrar la medida correctiva: {e}")
+        return jsonify({'status': 'error', 'message': 'Hubo un error.'}), 500
 
 def generar_pdf_formato_lavado_mano(detalle_lavado_manos,formato_lavado_registro):
     try:
@@ -367,21 +388,43 @@ def download_formato():
     formato_lavado_id = request.args.get('formato_id')
 
     # Realizar la consulta para obtener el formato de lavado de mano que corresponda
-    detalle_lavado_manos = execute_query(f"SELECT * FROM v_lavados_manos WHERE idformatos = {formato_lavado_id}")
+    detalle_lavado_manos = execute_query(f"SELECT * FROM v_lavados_manos WHERE idlavadomano = {formato_lavado_id}")
 
-    #Obtener el formato de lavado de manos con sus detalles
-    formato_lavado_registro = execute_query(F"""SELECT 
-                                                    idformatos,
-                                                    TO_CHAR(TO_DATE(mes || ' ' || anio, 'MM YYYY'), 'TMMonth') AS mes,
-                                                    anio,
-                                                    fk_idtipoformato,
-                                                    estado
-                                                FROM 
-                                                    formatos 
-                                                WHERE 
-                                                    idformatos = {formato_lavado_id}""")
-    seleccionar_formato = formato_lavado_registro[0]
-    # Generar el PDF con la información del trabajador
-    pdf_buffer = generar_pdf_formato_lavado_mano(detalle_lavado_manos,seleccionar_formato)
+    # Estructura de diccionarios anidados
+    agrupado_por_fecha = defaultdict(lambda: defaultdict(list))
 
-    return send_file(pdf_buffer, as_attachment=True, download_name="Formato_Lavado_Manos.pdf", mimetype='application/pdf')
+    # Rellenar el diccionario anidado con datos formateados
+    for registro in detalle_lavado_manos:
+        # Formatear la fecha como "DD/MM/YYYY"
+        fecha_formateada = registro['fecha'].strftime("%d/%m/%Y")
+        
+        # Formatear la hora como "HH:MM"
+        hora_formateada = registro['hora'].strftime("%H:%M")
+        
+        nombre = registro['nombre_formateado']
+        
+        # Agregar los datos formateados al diccionario
+        agrupado_por_fecha[fecha_formateada][nombre].append(hora_formateada)
+
+    # Convertir defaultdict a diccionario regular (opcional)
+    agrupado_por_fecha = {fecha: dict(nombres) for fecha, nombres in agrupado_por_fecha.items()}
+
+    # Mostrar el resultado
+    print(agrupado_por_fecha)
+
+    # #Obtener el formato de lavado de manos con sus detalles
+    # formato_lavado_registro = execute_query(F"""SELECT 
+    #                                                 idformatos,
+    #                                                 TO_CHAR(TO_DATE(mes || ' ' || anio, 'MM YYYY'), 'TMMonth') AS mes,
+    #                                                 anio,
+    #                                                 fk_idtipoformato,
+    #                                                 estado
+    #                                             FROM 
+    #                                                 formatos 
+    #                                             WHERE 
+    #                                                 idformatos = {formato_lavado_id}""")
+    # seleccionar_formato = formato_lavado_registro[0]
+    # # Generar el PDF con la información del trabajador
+    # pdf_buffer = generar_pdf_formato_lavado_mano(detalle_lavado_manos,seleccionar_formato)
+
+    # return send_file(pdf_buffer, as_attachment=True, download_name="Formato_Lavado_Manos.pdf", mimetype='application/pdf')

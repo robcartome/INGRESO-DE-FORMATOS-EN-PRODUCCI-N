@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Kardex{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <h1 class="mb-1 text-center text-warning">Kardex</h1>
+    
+    <!-- Formulario para el kardex -->
+    <div id="listaKardex">
+        <form id="formAgregarKardex" action="{{ url_for('kardex.kardex_info')}}" method="POST" enctype="multipart/form-data">
+            <div class="form-row align-items-end mb-4">
+                <div class="form-group col-lg-8 col-md-8">
+                    <label for="selectProducto" class="font-weight-bold text-warning">Producto</label>
+                    <select id="selectProducto" class="form-control" name="selectProducto">
+                        <option value="">Seleccione el Producto</option>
+                        {% for p in productos %}
+                            <option value="{{ p.idproducto }}">{{ p.descripcion_producto }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-lg-2 col-md-4">
+                    <button type="submit" class="btn btn-warning text-white w-100">
+                        <i class="fas fa-plus-circle"></i> Agregar Registro
+                    </button>
+                </div>
+                <div class="form-group col-lg-2 col-md-4">
+                    <button type="button" class="btn btn-outline-warning w-100" data-toggle="modal" data-target="#registrarProductos">
+                        <i class="fas fa-plus"></i> Agregar Producto
+                    </button>
+                </div>
+            </div>
+        </form>
+    
+        <!-- Sección para mostrar la lista de todos los kardex -->
+        <div>
+            <h3 class="text-center text-warning font-weight-bold">Registros de Kardex Activos</h3>
+            <div class="row">
+                {% for k in v_kardex %}
+                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                        <div class="card shadow-lg h-100" style="border-radius: 15px; overflow: hidden;">
+                            <div class="card-header text-center font-weight-bold text-white" style="font-size: 20px; background-color: #FF8C00;">
+                                {{ k.descripcion_producto }}
+                            </div>
+                            <div class="card-body" style="background-color: #FFF3E0;">
+                                <p class="card-text" style="font-size: 16px; color: #000000;">
+                                    <strong>Mes:</strong> {{ k.mes }}<br>
+                                    <strong>Año:</strong> {{ k.anio }}<br>
+                                    <strong>Estado:</strong> {{ k.estado }}
+                                </p>
+                                <button type="button" class="btn btn-warning btn-block font-weight-bold mt-3" 
+                                        onclick="verDetallesKardex('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
+                                    <i class="fas fa-arrow-circle-right"></i> Ver
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para registrar productos -->
+    <div class="modal fade" id="registrarProductos" tabindex="-1" role="dialog" aria-labelledby="registrarProductosLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="formRegistrarProductos" method="POST" enctype="multipart/form-data">
+                    <div class="modal-header bg-warning text-white">
+                        <h5 class="modal-title" id="registrarProductosLabel">Agregar Producto</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="IdProducto" name="idproducto">
+                        <div class="form-group">
+                            <label for="descripcionProducto" class="font-weight-bold">Descripción del producto</label>
+                            <input type="text" id="descripcionProducto" class="form-control" name="descripcionProducto" placeholder="Ingresa la descripción del producto" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning text-white">Agregar Producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección para mostrar los detalles de un kardex específico -->
+    <div id="detallesKardex" style="display: none;">
+        <div class="mb-4">
+            <button class="btn btn-secondary" onclick="volverListaKardex('{{ k.idkardex }}')">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </div>
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <label for="fecha_kardex" style="color: #FF8C00;">Ingresa la fecha:</label>
+                <input type="date" id="fecha_kardex" class="form-control" name="fecha_kardex" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="nombresTrabajador" style="color: #FF8C00;">N° de días:</label>
+                <input type="number" id="nombresTrabajador" class="form-control" name="nombresTrabajador" placeholder="N° de días desde la recepción la MP" autocomplete="off" required>
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <label for="apellidosTrabajador" style="color: #FF8C00;">Seleccione el Proveedor:</label>
+                <select id="selectProducto" class="form-control" name="selectProducto">
+                    <option value="Frutos & Especies">Frutos & Especies</option>
+                    <!-- {% for p in productos %}
+                        <option value="{{ p.idproducto }}">{{ p.descripcion_producto }}</option>
+                    {% endfor %} -->
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="saldoInicial" style="color: #FF8C00;">Saldo Inicial:</label>
+                <input type="number" id="saldoInicial" class="form-control" name="saldoInicial" placeholder="Saldo inicial" autocomplete="off">
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <label for="ingresoKardex" style="color: #FF8C00;">Ingreso:</label>
+                <input type="number" id="ingresoKardex" class="form-control" name="ingresoKardex" placeholder="Ingreso" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="salidaKardex" style="color: #FF8C00;">Salida:</label>
+                <input type="number" id="salidaKardex" class="form-control" name="salidaKardex" placeholder="Salida" autocomplete="off">
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <label for="saldoFinal" style="color: #FF8C00;">Saldo Final:</label>
+                <input type="number" id="saldoFinal" class="form-control" name="saldoFinal" placeholder="Saldo Final" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="observaciones" style="color: #FF8C00;">Observaciones:</label>
+                <input type="text" id="observaciones" class="form-control" name="observaciones" placeholder="Observaciones" autocomplete="off">
+            </div>
+        </div>
+        <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;" onclick="volverListaKardex()"><i class="fas fa-plus-circle"></i> Agregar</button>
+        <h3 id="tituloDetallesKardex" class="text-center text-warning font-weight-bold"></h3>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Lote</th>
+                    <th>Saldo Inicial</th>
+                    <th>Ingreso</th>
+                    <th>Salida</th>
+                    <th>Saldo Final</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaDetallesKardex">
+                <!-- Detalles del kardex serán insertados aquí -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/kardex.js') }}"></script>
+
+{% endblock %}

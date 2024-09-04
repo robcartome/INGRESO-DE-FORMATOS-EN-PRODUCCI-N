@@ -80,7 +80,7 @@ def control_general():
 
                 # Insertar control general personal
                 query_insertar_control = """ 
-                    INSERT INTO controles_generales_personal (carnet_salud, fk_idtrabajador, fk_idformatos) 
+                    INSERT INTO controles_generales_personal (carnet_salud, fk_idtrabajador, fk_idtipoformatos) 
                     VALUES (%s, %s, %s);
                 """
                 execute_query(query_insertar_control, (
@@ -167,7 +167,6 @@ def delete_trabajador():
             DELETE FROM trabajadores WHERE idtrabajador = %s;
         """
         execute_query(query_eliminar_trabajador, (idTrabajador,))
-
         
 
         return jsonify({'status': 'success', 'message': 'Trabajador eliminado correctamente.'}), 200

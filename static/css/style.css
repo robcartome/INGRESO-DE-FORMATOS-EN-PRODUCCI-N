@@ -45,7 +45,7 @@ html, body {
 }
 
 .modal-content {
-  background-color: #FFF5EE; /* Color de fondo suave para el modal */
+  background-color: white; /* Color de fondo suave para el modal */
   border-radius: 10px;
   padding: 0px;
 }

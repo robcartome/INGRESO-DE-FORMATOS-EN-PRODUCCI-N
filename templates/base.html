@@ -7,6 +7,8 @@
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <!-- Incluir íconos de Font Awesome -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <!-- CSS de Select2 y tema Bootstrap -->
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -51,7 +53,10 @@
                             <img src="{{ url_for('static', filename='img/personal.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
                             Control general del personal
                         </a>
-                        <a class="dropdown-item" href="{{ url_for('home.principal') }}">Formato 2 BPM</a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('kardex.kardex_info') }}">
+                            <img src="{{ url_for('static', filename='img/kardex.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
+                            Kardex
+                        </a>
                     </div>
                 </li>
             </ul>

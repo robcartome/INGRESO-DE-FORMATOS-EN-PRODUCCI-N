@@ -4,6 +4,7 @@ from flask import Flask, redirect
 from routes.home import home
 from routes.lavado_manos import lavadoMano
 from routes.control_general_personal import controlGeneral
+from routes.kardex import kardex
 
 app = Flask(__name__)
 
@@ -11,7 +12,7 @@ app = Flask(__name__)
 app.register_blueprint(home, url_prefix="/home")
 app.register_blueprint(lavadoMano, url_prefix = "/lavado_Manos")
 app.register_blueprint(controlGeneral, url_prefix='/control_general')
-
+app.register_blueprint(kardex, url_prefix='/kardex')
 
 # Definiendo la ruta por defecto
 @app.route('/')
