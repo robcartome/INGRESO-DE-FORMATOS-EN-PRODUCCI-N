@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="12">
+                    <table class="header-table">
+                        <tr class="s2" style="font-weight: bold;">
+                            <td colspan="9" class="border-none">PRODUCTO: __________________________________________________________________</td>
+                            <td colspan="3" class="border-none">MES:_______________________________________</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- Cabecera del cuerpo del reporte -->
+            <tr class="border">
+                <th class="border">FECHA</th>
+                <th class="border">LOTE</th>
+                <th class="border">SALDO INICIAL</th>
+                <th class="border">INGRESO</th>
+                <th class="border">SALIDA</th>
+                <th class="border">SALDO FINAL</th>
+                <th class="w-50 border" colspan="8">OBSERVACIONES</th>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="body-content">
+            <tr class="text-center">
+                <td >01/09/2024</td>
+                <td>01</td>
+                <td>2000</td>
+                <td>600</td>
+                <td>200</td>
+                <td>2400</td>
+                <td>Sin observaciones</td>
+            </tr>
+            <tr class="text-center">
+                <td>01/09/2024</td>
+                <td>01</td>
+                <td>2000</td>
+                <td>600</td>
+                <td>200</td>
+                <td>2400</td>
+                <td>Sin observaciones</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="border-none">
+                    Frecuencia: Cada vez que se produce
+                </td>
+            </tr>
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>

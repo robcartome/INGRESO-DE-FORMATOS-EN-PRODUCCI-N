@@ -1,15 +1,19 @@
-from flask import Blueprint, render_template, request, jsonify, send_file
+import io
+import os
+
+from flask import Blueprint, render_template, request, jsonify, send_file, make_response
 from connection.database import execute_query
-import base64
 from datetime import datetime
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image, Spacer, Frame, PageTemplate, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-import io
+
 from collections import defaultdict
 from datetime import time, date
+from  .utils.helpers import image_to_base64
+from  .utils.helpers import generar_reporte
 
 ########## PARA LAVADO_MANOS.HTML ###################################################################################
 
@@ -384,6 +388,7 @@ def generar_pdf_formato_lavado_mano(detalle_lavado_manos,formato_lavado_registro
 
 @lavadoMano.route('/download_formato', methods=['GET'])
 def download_formato():
+
     # Obtener el id del trabajador de los argumentos de la URL
     formato_lavado_id = request.args.get('formato_id')
 
@@ -397,12 +402,12 @@ def download_formato():
     for registro in detalle_lavado_manos:
         # Formatear la fecha como "DD/MM/YYYY"
         fecha_formateada = registro['fecha'].strftime("%d/%m/%Y")
-        
+
         # Formatear la hora como "HH:MM"
         hora_formateada = registro['hora'].strftime("%H:%M")
-        
+
         nombre = registro['nombre_formateado']
-        
+
         # Agregar los datos formateados al diccionario
         agrupado_por_fecha[fecha_formateada][nombre].append(hora_formateada)
 
@@ -410,7 +415,46 @@ def download_formato():
     agrupado_por_fecha = {fecha: dict(nombres) for fecha, nombres in agrupado_por_fecha.items()}
 
     # Mostrar el resultado
-    print(agrupado_por_fecha)
+    # print(agrupado_por_fecha)
+
+    # Generar Template para reporte
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report="REPORTE DE LAVADO DE MANOS"
+    """
+    example info
+        {
+            '04/09/2024':
+            {
+                'Cristian E.': ['09:18'],
+                'LIZBETH P.': ['09:18']
+            },
+            '03/09/2024':
+            {
+                'Cristian E.': ['09:18'],
+                'LIZBETH P.': ['09:18', '10:19'],
+                'Catherine P.': ['09:18', '09:19']
+            },'04/09/2024':
+        }
+    """
+    template = render_template(
+        "reports/reporte_lavado_de_manos.html",
+        info=agrupado_por_fecha,
+        title_manual="MANUAL DE PROCEDIMIENTOS OPERACIONALES DE SANEAMIENTO",
+        title_report=title_report,
+        format_code_report="TI-POES-F03-RLM",
+        logo_base64=logo_base64
+    )
+    # Renderiza la plantilla de Kardex
+    # template = render_template(
+    #     "reports/reporte_kardex.html",
+    #     info=info,
+    #     title_manual="MANUAL DE BUENAS PRÁCTICAS DE MANUFACTURA",
+    #     title_report="KARDEX",
+    #     codigo_report="TI-BPM-F02-KARDEX",
+    #     logo_base64=logo_base64
+    # )
+    return generar_reporte(template, title_report)
 
     # #Obtener el formato de lavado de manos con sus detalles
     # formato_lavado_registro = execute_query(F"""SELECT 
@@ -427,4 +471,5 @@ def download_formato():
     # # Generar el PDF con la información del trabajador
     # pdf_buffer = generar_pdf_formato_lavado_mano(detalle_lavado_manos,seleccionar_formato)
 
+    # return send_file(pdf_buffer, as_attachment=True, download_name="Formato_Lavado_Manos.pdf", mimetype='application/pdf')
     # return send_file(pdf_buffer, as_attachment=True, download_name="Formato_Lavado_Manos.pdf", mimetype='application/pdf')
