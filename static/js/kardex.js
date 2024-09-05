@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    setDefaultFechaKardex();
     // Manejar los registros de productos 
     $('#formRegistrarProductos').on('submit', function(event) {
         event.preventDefault();
@@ -86,13 +87,10 @@ $(document).ready(function() {
     });
 });
 
-//Función para mostrar la fecha actual en la fecha
 function setDefaultFechaKardex() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('fecha_kardex').value = today;
+    const today = new Date().toISOString().split('T')[0];  // Obtiene la fecha actual en formato YYYY-MM-DD
+    document.getElementById('fecha_kardex').value = today;  // Asigna la fecha al campo de fecha
 }
-
-window.onload = setDefaultFechaKardex;
 
 function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     // Ocultar la lista de todos los kardex
