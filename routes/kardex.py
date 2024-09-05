@@ -151,19 +151,23 @@ def detalle_kardex_table(id_kardex):
 
 @kardex.route('/descargar_formato_kardex/<int:id_kardex>', methods=['GET'])
 def descargar_formato_kardex(id_kardex):
-
-    query_kardex = "SELECT * FROM v_kardex"
-    kardex = execute_query(query_kardex,(id_kardex))
-
+    id_kardex = int(id_kardex)
+    
+    # Consulta para obtener el kardex
+    query_kardex = "SELECT * FROM v_kardex WHERE idkardex = %s"
+    kardex = execute_query(query_kardex, (id_kardex,))
+    
+    # Consulta para obtener los detalles del kardex
     query_detalle_kardex = "SELECT * FROM detalles_kardex WHERE fk_idkardex = %s"
     detalle_kardex = execute_query(query_detalle_kardex, (id_kardex,))
 
-    # Convertir la fecha al formato deseado antes de enviarlo al frontend
+    # Formatear la fecha en los detalles
     detalles_formateados = []
     for detalle in detalle_kardex:
-        detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')  # Formatear la fecha a DD/MM/YYYY
+        detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')  # Formato DD/MM/YYYY
         detalles_formateados.append(detalle)
 
-    print(kardex,detalles_formateados)
+    print(kardex, detalles_formateados)
 
-    return jsonify(kardex,detalles_formateados)
+    # Empaquetar ambos resultados en un solo diccionario
+    return jsonify({'kardex': kardex, 'detalles': detalles_formateados})
