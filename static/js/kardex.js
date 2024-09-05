@@ -97,6 +97,9 @@ function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     document.getElementById('listaKardex').style.display = 'none';
 
     // Mostrar la sección de detalles
+    document.getElementById('llenarFormularioKardex').style.display = 'block';
+
+    // Mostrar la sección de detalles
     document.getElementById('detallesKardex').style.display = 'block';
 
     // Actualizar el título con la información del producto y la fecha
@@ -148,11 +151,58 @@ function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     });
 }
 
+function verDetallesKardexCerrado(idKardex, descripcionProducto, mes, anio) {
+    // Ocultar la lista de todos los kardex
+    document.getElementById('listaKardex').style.display = 'none';
+
+    // Mostrar la sección de detalles
+    document.getElementById('detallesKardex').style.display = 'block';
+
+    // Actualizar el título con la información del producto y la fecha
+    document.getElementById('tituloDetallesKardex').innerText = `Detalles del Kardex para ${descripcionProducto} - ${mes}/${anio}`;
+
+    // Aquí pasamos el id para mostrarlo en la tabla
+    $.get('/kardex/detalle_kardex_table/' + idKardex, function(data) {
+        var tableBody = $('#tablaDetallesKardex');
+        tableBody.empty();
+
+        // Verificar si los datos recibidos son un array y tienen contenido
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(function(item) {
+                var row = '<tr>' +
+                    '<td class="text-center">' + item.fecha + '</td>' +
+                    '<td class="text-center">' + item.lote + '</td>' +
+                    '<td class="text-center">' + item.saldo_inicial + '</td>' +
+                    '<td class="text-center">' + item.ingreso + '</td>' +
+                    '<td class="text-center">' + item.salida + '</td>' +
+                    '<td class="text-center">' + item.saldo_final + '</td>' +
+                    '<td class="text-center">' + item.observaciones + '</td>' +
+                    '</tr>';
+                tableBody.append(row);
+            });
+        } else {
+            // Si no hay datos, mostrar un mensaje
+            var noDataRow = '<tr><td colspan="7" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
+            tableBody.append(noDataRow);
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error("Error al cargar los detalles del kardex:", textStatus, errorThrown);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al cargar detalles',
+            text: 'Ocurrió un error al cargar los detalles del kardex. Inténtalo de nuevo más tarde.',
+        });
+    });
+}
+
 
 
 function volverListaKardex() {
     // Ocultar la sección de detalles
     document.getElementById('detallesKardex').style.display = 'none';
+
+    // Mostrar la sección de detalles
+    document.getElementById('llenarFormularioKardex').style.display = 'none';
 
     // Mostrar la lista de todos los kardex
     document.getElementById('listaKardex').style.display = 'block';
@@ -281,6 +331,36 @@ function descargarFormatoKardex() {
             icon: 'error',
             title: 'Error',
             text: 'Hubo un error al generar el reporte.',
+        });
+    });
+}
+
+function finalizarKardex(idKardex) {
+    $.post('/kardex/finalizar_kardex', {
+        idKardex: idKardex
+    }, function(response) {
+        if (response.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Se finalizo',
+                text: 'el estado del kardex fue modificado a Finalizado.',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: response.message,
+            });
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en la solicitud',
+            text: 'Ocurrió un error al enviar la solicitud: ' + textStatus,
         });
     });
 }

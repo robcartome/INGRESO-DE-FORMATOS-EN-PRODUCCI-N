@@ -15,10 +15,13 @@ def kardex_info():
             query_kardex = "SELECT * FROM v_kardex WHERE estado = 'CREADO'"
             v_kardex = execute_query(query_kardex)
 
+            query_kardex_cerrado = "SELECT * FROM v_kardex WHERE estado = 'CERRADO'"
+            v_kardex_cerrado = execute_query(query_kardex_cerrado)
+
             query_proveedores = "SELECT * FROM proveedores"
             proveedor = execute_query(query_proveedores)
 
-            return render_template('kardex.html', productos=productos, v_kardex=v_kardex, proveedor=proveedor)
+            return render_template('kardex.html', productos=productos, v_kardex=v_kardex, proveedor=proveedor, v_kardex_cerrado=v_kardex_cerrado)
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('kardex.html')
@@ -171,3 +174,18 @@ def descargar_formato_kardex(id_kardex):
 
     # Empaquetar ambos resultados en un solo diccionario
     return jsonify({'kardex': kardex, 'detalles': detalles_formateados})
+
+@kardex.route('/finalizar_kardex', methods=['POST'])
+def finalizar_kardex():
+    try:
+        # Extracción de los datos del formulario
+        id_kardex = request.form['idKardex']
+
+        query_update_estado_kardex = "UPDATE kardex SET estado = %s WHERE idkardex = %s"
+        execute_query(query_update_estado_kardex,('CERRADO', id_kardex))
+
+        return jsonify({'status': 'success', 'message': 'Se finalizo correctamente el Kardex'}), 200
+
+    except Exception as e:
+        print(f"Error al agregar detalle de kardex: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el producto.'}), 500
