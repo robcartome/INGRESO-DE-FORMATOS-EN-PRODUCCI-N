@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS public.detalles_kardex (
 	ingreso INT NOT NULL,
 	salida INT NOT NULL,
 	saldo_final INT NOT NULL,
-	observaciones VARCHAR(80) NOT NULL,
+	observaciones VARCHAR(80),
 	fk_idkardex INT REFERENCES public.kardex(idkardex)
 );
 

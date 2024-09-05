@@ -60,7 +60,7 @@ def agregar_producto():
 @kardex.route('/detalles_kardex/<int:id_kardex>', methods=['GET'])
 def detalles_kardex(id_kardex):
     try:
-        query_detalles = "SELECT * FROM detalles_kardex WHERE fk_idkardex = %s"
+        query_detalles = "SELECT * FROM detalle_kardex WHERE fk_idkardex = %s"
         detalles = execute_query(query_detalles, (id_kardex,))
 
         detalles_json = []
@@ -80,3 +80,94 @@ def detalles_kardex(id_kardex):
     except Exception as e:
         print(f"Error al obtener los detalles del kardex: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al obtener los detalles del kardex.'}), 500
+
+    
+def obtener_iniciales(cadena):
+    palabras = cadena.split()  # Divide la cadena en palabras
+    iniciales = ''.join([palabra[0] for palabra in palabras if palabra.isalpha()])  # Toma la primera letra de cada palabra
+    return iniciales.upper()  # Convierte las iniciales a mayúsculas
+    
+@kardex.route('/registrar_lote_kardex', methods=['POST'])
+def registrar_lote_kardex():
+    try:
+        fecha_actual = datetime.now()
+
+        # Extracción de los datos del formulario
+        id_kardex = request.form['idkardex']
+        producto = request.form['descripcion_producto']
+        fecha = request.form['fecha']
+        dias = request.form['dias']
+        proveedor = request.form['proveedor']
+        saldo_inicial = request.form['saldo_inicial']
+        ingreso = request.form['ingreso']
+        salida = request.form['salida']
+        observaciones = request.form['observaciones']
+
+        # Validación de datos
+        if not all([id_kardex, producto, fecha, dias, proveedor, saldo_inicial, ingreso, salida]):
+            return jsonify({'status': 'error', 'message': 'Todos los campos son obligatorios.'}), 400
+        
+        # Convertir a números si es necesario
+        saldo_inicial = float(saldo_inicial)
+        ingreso = float(ingreso)
+        salida = float(salida)
+
+        saldo_final = saldo_inicial + ingreso - salida
+
+        if not observaciones:
+            observaciones = "-"
+
+        # Generación del lote
+        anio_actual = fecha_actual.year
+        lote = f"LT{dias}{str(anio_actual)[-2:]}{obtener_iniciales(proveedor)}{obtener_iniciales(producto)}"
+
+        # Suponiendo que tienes una función 'execute_query' definida para manejar la base de datos
+        query_insert_detalle_kardex = """
+            INSERT INTO detalles_kardex 
+            (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, fk_idkardex) 
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        """
+        execute_query(query_insert_detalle_kardex, (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, id_kardex))
+
+        return jsonify({'status': 'success', 'message': 'Se registró el producto correctamente.'}), 200
+
+    except Exception as e:
+        print(f"Error al agregar detalle de kardex: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el producto.'}), 500
+    
+@kardex.route('/detalle_kardex_table/<int:id_kardex>', methods=['GET'])
+def detalle_kardex_table(id_kardex):
+    query_detalle_kardex = "SELECT * FROM detalles_kardex WHERE fk_idkardex = %s"
+    detalle_kardex = execute_query(query_detalle_kardex, (id_kardex,))
+
+    # Convertir la fecha al formato deseado antes de enviarlo al frontend
+    detalles_formateados = []
+    for detalle in detalle_kardex:
+        detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')  # Formatear la fecha a DD/MM/YYYY
+        detalles_formateados.append(detalle)
+
+    return jsonify(detalles_formateados)
+
+
+@kardex.route('/descargar_formato_kardex/<int:id_kardex>', methods=['GET'])
+def descargar_formato_kardex(id_kardex):
+    id_kardex = int(id_kardex)
+    
+    # Consulta para obtener el kardex
+    query_kardex = "SELECT * FROM v_kardex WHERE idkardex = %s"
+    kardex = execute_query(query_kardex, (id_kardex,))
+    
+    # Consulta para obtener los detalles del kardex
+    query_detalle_kardex = "SELECT * FROM detalles_kardex WHERE fk_idkardex = %s"
+    detalle_kardex = execute_query(query_detalle_kardex, (id_kardex,))
+
+    # Formatear la fecha en los detalles
+    detalles_formateados = []
+    for detalle in detalle_kardex:
+        detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')  # Formato DD/MM/YYYY
+        detalles_formateados.append(detalle)
+
+    print(kardex, detalles_formateados)
+
+    # Empaquetar ambos resultados en un solo diccionario
+    return jsonify({'kardex': kardex, 'detalles': detalles_formateados})

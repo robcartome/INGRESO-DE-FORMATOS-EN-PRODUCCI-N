@@ -53,6 +53,10 @@
                                         onclick="verDetallesKardex('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
                                     <i class="fas fa-arrow-circle-right"></i> Ver
                                 </button>
+                                <button type="button" class="btn btn-danger btn-block font-weight-bold mt-3" 
+                                        onclick="verDetallesKardex('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
+                                    <i class="fas fa-check-circle"></i> Finalizar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -90,8 +94,18 @@
 
     <!-- Sección para mostrar los detalles de un kardex específico -->
     <div id="detallesKardex" style="display: none;">
+
+        <!-- Campo oculto para almacenar el idKardex -->
+        <input type="hidden" id="idkardex_hidden">
+        <!-- Campo oculto para almacenar la descripcion_producto -->
+        <input type="hidden" id="descripcion_hidden">
+        <!-- Campo oculto para almacenar el anio -->
+        <input type="hidden" id="mesKardex">
+        <!-- Campo oculto para almacenar el mes -->
+        <input type="hidden" id="anioKardex">
+
         <div class="mb-4">
-            <button class="btn btn-secondary" onclick="volverListaKardex('{{ k.idkardex }}')">
+            <button class="btn btn-secondary" onclick="volverListaKardex()">
                 <i class="fas fa-arrow-left"></i> Volver
             </button>
         </div>
@@ -101,18 +115,17 @@
                 <input type="date" id="fecha_kardex" class="form-control" name="fecha_kardex" required>
             </div>
             <div class="form-group col-md-6">
-                <label for="nombresTrabajador" style="color: #FF8C00;">N° de días:</label>
-                <input type="number" id="nombresTrabajador" class="form-control" name="nombresTrabajador" placeholder="N° de días desde la recepción la MP" autocomplete="off" required>
+                <label for="numeroDias" style="color: #FF8C00;">N° de días:</label>
+                <input type="number" id="numeroDias" class="form-control" name="numeroDias" placeholder="N° de días desde la recepción la MP" autocomplete="off" required>
             </div>
         </div>
         <div class="form-row mb-3">
             <div class="form-group col-md-6">
-                <label for="apellidosTrabajador" style="color: #FF8C00;">Seleccione el Proveedor:</label>
-                <select id="selectProducto" class="form-control" name="selectProducto">
-                    <option value="Frutos & Especies">Frutos & Especies</option>
-                    <!-- {% for p in productos %}
-                        <option value="{{ p.idproducto }}">{{ p.descripcion_producto }}</option>
-                    {% endfor %} -->
+                <label for="selectProveedor" style="color: #FF8C00;">Seleccione el Proveedor:</label>
+                <select id="selectProveedor" class="form-control" name="selectProveedor" required>
+                    {% for p in proveedor %}
+                        <option value="{{ p.nom_empresa }}">{{ p.nom_empresa }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="form-group col-md-6">
@@ -131,33 +144,43 @@
             </div>
         </div>
         <div class="form-row mb-3">
-            <div class="form-group col-md-6">
-                <label for="saldoFinal" style="color: #FF8C00;">Saldo Final:</label>
-                <input type="number" id="saldoFinal" class="form-control" name="saldoFinal" placeholder="Saldo Final" autocomplete="off">
-            </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-12">
                 <label for="observaciones" style="color: #FF8C00;">Observaciones:</label>
                 <input type="text" id="observaciones" class="form-control" name="observaciones" placeholder="Observaciones" autocomplete="off">
             </div>
         </div>
-        <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;" onclick="volverListaKardex()"><i class="fas fa-plus-circle"></i> Agregar</button>
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <button type="button" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;" onclick="registrarDetalleKardex()">
+                    <i class="fas fa-plus-circle"></i> Agregar
+                </button>
+            </div>
+            <div class="form-group col-md-6">
+                <button type="button" class="btn d-block w-100 mb-4" style="background-color: #FFC107; color: white;" onclick="descargarFormatoKardex()">
+                    <i class="fas fa-download"></i> Descargar Formato
+                </button>
+            </div>
+        </div>
+        
         <h3 id="tituloDetallesKardex" class="text-center text-warning font-weight-bold"></h3>
-        <table class="table table-striped table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Fecha</th>
-                    <th>Lote</th>
-                    <th>Saldo Inicial</th>
-                    <th>Ingreso</th>
-                    <th>Salida</th>
-                    <th>Saldo Final</th>
-                    <th>Observaciones</th>
-                </tr>
-            </thead>
-            <tbody id="tablaDetallesKardex">
-                <!-- Detalles del kardex serán insertados aquí -->
-            </tbody>
-        </table>
+        <div class="table-responsive"> <!-- Añade esta clase para hacer la tabla responsive -->
+            <table class="table table-bordered">
+                <thead style="background-color: #FFC107; color: white;">
+                    <tr>
+                        <th class="text-center">Fecha</th>
+                        <th class="text-center">Lote</th>
+                        <th class="text-center">Saldo Inicial</th>
+                        <th class="text-center">Ingreso</th>
+                        <th class="text-center">Salida</th>
+                        <th class="text-center">Saldo Final</th>
+                        <th class="text-center">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaDetallesKardex">
+                    <!-- Detalles del kardex serán insertados aquí -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
