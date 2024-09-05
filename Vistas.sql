@@ -90,6 +90,5 @@ ORDER BY
 	kr.idkardex
 DESC;
 
-SELECT * FROM v_kardex WHERE estado = 'CREADO'
 SELECT * FROM public.detalles_kardex
 
