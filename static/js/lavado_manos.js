@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    setDefaultFechaKardex();
     $('#formControlGeneralPersona').on('submit', function(event) {
         event.preventDefault();
         var formElement = document.getElementById('formControlGeneralPersona');
@@ -42,6 +43,10 @@ $(document).ready(function() {
     });
 });
 
+function setDefaultFechaKardex() {
+    const today = new Date().toISOString().split('T')[0];  // Obtiene la fecha actual en formato YYYY-MM-DD
+    document.getElementById('fechaLavado').value = today;  // Asigna la fecha al campo de fecha
+}
 
 function generarFormatoLavadoManos() {
     $.post('/lavado_Manos/generar_formato_lavado', function(response) {
@@ -101,8 +106,8 @@ function verDetalleHistorial(idFormatos) {
         if (response.status === 'success') {
             // Construye el contenido del modal con los detalles obtenidos
             let detalles = `
-                <table class="table table-striped table-bordered">
-                    <thead>
+                <table class="table table-bordered">
+                    <thead style="background-color: #FFC107; color: white;">
                         <tr>
                             <th>Fecha</th>
                             <th>Hora</th>
@@ -152,7 +157,7 @@ function verDetalleHistorial(idFormatos) {
 
 
 
-function registrarMedidasCorrectivas(idmano) {
+function registrarMedidasCorrectivas() {
     Swal.fire({
         title: 'Registrar Medida Correctiva',
         input: 'textarea',
@@ -176,7 +181,6 @@ function registrarMedidasCorrectivas(idmano) {
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    idmano: idmano,
                     medida_correctiva: medidaCorrectiva
                 }),
                 success: function(response) {
@@ -208,7 +212,7 @@ function registrarMedidasCorrectivas(idmano) {
     });
 }
 
-// <- Para entregarUtil.html ->
+
 $(document).ready(function() {
     $('#selectTrabajador').select2({
         placeholder: "Seleccione el colaborador a registrar",

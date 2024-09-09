@@ -5,6 +5,7 @@ SELECT
     dlv.idmano,
     dlv.hora,
     dlv.fecha,
+	dlv.medida_correctiva,
     CONCAT(
         SUBSTRING(t.nombres FROM 1 FOR POSITION(' ' IN t.nombres) - 1), 
         ' ', 
@@ -22,9 +23,9 @@ JOIN
     lavadosmanos lv ON lv.idlavadomano = dlv.fk_idlavadomano
 ORDER BY 
     dlv.fecha DESC;
-	
 
 SELECT * FROM v_lavados_manos
+
 	
 SELECT 
     idformatos,
@@ -37,6 +38,8 @@ FROM
 WHERE 
     fk_idtipoformato = 2 
     AND estado = 'CERRADO';
+
+SELECT * FROM 
 
 SELECT 
 	idformatos,
@@ -63,18 +66,6 @@ WHERE
 ORDER BY
 	f.idlavadomano DESC;
 
-SELECT * FROM public.detalle_lavados_manos
-
-SELECT * FROM public.controles_generales_personal
-
-SELECT * FROM public.tiposformatos
-
-SELECT * FROM public.controles_generales_personal
-
-SELECT * FROM trabajadores
-
-SELECT * FROM kardex;
-
 CREATE OR REPLACE VIEW v_kardex AS
 SELECT
 	kr.idkardex,
@@ -90,5 +81,31 @@ ORDER BY
 	kr.idkardex
 DESC;
 
-SELECT * FROM public.detalles_kardex
+SELECT * FROM public.tiposformatos
 
+SELECT 
+	c.idcontrolgeneral,t.idtrabajador, t.dni, t.nombres, t.apellidos, 
+	t.fecha_nacimiento, t.direccion, t.celular, 
+	t.celular_emergencia, t.fecha_ingreso, 
+	t.area, t.cargo, t.fk_idsexo, cn.carnet_salud
+FROM 
+	trabajadores t 
+JOIN 
+	controles_generales_personal c ON t.idtrabajador = c.fk_idtrabajador
+JOIN
+	carnetsalud cn ON c.fk_idcarnetsalud = cn.idcarnetsalud;
+
+CREATE OR REPLACE VIEW v_control_general_personal AS
+SELECT
+	c.idcontrolgeneral, cs.idcarnetsalud, cs.carnet_salud, t.idtrabajador, t.dni, t.nombres, t.apellidos, t.fecha_nacimiento, 
+	t.direccion, t.celular, t.celular_emergencia, t.fecha_ingreso, t.area, t.cargo, t.fk_idsexo
+FROM
+	controles_generales_personal c
+JOIN
+	carnetsalud cs ON cs.idcarnetsalud = c.fk_idcarnetsalud
+JOIN
+	trabajadores t ON t.idtrabajador = c.fk_idtrabajador;
+
+SELECT * FROM v_control_general_personal
+
+SELECT * FROM v_lavados_manos WHERE estado = 'CREADO' ORDER BY idmano DESC

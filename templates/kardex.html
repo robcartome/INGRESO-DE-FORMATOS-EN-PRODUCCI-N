@@ -131,11 +131,11 @@
         <!-- Campo oculto para almacenar el mes -->
         <input type="hidden" id="anioKardex">
 
-        <div class="mb-4">
+        <!-- <div class="mb-4">
             <button class="btn btn-secondary" onclick="volverListaKardex()">
                 <i class="fas fa-arrow-left"></i> Volver
             </button>
-        </div>
+        </div> -->
         <div class="form-row mb-3">
             <div class="form-group col-md-6">
                 <label for="fecha_kardex" style="color: #FF8C00;">Ingresa la fecha:</label>
@@ -176,21 +176,25 @@
                 <input type="text" id="observaciones" class="form-control" name="observaciones" placeholder="Observaciones" autocomplete="off">
             </div>
         </div>
-        <div class="form-row mb-3">
-            <div class="form-group col-md-6">
-                <button type="button" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;" onclick="registrarDetalleKardex()">
-                    <i class="fas fa-plus-circle"></i> Agregar
-                </button>
-            </div>
-            <div class="form-group col-md-6">
-                <button type="button" class="btn d-block w-100 mb-4" style="background-color: #FFC107; color: white;" onclick="descargarFormatoKardex()">
-                    <i class="fas fa-download"></i> Descargar Formato
-                </button>
-            </div>
+
+        <div class="form-group col-md-12">
+            <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="registrarDetalleKardex()">
+                <i class="fas fa-plus-circle"></i> Agregar
+            </button>
         </div>
     </div>
     <!-- Sección para mostrar los detalles de un kardex específico -->
-    <div id="detallesKardex" style="display: none;">  
+    <div id="detallesKardex" style="display: none;">
+        <div class="form-group col-md-12">
+            <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FFC107; color: white;" onclick="descargarFormatoKardex()">
+                <i class="fas fa-download"></i> Descargar Formato
+            </button>
+        </div>
+        <div class="mb-4">
+            <button class="btn btn-secondary" onclick="volverListaKardex()">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </div>  
         <h3 id="tituloDetallesKardex" class="text-center text-warning font-weight-bold"></h3>
         <div class="table-responsive"> <!-- Añade esta clase para hacer la tabla responsive -->
             <table class="table table-bordered">

@@ -41,6 +41,14 @@ CREATE TABLE IF NOT EXISTS public.LavadosManos (
 	fk_idTipoFormatos INT REFERENCES public.TiposFormatos(idTipoFormato) NOT NULL
 );
 
+-- Creación de la tabla para las medidas correctivas asignadas al observador
+CREATE TABLE IF NOT EXISTS public.MedidasCorrectivasObservaciones (
+	idMedidaCorrectivaOb SERIAL PRIMARY KEY,
+	DetalleDeMedidaCorrectiva VARCHAR(100),
+	Fecha DATE,
+	fk_idLavadoMano INT REFERENCES public.LavadosManos(idLavadoMano) NOT NULL
+);
+
 -- Tabla para el detalle de lavado de manos
 CREATE TABLE IF NOT EXISTS public.Detalle_lavados_manos (
 	idMano SERIAL PRIMARY KEY,
@@ -51,10 +59,17 @@ CREATE TABLE IF NOT EXISTS public.Detalle_lavados_manos (
 	fk_idLavadoMano INT REFERENCES public.LavadosManos(idLavadoMano) NOT NULL
 );
 
+-- Tabla para el formato carnet de salud
+CREATE TABLE IF NOT EXISTS public.CarnetSalud (
+	idCarnetSalud SERIAL PRIMARY KEY,
+	Carnet_salud BYTEA NOT NULL,
+	Fecha_Vencimiento DATE NOT NULL
+);
+
 -- Tabla para el formato de control general del personal
 CREATE TABLE IF NOT EXISTS public.controles_generales_personal (
-	idControlGeneral SERIAL PRIMARY KEY,
-	Carnet_salud BYTEA NOT NULL,
+	idControlGeneral SERIAL PRIMARY KEY, 
+	fk_idCarnetSalud INT REFERENCES public.CarnetSalud(idCarnetSalud) NOT NULL,
 	fk_idTrabajador INT REFERENCES public.Trabajadores(idTrabajador) NOT NULL,
 	fk_idTipoFormatos INT REFERENCES public.TiposFormatos(idTipoFormato) NOT NULL
 );
@@ -94,7 +109,8 @@ CREATE TABLE IF NOT EXISTS public.Proveedores (
 -- Crear la tabla para registrar productos
 CREATE TABLE IF NOT EXISTS public.productos (
 	idproducto SERIAL PRIMARY KEY,
-	descripcion_producto VARCHAR(70) NOT NULL
+	descripcion_producto VARCHAR(70) NOT NULL,
+	Stock INT NOT NULL
 );
 
 --Tabla para generar el formato de kardex
@@ -120,5 +136,7 @@ CREATE TABLE IF NOT EXISTS public.detalles_kardex (
 	observaciones VARCHAR(80),
 	fk_idkardex INT REFERENCES public.kardex(idkardex)
 );
+
+
 
 
