@@ -508,7 +508,7 @@ def download_formato():
     trabajador = detalle_trabajador[0]
 
     # Realizar la consulta para obtener el control general del trabajador
-    detalle_control_general = execute_query(f"SELECT * FROM v_control_general_personal WHERE idtrabajdor = {trabajador_id}")
+    detalle_control_general = execute_query(f"SELECT * FROM v_control_general_personal WHERE idtrabajador = {trabajador_id}")
 
     # Asegurarse de que se obtuvieron resultados y acceder correctamente a los datos
     if detalle_control_general:

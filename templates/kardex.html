@@ -33,61 +33,83 @@
             </div>
         </form>
     
-        <!-- Sección para mostrar la lista de todos los kardex -->
+        <!-- Sección para mostrar la lista de todos los kardex activos -->
         <div>
-            <h3 class="text-center text-warning font-weight-bold">Registros de Kardex Activos</h3>
-            <div class="row">
-                {% for k in v_kardex %}
-                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                        <div class="card shadow-lg h-100" style="border-radius: 15px; overflow: hidden;">
-                            <div class="card-header text-center font-weight-bold text-white" style="font-size: 20px; background-color: #FF8C00;">
-                                {{ k.descripcion_producto }}
-                            </div>
-                            <div class="card-body" style="background-color: #FFF3E0;">
-                                <p class="card-text" style="font-size: 16px; color: #000000;">
-                                    <strong>Mes:</strong> {{ k.mes }}<br>
-                                    <strong>Año:</strong> {{ k.anio }}<br>
-                                    <strong>Estado:</strong> {{ k.estado }}
-                                </p>
-                                <button type="button" class="btn btn-warning btn-block font-weight-bold mt-3" 
-                                        onclick="verDetallesKardex('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
+            <h3 class="text-center font-weight-bold" style="color: #FF8C00;">Registros de Kardex Activos</h3>
+            <div class="form-group col-md-6">
+                <label for="filtrarProductoKardex" style="color: #FF8C00;">Filtrar kardex:</label>
+                <input type="text" id="filtrarProductoKardex" class="form-control" name="filtrarProductoKardex" placeholder="Filtrar el kardex por el producto" onkeyup="filterKardexOpenProduct()"  autocomplete="off">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="kardexTableOpen">
+                    <thead style="background-color: #FF8C00; color: white;">
+                        <tr class="text-center">
+                            <th>Producto</th>
+                            <th>Mes</th>
+                            <th>Año</th>
+                            <th>Estado</th>
+                            <th>Ver</th>
+                            <th>Finalizar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for k in v_kardex %}
+                        <tr class="text-center">
+                            <td>{{ k.descripcion_producto }}</td>
+                            <td>{{ k.mes }}</td>
+                            <td>{{ k.anio }}</td>
+                            <td>{{ k.estado }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="verDetallesKardex('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
                                     <i class="fas fa-arrow-circle-right"></i> Ver
                                 </button>
-                                <button type="button" class="btn btn-danger btn-block font-weight-bold mt-3" 
-                                        onclick="finalizarKardex('{{ k.idkardex }}')" style="background-color: #ff0000;">
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="finalizarKardex('{{ k.idkardex }}')" style="background-color: #ff0000;">
                                     <i class="fas fa-check-circle"></i> Finalizar
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Sección para mostrar la lista de todos los kardex finalizados -->
         <div>
             <h3 class="text-center font-weight-bold" style="color: #ff0000;">Registros de Kardex Finalizados</h3>
-            <div class="row">
-                {% for k in v_kardex_cerrado %}
-                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                        <div class="card shadow-lg h-100" style="border-radius: 15px; overflow: hidden;">
-                            <div class="card-header text-center font-weight-bold text-white" style="font-size: 20px; background-color: #ff0000;">
-                                {{ k.descripcion_producto }}
-                            </div>
-                            <div class="card-body" style="background-color: #FFF3E0;">
-                                <p class="card-text" style="font-size: 16px; color: #000000;">
-                                    <strong>Mes:</strong> {{ k.mes }}<br>
-                                    <strong>Año:</strong> {{ k.anio }}<br>
-                                    <strong>Estado:</strong> {{ k.estado }}
-                                </p>
-                                <button type="button" class="btn btn-warning btn-block font-weight-bold mt-3" 
-                                        onclick="verDetallesKardexCerrado('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
+            <div class="form-group col-md-6">
+                <label for="filtrarProductoKardex" style="color: #ff0000;">Filtrar kardex finalizados:</label>
+                <input type="text" id="filtrarProductoKardexClose" class="form-control" name="filtrarProductoKardex" placeholder="Filtrar el kardex por el producto" onkeyup="filterKardexCloseProduct()"  autocomplete="off">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="tableCloseKardex">
+                    <thead style="background-color: #ff0000; color: white;">
+                        <tr class="text-center">
+                            <th>Producto</th>
+                            <th>Mes</th>
+                            <th>Año</th>
+                            <th>Estado</th>
+                            <th>Ver</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for k in v_kardex_cerrado %}
+                        <tr class="text-center">
+                            <td>{{ k.descripcion_producto }}</td>
+                            <td>{{ k.mes }}</td>
+                            <td>{{ k.anio }}</td>
+                            <td>{{ k.estado }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="verDetallesKardexCerrado('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
                                     <i class="fas fa-arrow-circle-right"></i> Ver
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -108,6 +130,8 @@
                         <div class="form-group">
                             <label for="descripcionProducto" class="font-weight-bold">Descripción del producto</label>
                             <input type="text" id="descripcionProducto" class="form-control" name="descripcionProducto" placeholder="Ingresa la descripción del producto" autocomplete="off">
+                            <label for="stockProducto" class="font-weight-bold">Stock Actual</label>
+                            <input type="number" id="stockProducto" class="form-control" name="stockProducto" placeholder="Stock actual del producto" autocomplete="off">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -142,41 +166,30 @@
                 <input type="date" id="fecha_kardex" class="form-control" name="fecha_kardex" required>
             </div>
             <div class="form-group col-md-6">
-                <label for="numeroDias" style="color: #FF8C00;">N° de días:</label>
-                <input type="number" id="numeroDias" class="form-control" name="numeroDias" placeholder="N° de días desde la recepción la MP" autocomplete="off" required>
+                <label for="loteKardex" style="color: #FF8C00;">Lote:</label>
+                <input type="text" id="loteKardex" class="form-control" name="loteKardex" placeholder="Ingrese el lote correspondiente" autocomplete="off" required>
             </div>
         </div>
         <div class="form-row mb-3">
-            <div class="form-group col-md-6">
-                <label for="selectProveedor" style="color: #FF8C00;">Seleccione el Proveedor:</label>
-                <select id="selectProveedor" class="form-control" name="selectProveedor" required>
-                    {% for p in proveedor %}
-                        <option value="{{ p.nom_empresa }}">{{ p.nom_empresa }}</option>
-                    {% endfor %}
-                </select>
-            </div>
             <div class="form-group col-md-6">
                 <label for="saldoInicial" style="color: #FF8C00;">Saldo Inicial:</label>
                 <input type="number" id="saldoInicial" class="form-control" name="saldoInicial" placeholder="Saldo inicial" autocomplete="off">
             </div>
-        </div>
-        <div class="form-row mb-3">
             <div class="form-group col-md-6">
                 <label for="ingresoKardex" style="color: #FF8C00;">Ingreso:</label>
                 <input type="number" id="ingresoKardex" class="form-control" name="ingresoKardex" placeholder="Ingreso" autocomplete="off">
             </div>
+        </div>
+        <div class="form-row mb-3">
             <div class="form-group col-md-6">
                 <label for="salidaKardex" style="color: #FF8C00;">Salida:</label>
                 <input type="number" id="salidaKardex" class="form-control" name="salidaKardex" placeholder="Salida" autocomplete="off">
             </div>
-        </div>
-        <div class="form-row mb-3">
-            <div class="form-group col-md-12">
+            <div class="form-group col-md-6">
                 <label for="observaciones" style="color: #FF8C00;">Observaciones:</label>
                 <input type="text" id="observaciones" class="form-control" name="observaciones" placeholder="Observaciones" autocomplete="off">
             </div>
         </div>
-
         <div class="form-group col-md-12">
             <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="registrarDetalleKardex()">
                 <i class="fas fa-plus-circle"></i> Agregar
@@ -196,8 +209,20 @@
             </button>
         </div>  
         <h3 id="tituloDetallesKardex" class="text-center text-warning font-weight-bold"></h3>
-        <div class="table-responsive"> <!-- Añade esta clase para hacer la tabla responsive -->
-            <table class="table table-bordered">
+        <div class="table-responsive">
+            <div class="col-md-6">
+                <form>
+                    <div class="input-group mb-3">
+                        <div class="input-container">
+                            <label for="filterFechaDetalleKardex" style="color: #FF8C00;">Filtrar por fecha:</label>
+                            <input type="date" id="filterFechaDetalleKardex" class="form-control" name="filterFechaDetalleKardex"
+                            onchange="filterTableDetalleKardex()" 
+                            />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <table class="table table-bordered" id="detalleKardexTable">
                 <thead style="background-color: #FFC107; color: white;">
                     <tr>
                         <th class="text-center">Fecha</th>
@@ -213,7 +238,7 @@
                     <!-- Detalles del kardex serán insertados aquí -->
                 </tbody>
             </table>
-        </div>
+        </div>        
     </div>
 </div>
 
