@@ -7,8 +7,6 @@ VALUES ('75472443', 'Cristian Jhon', 'Espinoza Camones', '2001-02-19', 'Jr. Este
 pg_read_binary_file('C:\\Users\\cristianec.MISTR\\Documents\\PYTHON\\Proyectos\\Ingreso de formatos en producción\\images.jpg')
 , 2);
 
-SELECT * FROM public.formatos
-
 SELECT * FROM public.tiposformatos
 
 SELECT * FROM public.controles_generales_personal
