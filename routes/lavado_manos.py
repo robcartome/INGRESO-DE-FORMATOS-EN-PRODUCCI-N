@@ -1,17 +1,9 @@
-import io
 import os
 
-from flask import Blueprint, render_template, request, jsonify, send_file, make_response
+from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
 from datetime import datetime
-from reportlab.lib.pagesizes import letter, landscape
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image, Spacer, Frame, PageTemplate, KeepTogether
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-
 from collections import defaultdict
-from datetime import time, date
 from  .utils.helpers import image_to_base64
 from  .utils.helpers import generar_reporte
 
