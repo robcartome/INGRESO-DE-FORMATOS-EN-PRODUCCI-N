@@ -5,16 +5,22 @@ SELECT
     dlv.idmano,
     dlv.hora,
     dlv.fecha,
-	dlv.medida_correctiva,
     CONCAT(
-        SUBSTRING(t.nombres FROM 1 FOR POSITION(' ' IN t.nombres) - 1), 
+        -- Usamos COALESCE para evitar un valor NULL si no se encuentra el espacio
+        COALESCE(
+            -- Si se encuentra un espacio, tomamos la subcadena
+            SUBSTRING(t.nombres FROM 1 FOR NULLIF(POSITION(' ' IN t.nombres) - 1, -1)),
+            -- Si no se encuentra, tomamos todo el nombre
+            t.nombres
+        ), 
         ' ', 
+        -- Toma la inicial del apellido
         SUBSTRING(t.apellidos FROM 1 FOR 1), 
         '.'
     ) AS nombre_formateado,
     lv.idlavadomano,
-	lv.fk_idtipoformatos,
-	lv.estado
+    lv.fk_idtipoformatos,
+    lv.estado
 FROM 
     detalle_lavados_manos dlv
 JOIN 
@@ -24,8 +30,13 @@ JOIN
 ORDER BY 
     dlv.fecha DESC;
 
-SELECT * FROM v_lavados_manos
+DROP VIEW detalle_lavados_manos
 
+SELECT * FROM detalle_lavados_manos
+
+SELECT * FROM trabajadores
+
+SELECT * FROM v_lavados_manos
 	
 SELECT 
     idformatos,
@@ -39,7 +50,7 @@ WHERE
     fk_idtipoformato = 2 
     AND estado = 'CERRADO';
 
-SELECT * FROM 
+SELECT * FROM v_lavados_manos
 
 SELECT 
 	idformatos,
@@ -109,3 +120,7 @@ JOIN
 SELECT * FROM v_control_general_personal
 
 SELECT * FROM v_lavados_manos WHERE estado = 'CREADO' ORDER BY idmano DESC
+
+SELECT * FROM public.medidascorrectivasobservaciones
+
+SELECT * FROM public.lavadosmanos

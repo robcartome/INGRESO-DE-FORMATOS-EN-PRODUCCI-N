@@ -65,23 +65,37 @@ $(document).ready(function() {
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
-                        location.reload();
+                        location.reload();  // Recargar la página tras el éxito
                     });
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: response.message || 'Hubo un error al registrar un kardex para este producto. Por favor, inténtelo nuevamente.',
+                        text: response.message,  // Mostrar el mensaje de error enviado desde el servidor
                     });
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Error en la solicitud AJAX:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
-                });
+                
+                // Verificar si la respuesta contiene datos en formato JSON
+                var response = xhr.responseJSON;
+                
+                if (response && response.message) {
+                    // Mostrar el mensaje de error enviado por el servidor
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,  // Mensaje de error desde el servidor
+                    });
+                } else {
+                    // Mostrar un mensaje genérico si no hay detalles en la respuesta
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error inesperado.',
+                    });
+                }
             }
         });
     });
@@ -91,6 +105,63 @@ function setDefaultFechaKardex() {
     const today = new Date().toISOString().split('T')[0];  // Obtiene la fecha actual en formato YYYY-MM-DD
     document.getElementById('fecha_kardex').value = today;  // Asigna la fecha al campo de fecha
 }
+
+function verDetallesKardexCerrado(idKardex, descripcionProducto, mes, anio) {
+    // Ocultar la lista de todos los kardex
+    document.getElementById('listaKardex').style.display = 'none';
+
+    // Mostrar la sección de detalles
+    document.getElementById('detallesKardex').style.display = 'block';
+
+    // Actualizar el título con la información del producto y la fecha
+    document.getElementById('tituloDetallesKardex').innerText = `Detalles del Kardex para ${descripcionProducto} - ${mes}/${anio}`;
+
+    // Asignar el idKardex al input hidden
+    document.getElementById('idkardex_hidden').value = idKardex;
+
+    // Asignar la descripcion_producto al input hidden
+    document.getElementById('descripcion_hidden').value = descripcionProducto;
+
+    // Asignar el idKardex al input hidden
+    document.getElementById('mesKardex').value = mes;
+
+    // Asignar la descripcion_producto al input hidden
+    document.getElementById('anioKardex').value = anio;
+
+    // Aquí pasamos el id para mostrarlo en la tabla de detalles del Kardex
+    $.get('/kardex/detalle_kardex_table/' + idKardex, function(data) {
+        var tableBody = $('#tablaDetallesKardex');
+        tableBody.empty();
+
+        // Verificar si los datos recibidos son un array y tienen contenido
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(function(item) {
+                var row = '<tr>' +
+                    '<td class="text-center">' + item.fecha + '</td>' +
+                    '<td class="text-center">' + item.lote + '</td>' +
+                    '<td class="text-center">' + item.saldo_inicial + '</td>' +
+                    '<td class="text-center">' + item.ingreso + '</td>' +
+                    '<td class="text-center">' + item.salida + '</td>' +
+                    '<td class="text-center">' + item.saldo_final + '</td>' +
+                    '<td class="text-center">' + item.observaciones + '</td>' +
+                    '</tr>';
+                tableBody.append(row);
+            });
+        } else {
+            // Si no hay datos, mostrar un mensaje
+            var noDataRow = '<tr><td colspan="7" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
+            tableBody.append(noDataRow);
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error("Error al cargar los detalles del kardex:", textStatus, errorThrown);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al cargar detalles',
+            text: 'Ocurrió un error al cargar los detalles del kardex. Inténtalo de nuevo más tarde.',
+        });
+    });
+}
+
 
 function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     // Ocultar la lista de todos los kardex
@@ -111,13 +182,32 @@ function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     // Asignar la descripcion_producto al input hidden
     document.getElementById('descripcion_hidden').value = descripcionProducto;
 
-    // Asignar el idKardex al input hidden
+    // Asignar el mes al input hidden
     document.getElementById('mesKardex').value = mes;
 
-    // Asignar la descripcion_producto al input hidden
+    // Asignar el año al input hidden
     document.getElementById('anioKardex').value = anio;
 
-    // Aquí pasamos el id para mostrarlo en la tabla
+    // Hacer una solicitud AJAX para obtener el stock (saldoInicial) usando el idKardex
+    fetch('/kardex/get_stock', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ idkardex: idKardex })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Colocar el valor del stock en el campo saldoInicial
+            document.getElementById('saldoInicial').value = data.stock;
+        } else {
+            console.error('Error al obtener el stock:', data.message);
+        }
+    })
+    .catch(error => console.error('Error en la solicitud del stock:', error));
+
+    // Aquí pasamos el id para mostrarlo en la tabla de detalles del Kardex
     $.get('/kardex/detalle_kardex_table/' + idKardex, function(data) {
         var tableBody = $('#tablaDetallesKardex');
         tableBody.empty();
@@ -151,48 +241,54 @@ function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     });
 }
 
-function verDetallesKardexCerrado(idKardex, descripcionProducto, mes, anio) {
-    // Ocultar la lista de todos los kardex
-    document.getElementById('listaKardex').style.display = 'none';
+// Filtrar la tabla de detalle del kardex por la fecha seleccionada
+function filterTableDetalleKardex() {
+    // Obtener el valor del input de fecha
+    let input = document.getElementById('filterFechaDetalleKardex');
+    let filter = input.value;  // El valor del input de fecha es en formato yyyy-mm-dd
 
-    // Mostrar la sección de detalles
-    document.getElementById('detallesKardex').style.display = 'block';
+    let table = document.getElementById('detalleKardexTable');
+    let tr = table.getElementsByTagName('tr');
 
-    // Actualizar el título con la información del producto y la fecha
-    document.getElementById('tituloDetallesKardex').innerText = `Detalles del Kardex para ${descripcionProducto} - ${mes}/${anio}`;
+    // Iterar sobre las filas de la tabla (excepto la cabecera)
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td')[0];  // Obtener la primera celda (columna de fecha)
 
-    // Aquí pasamos el id para mostrarlo en la tabla
-    $.get('/kardex/detalle_kardex_table/' + idKardex, function(data) {
-        var tableBody = $('#tablaDetallesKardex');
-        tableBody.empty();
+        if (td) {
+            // Obtener el valor de la fecha de la celda
+            let txtValue = td.textContent || td.innerText;
 
-        // Verificar si los datos recibidos son un array y tienen contenido
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(function(item) {
-                var row = '<tr>' +
-                    '<td class="text-center">' + item.fecha + '</td>' +
-                    '<td class="text-center">' + item.lote + '</td>' +
-                    '<td class="text-center">' + item.saldo_inicial + '</td>' +
-                    '<td class="text-center">' + item.ingreso + '</td>' +
-                    '<td class="text-center">' + item.salida + '</td>' +
-                    '<td class="text-center">' + item.saldo_final + '</td>' +
-                    '<td class="text-center">' + item.observaciones + '</td>' +
-                    '</tr>';
-                tableBody.append(row);
-            });
-        } else {
-            // Si no hay datos, mostrar un mensaje
-            var noDataRow = '<tr><td colspan="7" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
-            tableBody.append(noDataRow);
+            // Asegurarse de que ambas fechas estén en formato yyyy-mm-dd antes de compararlas
+            let formattedCellDate = formatDate(txtValue);  // Formateamos la fecha de la celda
+
+            if (formattedCellDate === filter || filter === "") {
+                // Si coinciden o no hay filtro, mostrar la fila
+                tr[i].style.display = "";
+            } else {
+                // Si no coinciden, ocultar la fila
+                tr[i].style.display = "none";
+            }
         }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error("Error al cargar los detalles del kardex:", textStatus, errorThrown);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error al cargar detalles',
-            text: 'Ocurrió un error al cargar los detalles del kardex. Inténtalo de nuevo más tarde.',
-        });
-    });
+    }
+}
+
+// Función para convertir una fecha en formato dd/mm/yyyy o mm/dd/yyyy a yyyy-mm-dd
+function formatDate(dateString) {
+    // Suponiendo que la fecha de la celda está en formato dd/mm/yyyy
+    let parts = dateString.split('/');
+    
+    // Verificar si la fecha tiene el formato esperado dd/mm/yyyy
+    if (parts.length === 3) {
+        let day = parts[0];
+        let month = parts[1];
+        let year = parts[2];
+
+        // Retornar en formato yyyy-mm-dd
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    // Si el formato no es dd/mm/yyyy, devolver la fecha tal como está
+    return dateString;
 }
 
 
@@ -210,32 +306,20 @@ function volverListaKardex() {
 
 function registrarDetalleKardex() {
     var idkardex = document.getElementById('idkardex_hidden').value;
-    var descripcion_producto = document.getElementById('descripcion_hidden').value;
     var fecha = document.getElementById('fecha_kardex').value;
-    var dias = document.getElementById('numeroDias').value;
-    var proveedor = document.getElementById('selectProveedor').value;
+    var lote = document.getElementById('loteKardex').value;
     var saldo_inicial = document.getElementById('saldoInicial').value;
     var ingreso = document.getElementById('ingresoKardex').value;
     var salida = document.getElementById('salidaKardex').value;
     var observaciones = document.getElementById('observaciones').value;
 
+    var descripcion_producto = document.getElementById('descripcion_hidden').value;
     var mes = document.getElementById('mesKardex').value; 
     var anio = document.getElementById('anioKardex').value;
 
-    // Agrega depuración para imprimir los valores obtenidos
-    console.log("Valores obtenidos del formulario:");
-    console.log("idkardex:", idkardex);
-    console.log("descripcion_producto:", descripcion_producto);
-    console.log("fecha:", fecha);
-    console.log("dias:", dias);
-    console.log("proveedor:", proveedor);
-    console.log("saldo_inicial:", saldo_inicial);
-    console.log("ingreso:", ingreso);
-    console.log("salida:", salida);
-    console.log("observaciones:", observaciones);
     
     // Validar que los campos obligatorios no estén vacíos
-    if (!fecha || !dias || !proveedor || !saldo_inicial || !ingreso || !salida) {
+    if (!fecha || !lote || !saldo_inicial || !ingreso || !salida) {
         Swal.fire({
             icon: 'warning',
             title: 'Campos incompletos',
@@ -261,10 +345,8 @@ function registrarDetalleKardex() {
 
     $.post('/kardex/registrar_lote_kardex', {
         idkardex: idkardex, 
-        descripcion_producto: descripcion_producto, 
         fecha: fecha, 
-        dias: dias, 
-        proveedor: proveedor, 
+        lote: lote,
         saldo_inicial: saldo_inicial, 
         ingreso: ingreso, 
         salida: salida, 
@@ -363,4 +445,44 @@ function finalizarKardex(idKardex) {
             text: 'Ocurrió un error al enviar la solicitud: ' + textStatus,
         });
     });
+}
+
+//Para filtrar kardex activos
+function filterKardexOpenProduct() {
+    let input = document.getElementById('filtrarProductoKardex');
+    let filter = input.value.toLowerCase();
+    let table = document.getElementById('kardexTableOpen');
+    let tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td')[0];
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+
+//Para filtrar kardex finalizados
+function filterKardexCloseProduct() {
+    let input = document.getElementById('filtrarProductoKardexClose');
+    let filter = input.value.toLowerCase();
+    let table = document.getElementById('tableCloseKardex');
+    let tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td')[0];
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
 }
