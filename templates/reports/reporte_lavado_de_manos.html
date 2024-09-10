@@ -49,6 +49,21 @@
             </tr>
             {% endfor %}
             {% endfor %}
+
+            <!-- Medidas correctivas -->
+            <tr>
+                <td colspan="12" class="border-none"></td>
+            </tr>
+            <tr>
+                <th colspan="1">FECHA</th>
+                <th colspan="6">MEDIDAS CORRECTIVAS</th>
+            </tr>
+            {% for date, medida in medidas_correctivas.items() %}
+            <tr>
+                <td colspan="1" class="text-center">{{ date }}</td>
+                <td colspan="6">{{ medida }}</td>
+            </tr>
+            {% endfor %}
         </tbody>
 
         <!-- Pie del reporte -->

@@ -201,18 +201,29 @@ def download_formato():
         # Agregar los datos formateados al diccionario
         agrupado_por_fecha[fecha_formateada][nombre].append(hora_formateada)
 
+    # Procesar las medidas correctivas
+    medidas_correctivas_agrupadas = defaultdict(str)
+    for medida in medidas_correctivas:
+        fecha_formateada = medida['fecha'].strftime("%d/%m/%Y")
+        detalle = medida['detalledemedidacorrectiva']
+
+        # Si ya existe un detalle para esa fecha, agregarlo con una coma
+        if medidas_correctivas_agrupadas[fecha_formateada]:
+            medidas_correctivas_agrupadas[fecha_formateada] += ', ' + detalle
+        else:
+            medidas_correctivas_agrupadas[fecha_formateada] = detalle
+
     # Convertir defaultdict a diccionario regular (opcional)
     agrupado_por_fecha = {fecha: dict(nombres) for fecha, nombres in agrupado_por_fecha.items()}
-
-    # Mostrar el resultado
-    # print(agrupado_por_fecha)
 
     # Generar Template para reporte
     logo_path = os.path.join('static', 'img', 'logo.png')
     logo_base64 = image_to_base64(logo_path)
     title_report="REPORTE DE LAVADO DE MANOS"
+
     """
-    example info
+    example
+    info
         {
             '04/09/2024':
             {
@@ -224,16 +235,21 @@ def download_formato():
                 'Cristian E.': ['09:18'],
                 'LIZBETH P.': ['09:18', '10:19'],
                 'Catherine P.': ['09:18', '09:19']
-            },'04/09/2024':
+            },
+        }
+    medidas_correctivas
+        {
+            '04/09/2024': 'Descripcion de medida correctiva'
         }
     """
     template = render_template(
         "reports/reporte_lavado_de_manos.html",
-        info=agrupado_por_fecha,
         title_manual="MANUAL DE PROCEDIMIENTOS OPERACIONALES DE SANEAMIENTO",
         title_report=title_report,
         format_code_report="TI-POES-F03-RLM",
-        logo_base64=logo_base64
+        logo_base64=logo_base64,
+        info=agrupado_por_fecha,
+        medidas_correctivas = medidas_correctivas_agrupadas
     )
     # Renderiza la plantilla de Kardex
     # template = render_template(
