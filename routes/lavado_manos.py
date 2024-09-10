@@ -12,8 +12,11 @@ from reportlab.lib.units import inch
 
 from collections import defaultdict
 from datetime import time, date
-from  .utils.helpers import image_to_base64
-from  .utils.helpers import generar_reporte
+from .utils.constans import POES
+from .utils.helpers import image_to_base64
+from .utils.helpers import generar_reporte
+from .utils.helpers import get_cabecera_formato
+
 
 ########## PARA LAVADO_MANOS.HTML ###################################################################################
 
@@ -179,6 +182,9 @@ def download_formato():
     # Obtener el id del trabajador de los argumentos de la URL
     formato_lavado_id = request.args.get('formato_id')
 
+    # Obtener cabecera
+    cabecera = get_cabecera_formato("lavadosmanos", formato_lavado_id)
+
     # Realizar la consulta para obtener el formato de lavado de mano que corresponda
     detalle_lavado_manos = execute_query(f"SELECT * FROM v_lavados_manos WHERE idlavadomano = {formato_lavado_id}")
 
@@ -219,7 +225,6 @@ def download_formato():
     # Generar Template para reporte
     logo_path = os.path.join('static', 'img', 'logo.png')
     logo_base64 = image_to_base64(logo_path)
-    title_report="REPORTE DE LAVADO DE MANOS"
 
     """
     example
@@ -244,21 +249,17 @@ def download_formato():
     """
     template = render_template(
         "reports/reporte_lavado_de_manos.html",
-        title_manual="MANUAL DE PROCEDIMIENTOS OPERACIONALES DE SANEAMIENTO",
-        title_report=title_report,
-        format_code_report="TI-POES-F03-RLM",
+        title_manual=POES,
+        title_report=cabecera[0]['nombreformato'],
+        format_code_report=cabecera[0]['codigo'], # "TI-POES-F03-RLM",
+        frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
         info=agrupado_por_fecha,
-        medidas_correctivas = medidas_correctivas_agrupadas
+        medidas_correctivas = medidas_correctivas_agrupadas,
+        mes='SETIEMBRE',
+        anio='2024'
     )
-    # Renderiza la plantilla de Kardex
-    # template = render_template(
-    #     "reports/reporte_kardex.html",
-    #     info=info,
-    #     title_manual="MANUAL DE BUENAS PRÁCTICAS DE MANUFACTURA",
-    #     title_report="KARDEX",
-    #     codigo_report="TI-BPM-F02-KARDEX",
-    #     logo_base64=logo_base64
-    # )
-    return generar_reporte(template, title_report)
+
+    filename=f"REPORTE DE LAVADO DE MANOS - {(detalle_lavado_manos[0]['fecha']).strftime('%m/%Y')}"
+    return generar_reporte(template, filename)
 
