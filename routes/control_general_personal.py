@@ -17,13 +17,17 @@ def control_general():
     if request.method == 'GET':
         try:
             # Obtener a los trabajadores
-            query_trabajador = """SELECT t.idtrabajador, t.dni, t.nombres, t.apellidos, 
-                                  t.fecha_nacimiento, t.direccion, t.celular, 
-                                  t.celular_emergencia, t.fecha_ingreso, 
-                                  t.area, t.cargo, t.fk_idsexo, c.carnet_salud 
-                                  FROM trabajadores t 
-                                  LEFT JOIN controles_generales_personal c 
-                                  ON t.idtrabajador = c.fk_idtrabajador"""
+            query_trabajador = """SELECT 
+                                    c.idcontrolgeneral,t.idtrabajador, t.dni, t.nombres, t.apellidos, 
+                                    t.fecha_nacimiento, t.direccion, t.celular, 
+                                    t.celular_emergencia, t.fecha_ingreso, 
+                                    t.area, t.cargo, t.fk_idsexo, cn.carnet_salud
+                                FROM 
+                                    trabajadores t 
+                                JOIN 
+                                    controles_generales_personal c ON t.idtrabajador = c.fk_idtrabajador
+                                JOIN
+                                    carnetsalud cn ON c.fk_idcarnetsalud = cn.idcarnetsalud"""
             trabajadores = execute_query(query_trabajador)
 
             query_genero = "SELECT * FROM sexos"
@@ -78,14 +82,23 @@ def control_general():
             if result and len(result) > 0:
                 idTrabajador = result[0]['idtrabajador']
 
-                # Insertar control general personal
+                # Insertar el carnet de salud y devolver el id generado
+                query_carnet_salud = """
+                    INSERT INTO carnetsalud (carnet_salud) 
+                    VALUES (%s) 
+                    RETURNING idcarnetsalud;
+                """
+                
+                # Ejecutamos la consulta y obtenemos el id del nuevo carnet
+                idcarnet_result = execute_query(query_carnet_salud, (psycopg2.Binary(file_data),))
+                idcarnet = idcarnet_result[0]['idcarnetsalud']
+
+                # Insertar control general personal con el id del carnet y el id del trabajador
                 query_insertar_control = """ 
-                    INSERT INTO controles_generales_personal (carnet_salud, fk_idtrabajador, fk_idtipoformatos) 
+                    INSERT INTO controles_generales_personal (fk_idcarnetsalud, fk_idtrabajador, fk_idtipoformatos) 
                     VALUES (%s, %s, %s);
                 """
-                execute_query(query_insertar_control, (
-                    psycopg2.Binary(file_data), idTrabajador, 1
-                ))
+                execute_query(query_insertar_control, (idcarnet, idTrabajador, 1))
 
                 return jsonify({'status': 'success', 'message': 'Trabajador registrado exitosamente.'}), 200
             else:
@@ -136,20 +149,30 @@ def update_trabajador():
 
         if file_data:
             # Actualizar el carnet de salud si se subió un nuevo archivo
-            query_actualizar_carnet = """ 
-                UPDATE controles_generales_personal 
-                SET carnet_salud=%s
-                WHERE fk_idtrabajador=%s;
+            query_obtener_carnet = """ 
+                SELECT fk_idcarnetsalud FROM controles_generales_personal WHERE fk_idtrabajador = %s
             """
-            execute_query(query_actualizar_carnet, (
-                psycopg2.Binary(file_data), idTrabajador
-            ))
+            # Ejecuta la consulta y obtén la fila de resultados
+            idCarnet_result = execute_query(query_obtener_carnet, (idTrabajador,))
+            
+            # Asegúrate de que se obtuvo un resultado y extrae el valor correcto
+            if idCarnet_result and 'fk_idcarnetsalud' in idCarnet_result[0]:
+                idCarnet = idCarnet_result[0]['fk_idcarnetsalud']
 
+                # Actualizar el carnet de salud con el archivo subido
+                query_actualizar_carnet = "UPDATE carnetsalud SET carnet_salud = %s WHERE idcarnetsalud = %s"
+                execute_query(query_actualizar_carnet, (file_data, idCarnet))
+            else:
+                # Manejo si no se encuentra un carnet asociado
+                return jsonify({'status': 'error', 'message': 'No se encontró un carnet de salud para el trabajador.'}), 404
+
+        # Siempre devolver una respuesta exitosa
         return jsonify({'status': 'success', 'message': 'Información del trabajador actualizada correctamente.'}), 200
 
     except Exception as e:
         print(f"Error al actualizar el trabajador: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al actualizar la información del trabajador.'}), 500
+
     
 @controlGeneral.route('/delete', methods=['POST'])
 def delete_trabajador():
@@ -161,35 +184,28 @@ def delete_trabajador():
             DELETE FROM controles_generales_personal WHERE fk_idtrabajador = %s;
         """
         execute_query(query_eliminar_control, (idTrabajador,))
-
-        # Eliminar el trabajador de la base de datos
-        query_eliminar_trabajador = """
-            DELETE FROM trabajadores WHERE idtrabajador = %s;
-        """
-        execute_query(query_eliminar_trabajador, (idTrabajador,))
         
-
-        return jsonify({'status': 'success', 'message': 'Trabajador eliminado correctamente.'}), 200
+        return jsonify({'status': 'success', 'message': 'Registro eliminado.'}), 200
 
     except Exception as e:
         print(f"Error al eliminar el trabajador: {e}")
         return jsonify({'status': 'error', 'message': 'Hubo un error al eliminar el trabajador.'}), 500
     
 
-def generar_pdf_formato_generales_personal(trabajador, detalle_control_general):
+def generar_pdf_formato_generales_personal(detalle_control_general):
     try:
         # Usar los datos del trabajador correctamente, asumiendo que 'trabajador' es un diccionario o RealDictRow
-        nombre_trabajador = trabajador['nombres']
-        apellido_trabajador = trabajador['apellidos']
-        fecha_nacimiento_trabajador = trabajador['fecha_nacimiento'].strftime('%d/%m/%Y')
-        sexo_trabajador = 'Femenino' if trabajador['fk_idsexo'] == 1 else 'Masculino' 
-        direccion = trabajador['direccion']
-        celular = trabajador['celular']
-        celularEmergencia = trabajador['celular_emergencia']
-        dni = trabajador['dni']
-        fechaIngreso = trabajador['fecha_ingreso'].strftime('%d/%m/%Y')
-        area = trabajador['area']
-        cargo = trabajador['cargo']
+        nombre_trabajador = detalle_control_general['nombres']
+        apellido_trabajador = detalle_control_general['apellidos']
+        fecha_nacimiento_trabajador = detalle_control_general['fecha_nacimiento'].strftime('%d/%m/%Y')
+        sexo_trabajador = 'Femenino' if detalle_control_general['fk_idsexo'] == 1 else 'Masculino' 
+        direccion = detalle_control_general['direccion']
+        celular = detalle_control_general['celular']
+        celularEmergencia = detalle_control_general['celular_emergencia']
+        dni = detalle_control_general['dni']
+        fechaIngreso = detalle_control_general['fecha_ingreso'].strftime('%d/%m/%Y')
+        area = detalle_control_general['area']
+        cargo = detalle_control_general['cargo']
         carnet_salud_data = detalle_control_general['carnet_salud']
 
         # Crear un buffer en memoria
@@ -492,7 +508,7 @@ def download_formato():
     trabajador = detalle_trabajador[0]
 
     # Realizar la consulta para obtener el control general del trabajador
-    detalle_control_general = execute_query(f"SELECT * FROM controles_generales_personal WHERE fk_idtrabajador = {trabajador_id}")
+    detalle_control_general = execute_query(f"SELECT * FROM v_control_general_personal WHERE idtrabajador = {trabajador_id}")
 
     # Asegurarse de que se obtuvieron resultados y acceder correctamente a los datos
     if detalle_control_general:
@@ -501,7 +517,7 @@ def download_formato():
         return jsonify({'status': 'error', 'message': 'No se encontró información de control general.'}), 404
 
     # Generar el PDF con la información del trabajador
-    pdf_buffer = generar_pdf_formato_generales_personal(trabajador, detalle_control_general)
+    pdf_buffer = generar_pdf_formato_generales_personal(detalle_control_general)
 
     return send_file(pdf_buffer, as_attachment=True, download_name="Formato_Control_General_Personal.pdf", mimetype='application/pdf')
 
