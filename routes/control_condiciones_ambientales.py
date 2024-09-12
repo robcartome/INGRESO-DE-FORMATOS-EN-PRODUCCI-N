@@ -169,20 +169,17 @@ def descargar_formato_CA(idCA):
     idCA = int(idCA)
     
     # Consulta para obtener el kardex
-    query_kardex = "SELECT * FROM v_kardex WHERE idkardex = %s"
-    kardex = execute_query(query_kardex, (idCA,))
-    
-    # Consulta para obtener los detalles del kardex
-    query_detalle_kardex = "SELECT * FROM detalles_kardex WHERE fk_idkardex = %s"
-    detalle_kardex = execute_query(query_detalle_kardex, (idCA,))
+    query_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s"
+    ConsultCADetails = execute_query(query_CA, (idCA,))
+
 
     # Formatear la fecha en los detalles
     detalles_formateados = []
-    for detalle in detalle_kardex:
+    for detalle in ConsultCADetails:
         detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')  # Formato DD/MM/YYYY
         detalles_formateados.append(detalle)
 
-    print(kardex, detalles_formateados)
+    print(detalles_formateados)
 
     # Empaquetar ambos resultados en un solo diccionario
-    return jsonify({'kardex': kardex, 'detalles': detalles_formateados})
+    return jsonify({'status': 'success', 'detalles': detalles_formateados})
