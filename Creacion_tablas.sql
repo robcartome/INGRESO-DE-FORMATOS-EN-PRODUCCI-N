@@ -138,5 +138,58 @@ CREATE TABLE IF NOT EXISTS public.detalles_kardex (
 );
 
 
+-- << Condiciones Ambientales >> --
 
+-- Creación de las áreas para las condiciones ambientales
 
+CREATE TABLE IF NOT EXISTS public.areas (
+	idarea SERIAL PRIMARY KEY,
+	detalle_area VARCHAR(45) NOT NULL
+);
+
+-- Creación de la tabla de condición ambiental
+
+CREATE TABLE IF NOT EXISTS public.condiciones_ambientales (
+	idcondicionambiental SERIAL PRIMARY KEY,
+	mes VARCHAR(11) NOT NULL,
+	anio VARCHAR(4) NOT NULL,
+	estado VARCHAR(10) NOT NULL,
+	fk_idTipoFormatos INT REFERENCES public.TiposFormatos(idTipoFormato) NOT NULL,
+	fk_idArea INT REFERENCES public.areas(idarea) NOT NULL
+);
+
+-- Creación de la tabla para las acciones correctivas
+
+CREATE TABLE IF NOT EXISTS public.acciones_correctivas (
+	idAccion_correctiva SERIAL PRIMARY KEY,
+	detalle_Accion_correctiva VARCHAR(60) NOT NULL,
+	estado VARCHAR(30) NOT NULL
+);
+
+-- Creación de la tabla del detalle de condiciones ambientales
+
+CREATE TABLE IF NOT EXISTS public.detalle_condiciones_ambientales(
+	idDetalle_ca SERIAL PRIMARY KEY,
+	fecha DATE NOT NULL,
+	Hora TIME NOT NULL,
+	observaciones VARCHAR(50) NULL,
+	temperatura VARCHAR(10) NOT NULL,
+	humedad VARCHAR(10) NOT NULL,
+	fk_idAccion_correctiva INT REFERENCES public.acciones_correctivas(idAccion_correctiva) NULL,
+	fk_idCondicion_ambiental INT REFERENCES public.condiciones_ambientales(idcondicionambiental) NULL
+);
+
+-- CREACIÓN DE LA TABLA DE VERIFICACIÓN PREVIA
+
+CREATE TABLE IF NOT EXISTS public.Verificacion_previa(
+	idVerificacion_Previa SERIAL PRIMARY KEY,
+	detalle_verificacion_previa VARCHAR(50) NOT NULL
+);
+
+-- RELACIÓN DE MUCHOS A MUCHOS ENTRE LA VERIFICACIÓN PREVIA Y EL DETALLE DE LA CONDICÓN AMBIENTAL
+
+CREATE TABLE IF NOT EXISTS public.asignacion_verificacion_previa_condicion_ambiental (
+	idAsignacion_verificacion_previa SERIAL PRIMARY KEY,
+	fk_idDetalle_condicion_ambiental INT REFERENCES public.detalle_condiciones_ambientales(iddetalle_ca),
+	fk_idVerificacion_previa INT REFERENCES public.Verificacion_previa(idVerificacion_Previa)
+);

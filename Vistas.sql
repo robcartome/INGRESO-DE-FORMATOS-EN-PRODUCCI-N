@@ -117,10 +117,44 @@ JOIN
 JOIN
 	trabajadores t ON t.idtrabajador = c.fk_idtrabajador;
 
-SELECT * FROM v_control_general_personal
+SELECT * FROM areas;
 
-SELECT * FROM v_lavados_manos WHERE estado = 'CREADO' ORDER BY idmano DESC
+SELECT * FROM public.tiposformatos
 
-SELECT * FROM public.medidascorrectivasobservaciones
+SELECT * FROM public.condiciones_ambientales
 
-SELECT * FROM public.lavadosmanos
+CREATE OR REPLACE VIEW v_condiciones_ambientales AS
+SELECT
+	ca.idcondicionambiental, TO_CHAR(TO_DATE(ca.mes || ' ' || ca.anio, 'MM YYYY'), 'TMMonth') AS mes, ca.anio, ca.estado, a.idarea, a.detalle_area
+FROM
+	condiciones_ambientales ca
+JOIN
+	areas a ON a.idarea = ca.fk_idarea;
+
+SELECT * FROM public.detalle_condiciones_ambientales
+
+SELECT * FROM public.verificacion_previa
+
+
+CREATE OR REPLACE VIEW v_detalle_control_CA AS
+SELECT
+    d.iddetalle_ca,
+    d.fecha,
+    d.hora,
+    d.temperatura,
+    d.humedad,
+    d.observaciones,
+    COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
+	ac.idaccion_correctiva,
+	ac.estado,
+    ca.idcondicionambiental
+FROM
+    detalle_condiciones_ambientales d
+LEFT JOIN
+    acciones_correctivas ac ON ac.idaccion_correctiva = d.fk_idaccion_correctiva
+JOIN
+    condiciones_ambientales ca ON ca.idcondicionambiental = d.fk_idcondicion_ambiental;
+
+DROP VIEW v_detalle_control_CA
+
+SELECT * FROM v_detalle_control_CA
