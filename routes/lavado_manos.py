@@ -4,8 +4,12 @@ from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
 from datetime import datetime
 from collections import defaultdict
-from  .utils.helpers import image_to_base64
-from  .utils.helpers import generar_reporte
+from datetime import time, date
+from .utils.constans import POES
+from .utils.helpers import image_to_base64
+from .utils.helpers import generar_reporte
+from .utils.helpers import get_cabecera_formato
+
 
 ########## PARA LAVADO_MANOS.HTML ###################################################################################
 
@@ -171,6 +175,9 @@ def download_formato():
     # Obtener el id del trabajador de los argumentos de la URL
     formato_lavado_id = request.args.get('formato_id')
 
+    # Obtener cabecera
+    cabecera = get_cabecera_formato("lavadosmanos", formato_lavado_id)
+
     # Realizar la consulta para obtener el formato de lavado de mano que corresponda
     detalle_lavado_manos = execute_query(f"SELECT * FROM v_lavados_manos WHERE idlavadomano = {formato_lavado_id}")
 
@@ -193,18 +200,28 @@ def download_formato():
         # Agregar los datos formateados al diccionario
         agrupado_por_fecha[fecha_formateada][nombre].append(hora_formateada)
 
+    # Procesar las medidas correctivas
+    medidas_correctivas_agrupadas = defaultdict(str)
+    for medida in medidas_correctivas:
+        fecha_formateada = medida['fecha'].strftime("%d/%m/%Y")
+        detalle = medida['detalledemedidacorrectiva']
+
+        # Si ya existe un detalle para esa fecha, agregarlo con una coma
+        if medidas_correctivas_agrupadas[fecha_formateada]:
+            medidas_correctivas_agrupadas[fecha_formateada] += ', ' + detalle
+        else:
+            medidas_correctivas_agrupadas[fecha_formateada] = detalle
+
     # Convertir defaultdict a diccionario regular (opcional)
     agrupado_por_fecha = {fecha: dict(nombres) for fecha, nombres in agrupado_por_fecha.items()}
-
-    # Mostrar el resultado
-    # print(agrupado_por_fecha)
 
     # Generar Template para reporte
     logo_path = os.path.join('static', 'img', 'logo.png')
     logo_base64 = image_to_base64(logo_path)
-    title_report="REPORTE DE LAVADO DE MANOS"
+
     """
-    example info
+    example
+    info
         {
             '04/09/2024':
             {
@@ -216,25 +233,26 @@ def download_formato():
                 'Cristian E.': ['09:18'],
                 'LIZBETH P.': ['09:18', '10:19'],
                 'Catherine P.': ['09:18', '09:19']
-            },'04/09/2024':
+            },
+        }
+    medidas_correctivas
+        {
+            '04/09/2024': 'Descripcion de medida correctiva'
         }
     """
     template = render_template(
         "reports/reporte_lavado_de_manos.html",
+        title_manual=POES,
+        title_report=cabecera[0]['nombreformato'],
+        format_code_report=cabecera[0]['codigo'], # "TI-POES-F03-RLM",
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
         info=agrupado_por_fecha,
-        title_manual="MANUAL DE PROCEDIMIENTOS OPERACIONALES DE SANEAMIENTO",
-        title_report=title_report,
-        format_code_report="TI-POES-F03-RLM",
-        logo_base64=logo_base64
+        medidas_correctivas = medidas_correctivas_agrupadas,
+        mes='SETIEMBRE',
+        anio='2024'
     )
-    # Renderiza la plantilla de Kardex
-    # template = render_template(
-    #     "reports/reporte_kardex.html",
-    #     info=info,
-    #     title_manual="MANUAL DE BUENAS PRÁCTICAS DE MANUFACTURA",
-    #     title_report="KARDEX",
-    #     codigo_report="TI-BPM-F02-KARDEX",
-    #     logo_base64=logo_base64
-    # )
-    return generar_reporte(template, title_report)
+
+    filename=f"REPORTE DE LAVADO DE MANOS - {(detalle_lavado_manos[0]['fecha']).strftime('%m/%Y')}"
+    return generar_reporte(template, filename)
 

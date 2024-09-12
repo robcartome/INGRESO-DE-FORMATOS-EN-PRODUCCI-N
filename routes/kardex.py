@@ -1,6 +1,12 @@
+import os
+
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from datetime import datetime
+from .utils.constans import BPM
+from .utils.helpers import image_to_base64
+from .utils.helpers import generar_reporte
+from .utils.helpers import get_cabecera_formato
 
 kardex = Blueprint('kardex', __name__)
 
@@ -184,11 +190,13 @@ def detalle_kardex_table(id_kardex):
 @kardex.route('/descargar_formato_kardex/<int:id_kardex>', methods=['GET'])
 def descargar_formato_kardex(id_kardex):
     id_kardex = int(id_kardex)
-    
+
+    cabecera = get_cabecera_formato("kardex", id_kardex)
+
     # Consulta para obtener el kardex
     query_kardex = "SELECT * FROM v_kardex WHERE idkardex = %s"
     kardex = execute_query(query_kardex, (id_kardex,))
-    
+
     # Consulta para obtener los detalles del kardex
     query_detalle_kardex = "SELECT * FROM detalles_kardex WHERE fk_idkardex = %s"
     detalle_kardex = execute_query(query_detalle_kardex, (id_kardex,))
@@ -199,10 +207,25 @@ def descargar_formato_kardex(id_kardex):
         detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')  # Formato DD/MM/YYYY
         detalles_formateados.append(detalle)
 
-    print(kardex, detalles_formateados)
+    # Generar Template para reporte
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report=cabecera[0]['nombreformato']
 
-    # Empaquetar ambos resultados en un solo diccionario
-    return jsonify({'kardex': kardex, 'detalles': detalles_formateados})
+    # Renderiza la plantilla de Kardex
+    template = render_template(
+        "reports/reporte_kardex.html",
+        title_manual=BPM,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        logo_base64=logo_base64,
+        info=detalles_formateados,
+        kardex=kardex[0]
+    )
+
+    file_name=f"{title_report} - {kardex[0]['mes']} - {kardex[0]['descripcion_producto']}"
+    return generar_reporte(template, file_name)
+
 
 @kardex.route('/finalizar_kardex', methods=['POST'])
 def finalizar_kardex():
