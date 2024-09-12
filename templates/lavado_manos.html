@@ -9,11 +9,25 @@
     
     <!-- Botón de Generar Formato -->
     {% if not formatos %}
-        <button type="button" class="btn btn-sm d-block w-100 mb-4" 
-                style="background-color: #FF7043; color: white;" 
-                onclick="generarFormatoLavadoManos()">
-            <i class="fas fa-file-alt"></i> GENERAR FORMATO
-        </button>
+        <div class="form-row mb-4 text-center">
+            <!-- Botón de Generar Formato -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FF7043; color: white; border-radius: 10px;" 
+                    onclick="generarFormatoLavadoManos()">
+                    <i class="fas fa-file-alt fa-lg mr-2"></i> GENERAR FORMATO
+                </button>
+            </div>
+        
+            <!-- Botón de Historial -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FFDAB9; color: #FF8C00; border: 2px solid #FF8C00; border-radius: 10px;" 
+                    data-toggle="modal" data-target="#historialLavadoManos">
+                    <i class="fas fa-history fa-lg mr-2"></i> HISTORIAL
+                </button>
+            </div>
+        </div>
     {% endif %}
     {% if formatos %}
         <!-- Formulario de Registro -->
@@ -53,42 +67,42 @@
                 <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalarRegistroLavado()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
             </div>
         </div>
+    
+        <!-- Registro de Lavado de Manos en Formato de Tabla -->
+        <div class="container-fluid mt-4">
+            <!-- Título centrado -->
+            <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Registro de Lavado de Manos</h3>
+            <!-- Botón de Medidas Correctivas -->
+            <div class="col-12 mb-3">
+                <button type="button" class="btn btn-warning btn-block text-white font-weight-bold" 
+                    onclick="registrarMedidasCorrectivas()">
+                    <i class="fas fa-info-circle mr-2"></i> Medidas Correctivas
+                </button>
+            </div>
+            
+            <!-- Tabla resizable -->
+            <div class="table-responsive mt-5">
+                <table class="table table-bordered">
+                    <thead style="background-color: #FF8C00; color: black;">
+                        <tr>
+                            <th class="text-center">Nombre</th>
+                            <th class="text-center">Hora</th>
+                            <th class="text-center">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for l in lavado_manos %}
+                        <tr>
+                            <td class="text-center">{{ l.nombre_formateado }}</td>
+                            <td class="text-center">{{ l.hora }}</td>
+                            <td class="text-center">{{ l.fecha }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     {% endif %}
-    <!-- Registro de Lavado de Manos en Formato de Tabla -->
-    <div class="container-fluid mt-4">
-        <!-- Título centrado -->
-        <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Registro de Lavado de Manos</h3>
-        <!-- Botón de Medidas Correctivas -->
-        <div class="col-12 mb-3">
-            <button type="button" class="btn btn-warning btn-block text-white font-weight-bold" 
-                onclick="registrarMedidasCorrectivas()">
-                <i class="fas fa-info-circle mr-2"></i> Medidas Correctivas
-            </button>
-        </div>
-        
-        <!-- Tabla resizable -->
-        <div class="table-responsive mt-5">
-            <table class="table table-bordered">
-                <thead style="background-color: #FF8C00; color: black;">
-                    <tr>
-                        <th class="text-center">Nombre</th>
-                        <th class="text-center">Hora</th>
-                        <th class="text-center">Fecha</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for l in lavado_manos %}
-                    <tr>
-                        <td class="text-center">{{ l.nombre_formateado }}</td>
-                        <td class="text-center">{{ l.hora }}</td>
-                        <td class="text-center">{{ l.fecha }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     
 
     <!-- Modal para mostrar el historial de los registros de los formatos de lavado de manos -->

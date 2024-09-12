@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Control de condiciones ambientales{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h1 class="mb-1 text-center" style="color: #FF8C00;">Control de condiciones ambientales</h1>
+    
+    <!-- Formulario para agregar una nueva condición ambiental -->
+    <div id="listaCA">
+        <form id="formCondicionAmbiental" method="POST" action="">
+            <div class="form-row align-items-end mb-4">
+                <div class="form-group col-lg-10 col-md-8">
+                    <label for="selectArea" class="font-weight-bold text-warning">Área:</label>
+                    <select id="selectArea" class="form-control" name="selectArea">
+                        <option value="">Seleccione el Área</option>
+                        {% for a in areas %}
+                            <option value="{{ a.idarea }}">{{ a.detalle_area }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-lg-2 col-md-2">
+                    <button type="submit" class="btn btn-warning text-white w-100">
+                        <i class="fas fa-plus-circle"></i> Agregar Registro
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Sección para mostrar la lista de todas la condiciones ambientales activas -->
+        <div>
+            <h3 class="text-center font-weight-bold" style="color: #FF8C00;">Registros de control de condiciones ambientales</h3>
+            <div class="form-group col-md-6">
+                <label for="filtrarAraeCa" style="color: #FF8C00;">Filtrar por área:</label>
+                <input type="text" id="filtrarAraeCa" class="form-control" name="filtrarAraeCa" placeholder="Filtrar el control de condiciones ambientales por área" onkeyup="filterCAOpenArea()"  autocomplete="off">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="caTableOpen">
+                    <thead style="background-color: #FF8C00; color: white;">
+                        <tr class="text-center">
+                            <th>Área</th>
+                            <th>Mes</th>
+                            <th>Año</th>
+                            <th>Estado</th>
+                            <th>Ver</th>
+                            <th>Finalizar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ca in v_condiciones_ambientales %}
+                        <tr class="text-center">
+                            <td>{{ ca.detalle_area }}</td>
+                            <td>{{ ca.mes }}</td>
+                            <td>{{ ca.anio }}</td>
+                            <td>{{ ca.estado }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="verDetallesCondicionesAmbientales('{{ ca.idcondicionambiental }}', '{{ ca.detalle_area }}', '{{ ca.mes }}', '{{ ca.anio }}')">
+                                    <i class="fas fa-arrow-circle-right"></i> Ver
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="finalizarDetallesCondicionesAmbientales('{{ ca.idcondicionambiental }}')" style="background-color: #ff0000;">
+                                    <i class="fas fa-check-circle"></i> Finalizar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sección para mostrar la lista de todos los CA finalizados -->
+        <div>
+            <h3 class="text-center font-weight-bold" style="color: #ff0000;">Registros de control de condiciones ambientales finalizados</h3>
+            <div class="form-group col-md-6">
+                <label for="filtrarAreaCA" style="color: #ff0000;">Filtrar por área:</label>
+                <input type="text" id="filtrarAreaCA" class="form-control" name="filtrarAreaCA" placeholder="Filtrar el control de condiciones ambientales por el área" onkeyup="filterCACloseArea()"  autocomplete="off">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="tableCloseCA">
+                    <thead style="background-color: #ff0000; color: white;">
+                        <tr class="text-center">
+                            <th>Producto</th>
+                            <th>Mes</th>
+                            <th>Año</th>
+                            <th>Estado</th>
+                            <th>Ver</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ca in v_finalizados_CA %}
+                        <tr class="text-center">
+                            <td>{{ ca.detalle_area }}</td>
+                            <td>{{ ca.mes }}</td>
+                            <td>{{ ca.anio }}</td>
+                            <td>{{ ca.estado }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="verDetallesCondicionesAmbientalesFinalizadas('{{ ca.idcondicionambiental }}', '{{ ca.detalle_area }}', '{{ ca.mes }}', '{{ ca.anio }}')">
+                                    <i class="fas fa-arrow-circle-right"></i> Ver
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección para mostrar los detalles de un control de condición ambiental especificos -->
+    <div id="llenarFormularioCA" style="display: none;">
+        <!-- Campo oculto para almacenar el idcondicionambiental -->
+        <input type="hidden" id="idcondicionambiental_hidden">
+        <!-- Campo oculto para almacenar la detallearea -->
+        <input type="hidden" id="detallearea_hidden">
+        <!-- Campo oculto para almacenar el anio -->
+        <input type="hidden" id="mesCA">
+        <!-- Campo oculto para almacenar el mes -->
+        <input type="hidden" id="anioCA">
+    
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <label for="fecha_CA" style="color: #FF8C00;">Ingresa la fecha:</label>
+                <input type="date" id="fecha_CA" class="form-control" name="fecha_CA" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="hora_CA" style="color: #FF8C00;">Hora:</label>
+                <input type="time" id="hora_CA" class="form-control" name="hora_CA" required>
+            </div>
+        </div>
+        
+        <h6 class="mb-4" style="color: #FFC107;">Verficación Previa</h6>
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <div class="form-check">
+                    <input type="checkbox" id="limpio" name="limpio" class="form-check-input">
+                    <label class="form-check-label" for="limpio">Limpio</label>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <div class="form-check">
+                    <input type="checkbox" id="ordenado" name="ordenado" class="form-check-input">
+                    <label class="form-check-label" for="ordenado">Ordenado</label>
+                </div>
+            </div>
+        </div>
+    
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <div class="form-check">
+                    <input type="checkbox" id="paletasLimpias" name="paletasLimpias" class="form-check-input">
+                    <label class="form-check-label" for="paletasLimpias">Paletas limpias</label>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <div class="form-check">
+                    <input type="checkbox" id="paletasBuenEstado" name="paletasBuenEstado" class="form-check-input">
+                    <label class="form-check-label" for="paletasBuenEstado">Paletas buen estado</label>
+                </div>
+            </div>
+        </div>
+        <h6 class="mb-4" style="color: #FFC107;">Verficación de condiciones ambientales</h6>
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <label for="temperatura" style="color: #FF8C00;">Temperatura (°C):</label>
+                <input type="number" id="temperatura" class="form-control" name="temperatura" placeholder="Temperatura" min="0" max="50" step="0.1" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="humedadRelativa" style="color: #FF8C00;">Humedad relativa (%):</label>
+                <input type="number" id="humedadRelativa" class="form-control" name="humedadRelativa" placeholder="Humedad relativa" min="0" max="100" step="1" required>
+            </div>
+        </div>
+    
+        <div class="form-row mb-3">
+            <div class="form-group col-md-6">
+                <label for="observaciones" style="color: #FF8C00;">Observaciones:</label>
+                <input type="text" id="observaciones" class="form-control" name="observaciones" placeholder="Observaciones" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="accionesCorrectivas" style="color: #FF8C00;">Acciones correctivas:</label>
+                <input type="text" id="accionesCorrectivas" class="form-control" name="accionesCorrectivas" placeholder="Acciones correctivas" autocomplete="off">
+            </div>
+        </div>
+    
+        <div class="form-group col-md-12">
+            <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="registrarDetalleCA()">
+                <i class="fas fa-plus-circle"></i> Agregar
+            </button>
+        </div>
+    </div>
+    
+    
+    <!-- Sección para mostrar los detalles de un controlAmbiental específico -->
+    <div id="detallesCA" style="display: none;">
+        <div class="form-group col-md-12">
+            <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FFC107; color: white;" onclick="descargarFormatoKardex()">
+                <i class="fas fa-download"></i> Descargar Formato
+            </button>
+        </div>
+        <div class="mb-4">
+            <button class="btn btn-secondary" onclick="volverListaCA()">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </div>  
+        <h3 id="tituloDetallesCA" class="text-center text-warning font-weight-bold"></h3>
+        <div class="table-responsive">
+            <div class="col-md-6">
+                <form>
+                    <div class="input-group mb-3">
+                        <div class="input-container">
+                            <label for="filterFechaDetalleCA" style="color: #FF8C00;">Filtrar por fecha:</label>
+                            <input type="date" id="filterFechaDetalleCA" class="form-control" name="filterFechaDetalleCA"
+                            onchange="filterTableDetalleCA()" 
+                            />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <table class="table table-bordered" id="detalleCATable">
+                <thead style="background-color: #FFC107; color: white;">
+                    <tr>
+                        <th class="text-center">Fecha</th>
+                        <th class="text-center">Hora</th>
+                        <th class="text-center">Limpio</th>
+                        <th class="text-center">Ordenado</th>
+                        <th class="text-center">Paletas Limpias</th>
+                        <th class="text-center">Paletas en buen estado</th>
+                        <th class="text-center">Temperatura</th>
+                        <th class="text-center">Humedad Relativa</th>
+                        <th class="text-center">Observaciones</th>
+                        <th class="text-center">Acciones Correctivas</th>
+                        <th class="text-center">Validar</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaDetallesCA">
+                    <!-- Detalles del kardex serán insertados aquí -->
+                </tbody>
+            </table>
+        </div>        
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/control_condiciones_ambientales.js') }}"></script>
+
+{% endblock %}

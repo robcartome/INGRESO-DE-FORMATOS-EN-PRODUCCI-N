@@ -123,11 +123,6 @@ def detalles_kardex(id_kardex):
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al obtener los detalles del kardex.'}), 500
 
     
-def obtener_iniciales(cadena):
-    palabras = cadena.split()  # Divide la cadena en palabras
-    iniciales = ''.join([palabra[0] for palabra in palabras if palabra.isalpha()])  # Toma la primera letra de cada palabra
-    return iniciales.upper()  # Convierte las iniciales a mayúsculas
-    
 @kardex.route('/registrar_lote_kardex', methods=['POST'])
 def registrar_lote_kardex():
     try:
