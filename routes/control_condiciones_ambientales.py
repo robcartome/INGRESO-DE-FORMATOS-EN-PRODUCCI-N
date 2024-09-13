@@ -183,3 +183,4 @@ def descargar_formato_CA(idCA):
 
     # Empaquetar ambos resultados en un solo diccionario
     return jsonify({'status': 'success', 'detalles': detalles_formateados})
+

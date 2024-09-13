@@ -6,6 +6,7 @@ from routes.lavado_manos import lavadoMano
 from routes.control_general_personal import controlGeneral
 from routes.kardex import kardex
 from routes.control_condiciones_ambientales import condiciones_ambientales
+from routes.registro_control_envasados import controlEnvasados
 
 app = Flask(__name__)
 
@@ -15,6 +16,7 @@ app.register_blueprint(lavadoMano, url_prefix = "/lavado_Manos")
 app.register_blueprint(controlGeneral, url_prefix='/control_general')
 app.register_blueprint(kardex, url_prefix='/kardex')
 app.register_blueprint(condiciones_ambientales, url_prefix='/condiciones_ambientales')
+app.register_blueprint(controlEnvasados, url_prefix='/control_envasados')
 
 # Definiendo la ruta por defecto
 @app.route('/')

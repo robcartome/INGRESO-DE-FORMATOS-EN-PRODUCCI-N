@@ -193,3 +193,27 @@ CREATE TABLE IF NOT EXISTS public.asignacion_verificacion_previa_condicion_ambie
 	fk_idDetalle_condicion_ambiental INT REFERENCES public.detalle_condiciones_ambientales(iddetalle_ca),
 	fk_idVerificacion_previa INT REFERENCES public.Verificacion_previa(idVerificacion_Previa)
 );
+
+
+-- << REGISTRO Y CONTROL DE ENVASADOS >>
+
+CREATE TABLE IF NOT EXISTS public.Registros_Controles_Envasados (
+	id_Registro_Control_Envasados SERIAL PRIMARY KEY,
+	mes VARCHAR(11) NOT NULL,
+	anio VARCHAR(4) NOT NULL,
+	estado VARCHAR(30) NULL 
+);
+
+CREATE TABLE IF NOT EXISTS public.Detalles_Registros_Controles_Envasados (
+	id_detalle_registro_controles_envasados SERIAL PRIMARY KEY,
+	fk_idTrabajador INT REFERENCES public.trabajadores(idtrabajador) NOT NULL,
+	fk_idproducto INT REFERENCES public.productos(idproducto) NOT NULL,
+	cantidad_producida INT NOT NULL,
+	fk_idProveedor INT REFERENCES public.proveedores(idproveedor) NOT NULL,
+	Lote_proveedor VARCHAR(15) NOT NULL,
+	Lote_asignado VARCHAR(15) NOT NULL,
+	fecha_vencimiento DATE NOT NULL,
+	Observacion VARCHAR(60) NULL, 
+	fk_id_registro_control_envasado INT REFERENCES public.Registros_Controles_Envasados(id_Registro_Control_Envasados)
+);
+
