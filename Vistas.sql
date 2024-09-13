@@ -155,6 +155,5 @@ LEFT JOIN
 JOIN
     condiciones_ambientales ca ON ca.idcondicionambiental = d.fk_idcondicion_ambiental;
 
-DROP VIEW v_detalle_control_CA
 
-SELECT * FROM v_detalle_control_CA
+SELECT * FROM public.registros_controles_envasados

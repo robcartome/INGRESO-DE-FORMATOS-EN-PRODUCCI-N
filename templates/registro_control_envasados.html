@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Control de envasados{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Registro y control de envasados</h1>
+
+    <!-- Botón para generar el formato -->
+    {% if not control_envasados %}
+        <div class="form-row mb-4 text-center">
+            <!-- Botón de Generar Formato -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FF7043; color: white; border-radius: 10px;" 
+                    onclick="generarFormatoLavadoManos()">
+                    <i class="fas fa-file-alt fa-lg mr-2"></i> GENERAR FORMATO
+                </button>
+            </div>
+        
+            <!-- Botón de Historial -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FFDAB9; color: #FF8C00; border: 2px solid #FF8C00; border-radius: 10px;" 
+                    data-toggle="modal" data-target="#historialLavadoManos">
+                    <i class="fas fa-history fa-lg mr-2"></i> HISTORIAL
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+
+{% endblock %}
