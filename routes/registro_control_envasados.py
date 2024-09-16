@@ -15,11 +15,27 @@ controlEnvasados = Blueprint('control_envasados', __name__)
 def control_envasados():
     if request.method == 'GET':
         try:
-            # Obtener a los trabajadores
-            query_registros_envasados = """SELECT * FROM registros_controles_envasados"""
-            control_envasados = execute_query(query_registros_envasados)
+            #Obtener si existe el registro de control de envasados creado
+            query_registros_envasados = "SELECT * FROM registros_controles_envasados WHERE estado = 'CREADO'"
+            control_envasados_creado = execute_query(query_registros_envasados)
 
-            return render_template('registro_control_envasados.html', control_envasados=control_envasados)
+            #Obtener el responsable para seleccionar
+            responsable_envasado = execute_query("SELECT * FROM trabajadores")
+
+            #Obtener el producto para seleccionar
+            producto_envasado = execute_query("SELECT * FROM productos")
+
+            #Obtener el proveedor a seleccionar 
+            proveedores_envasado = execute_query("SELECT idproveedor, nom_empresa FROM proveedores")
+
+            #Vista para mostrar el detalle de los registros de control de envasados activos
+            detalle_control_envasados = execute_query("SELECT * FROM v_registros_controles_envasados WHERE estado = 'CREADO'")
+
+            #Obtener el historial de los registros de controles ambientales
+            query_historial_envasados = "SELECT * FROM v_historial_registros_controles_envasados"
+            historial_envasados  = execute_query(query_historial_envasados)
+
+            return render_template('registro_control_envasados.html', control_envasados_creado=control_envasados_creado, historial_envasados=historial_envasados, responsable_envasado=responsable_envasado, producto_envasado=producto_envasado, proveedores_envasado=proveedores_envasado, detalle_control_envasados=detalle_control_envasados)
         
         except Exception as e:
             print(f"Error al obtener datos: {e}")
@@ -28,31 +44,114 @@ def control_envasados():
     elif request.method == 'POST':
         try:
             # Obtener datos del formulario
-            fechaLavado = request.form.get('fechaLavado')
-            horaLavado = request.form.get('horaLavado')
-            selectTrabajador = request.form.get('selectTrabajador')
+            responsable = request.form.get('selectResponsable')
+            producto = request.form.get('selectProducto')
+            cantidadProducida = request.form.get('cantidadProducida')
+            Proveedor =request.form.get('selectProveedor')
+            loteProveedor = request.form.get('loteProveedor')
+            loteAsignado = request.form.get('loteAsignado')
+            fechaVencimiento = request.form.get('fechaVencimiento')
+            observacionesEnvasados = request.form.get('observacionesEnvasados')
 
             # Verificar si hay un formato 'CREADO' para el tipo de formato 2
-            query_formatos = "SELECT idlavadomano FROM lavadosmanos WHERE fk_idtipoformatos = 2 AND estado = 'CREADO'"
-            formato = execute_query(query_formatos)
+            query_formatos = "SELECT id_registro_control_envasados FROM registros_controles_envasados WHERE fk_idtipoformato = 5 AND estado = 'CREADO'"
+            registroEnvasado = execute_query(query_formatos)
 
-            if not formato:
-                return jsonify({'status': 'error', 'message': 'No se encontró un formato válido para registrar el lavado de manos.'}), 400
+            if not registroEnvasado:
+                return jsonify({'status': 'error', 'message': 'No se encontró un formato válido para registrar el registro de control de envasados.'}), 400
             
+            if not observacionesEnvasados:
+                observacionAsignada = "-"
+            else:
+                observacionAsignada = observacionesEnvasados
+
             try:
                 # Insertar lavado de manos
-                query_insertar_trabajador = """ 
-                    INSERT INTO detalle_lavados_manos (fecha, hora, fk_idtrabajador, fk_idlavadomano) 
-                    VALUES (%s, %s, %s, %s);
+                query_insertar_controles_envasados = """ 
+                    INSERT INTO detalles_registros_controles_envasados (fk_idtrabajador, fk_idproducto, cantidad_producida, 
+                                                                        fk_idproveedor, lote_proveedor, lote_asignado, fecha_vencimiento, 
+                                                                        observacion, fk_id_registro_control_envasado) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """
                 
-                execute_query(query_insertar_trabajador, (fechaLavado, horaLavado, selectTrabajador, formato[0]['idlavadomano']))
+                execute_query(query_insertar_controles_envasados, (responsable, producto, cantidadProducida, Proveedor, loteProveedor, loteAsignado, fechaVencimiento, observacionAsignada, registroEnvasado[0]['id_registro_control_envasados']))
             except Exception as e:
                 # Convertir el mensaje de error a string
                 return jsonify({'status': 'error', 'message': str(e)}), 500
             
-            return jsonify({'status': 'success', 'message': 'Lavado de manos registrado.'}), 200
+            return jsonify({'status': 'success', 'message': 'Controles de envasados registrado.'}), 200
 
         except Exception as e:
             print(f"Error al procesar la solicitud POST: {e}")
-            return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el lavado de manos.'}), 500
+            return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el control de envasados registrado.'}), 500
+
+@controlEnvasados.route('/generar_formato_envasados', methods=['POST'])
+def generar_formato_envasados():
+    try:
+        fecha_actual = datetime.now()
+
+        mes_actual = fecha_actual.month
+        anio_actual = fecha_actual.year
+
+        # Eliminar el registro relacionado en controles_generales_personal
+        query_generar_formato = """
+            INSERT INTO registros_controles_envasados(mes,anio,fk_idtipoformato,estado) VALUES  (%s,%s,%s,%s);
+        """
+        execute_query(query_generar_formato, (mes_actual,anio_actual,5,'CREADO'))
+
+        return jsonify({'status': 'success', 'message': 'Se genero el registro.'}), 200
+
+    except Exception as e:
+        print(f"Error al generar el formato: {e}")
+        return jsonify({'status': 'error', 'message': 'Hubo un error al generar el formato.'}), 500
+    
+@controlEnvasados.route('/finalizar_Control_Envasados', methods=['POST'])
+def finalizar_Control_Envasados():
+    try:
+        #Actualizar el estado de "CREADO" a "CERRADO"
+        execute_query("UPDATE registros_controles_envasados SET estado = 'CERRADO' WHERE estado = 'CREADO'")
+        # Enviar los detalles de vuelta al frontend
+        return jsonify({'status': 'success'}), 200
+    except Exception as e:
+        print(f"Error al finalizar: {e}")
+        return jsonify({'status': 'error', 'message': 'Hubo un error al finalizar el control de envasados.'}), 500
+    
+@controlEnvasados.route('/obtener_detalle_envasados/<int:id_formatos>', methods=['GET'])
+def obtener_detalle_envasados(id_formatos):
+    try:
+        # Ejecutar la consulta SQL para obtener los detalles
+        query = "SELECT * FROM v_registros_controles_envasados WHERE id_registro_control_envasados = %s"
+        detalles = execute_query(query, (id_formatos,))
+
+        # Verificar si se encontraron resultados
+        if not detalles:
+            return jsonify({'status': 'error', 'message': 'No se encontraron detalles para el registro.'}), 404
+
+        # Enviar los detalles de vuelta al frontend
+        return jsonify({'status': 'success', 'detalles': detalles}), 200
+
+    except Exception as e:
+        print(f"Error al obtener los detalles: {e}")
+        return jsonify({'status': 'error', 'message': 'Hubo un error al obtener los detalles.'}), 500
+    
+
+
+@controlEnvasados.route('/download_formato', methods=['GET'])
+def download_formato():
+
+    # Obtener el id del trabajador de los argumentos de la URL
+    formato_lavado_id = request.args.get('formato_id')
+
+    #Realizar la consulta para todos los registros y controles de envasados finalizados
+    registros_controles_envasados = execute_query(f"SELECT * FROM registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}")
+
+    # Realizar la consulta para el detalle de todos los registros y controles de envasados finalizados
+    detalle_registros_controles_envasados = execute_query(f"SELECT * FROM v_registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}")
+
+    print(registros_controles_envasados)
+
+    print(detalle_registros_controles_envasados)
+
+    
+
+    

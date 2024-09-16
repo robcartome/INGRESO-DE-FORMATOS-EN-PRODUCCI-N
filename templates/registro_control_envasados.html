@@ -3,18 +3,38 @@
 {% block title %}Control de envasados{% endblock %}
 
 {% block content %}
+<style>
+    /* Estilo para hacer el modal más ancho en pantallas grandes */
+    @media (min-width: 992px) { /* Para pantallas grandes como laptops y PC */
+        .modal-xl {
+            max-width: 90%; /* Ajusta el porcentaje según lo necesites */
+        }
+    }
+
+    /* Estilo para pantallas más pequeñas como tablets y móviles */
+    @media (max-width: 991px) {
+        .modal-dialog {
+            max-width: 100%; /* Mantiene el modal ajustado al ancho de la pantalla */
+            margin: 10px; /* Un poco de margen para que no toque los bordes */
+        }
+
+        .modal-content {
+            border-radius: 0.5rem; /* Bordes redondeados para una mejor estética */
+        }
+    }
+</style>
 
 <div class="container-fluid">
     <h1 class="mb-4 text-center" style="color: #FF8C00;">Registro y control de envasados</h1>
 
     <!-- Botón para generar el formato -->
-    {% if not control_envasados %}
+    {% if not control_envasados_creado %}
         <div class="form-row mb-4 text-center">
             <!-- Botón de Generar Formato -->
             <div class="col-lg-6 col-md-6 mb-3">
                 <button type="button" class="btn btn-lg btn-block shadow-sm" 
                     style="background-color: #FF7043; color: white; border-radius: 10px;" 
-                    onclick="generarFormatoLavadoManos()">
+                    onclick="generarFormatoControlEnvasados()">
                     <i class="fas fa-file-alt fa-lg mr-2"></i> GENERAR FORMATO
                 </button>
             </div>
@@ -23,14 +43,204 @@
             <div class="col-lg-6 col-md-6 mb-3">
                 <button type="button" class="btn btn-lg btn-block shadow-sm" 
                     style="background-color: #FFDAB9; color: #FF8C00; border: 2px solid #FF8C00; border-radius: 10px;" 
-                    data-toggle="modal" data-target="#historialLavadoManos">
+                    data-toggle="modal" data-target="#historialControlEnvasados">
                     <i class="fas fa-history fa-lg mr-2"></i> HISTORIAL
                 </button>
             </div>
         </div>
     {% endif %}
 
+    {% if control_envasados_creado %}
+        <!-- Formulario de Registro -->
+        <form id="formControlEnvasados" method="POST" action="{{ url_for('control_envasados.control_envasados') }}" enctype="multipart/form-data">
+            <div class="form-row mb-3">
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="selectResponsable" class="font-weight-bold" style="color: #FF8C00;">Responsable:</label>
+                    <select id="selectResponsable" class="form-control" name="selectResponsable" required>
+                        <option value="">Seleccione el responsable</option>
+                        {% for t in responsable_envasado %}
+                            <option value="{{ t.idtrabajador }}">{{ t.nombres + ' ' + t.apellidos}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="selectProducto" class="font-weight-bold" style="color: #FF8C00;">Producto:</label>
+                    <select id="selectProducto" class="form-control" name="selectProducto" required>
+                        <option value="">Seleccione el producto</option>
+                        {% for p in producto_envasado %}
+                            <option value="{{ p.idproducto }}">{{ p.descripcion_producto }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row mb-3">
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="cantidadProducida" class="font-weight-bold" style="color: #FF8C00;">Cantidad producida:</label>
+                    <input type="number" id="cantidadProducida" class="form-control" name="cantidadProducida" placeholder="Ingresa la cantidad producida" required>
+                </div>
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="selectProveedor" class="font-weight-bold" style="color: #FF8C00;">Proveedor:</label>
+                    <select id="selectProveedor" class="form-control" name="selectProveedor" required>
+                        {% for pro in proveedores_envasado %}
+                            <option value="{{ pro.idproveedor }}">{{ pro.nom_empresa }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row mb-3">
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="loteProveedor" class="font-weight-bold" style="color: #FF8C00;">Lote del proveedor:</label>
+                    <input type="text" id="loteProveedor" class="form-control" name="loteProveedor" placeholder="Ingrese el lote del proveedor" required>
+                </div>
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="loteAsignado" class="font-weight-bold" style="color: #FF8C00;">Lote asignado:</label>
+                    <input type="text" id="loteAsignado" class="form-control" name="loteAsignado" placeholder="Ingrese el lote asignado" required>
+                </div>
+            </div>
+            <div class="form-row mb-3">
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="fechaVencimiento" class="font-weight-bold" style="color: #FF8C00;">Fecha de vencimiento:</label>
+                    <input type="date" id="fechaVencimiento" class="form-control" name="fechaVencimiento" required>
+                </div>
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="observacionesEnvasados" class="font-weight-bold" style="color: #FF8C00;">Observaciones:</label>
+                    <input type="text" id="observacionesEnvasados" class="form-control" name="observacionesEnvasados" placeholder="Observaciones">
+                </div>
+            </div>
+            <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;"><i class="fas fa-plus-circle"></i> AGREGAR REGISTRO</button>
+        </form>
+        
+        <!-- Botones de Historial y Finalizar Registro -->
+        <div class="form-row mb-4">
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;" data-toggle="modal" data-target="#historialControlEnvasados">
+                    <i class="fas fa-history"></i> HISTORIAL
+                </button>
+            </div>
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalizarControlEnvasados()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
+            </div>
+        </div>
+    
+        <!-- Registro de Lavado de Manos en Formato de Tabla -->
+        <div class="container-fluid mt-4">
+            <!-- Título centrado -->
+            <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Registro de control de envasados</h3>
+            
+            <!-- Tabla resizable -->
+            <div class="table-responsive mt-5">
+                <table class="table table-bordered">
+                    <thead style="background-color: #FF8C00; color: white;">
+                        <tr>
+                            <th class="text-center">Responsable</th>
+                            <th class="text-center">Producto</th>
+                            <th class="text-center">C. Producida</th>
+                            <th class="text-center">Razón Social P.</th>
+                            <th class="text-center">Lote P.</th>
+                            <th class="text-center">Lote asignado</th>
+                            <th class="text-center">F. Vcto.</th>
+                            <th class="text-center">Obs.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for de in detalle_control_envasados %}
+                        <tr>
+                            <td class="text-center">{{ de.responsable }}</td>
+                            <td class="text-center">{{ de.descripcion_producto }}</td>
+                            <td class="text-center">{{ de.cantidad_producida }}</td>
+                            <td class="text-center">{{ de.nom_empresa }}</td>
+                            <td class="text-center">{{ de.lote_proveedor }}</td>
+                            <td class="text-center">{{ de.lote_asignado }}</td>
+                            <td class="text-center">{{ de.fecha_vencimiento }}</td>
+                            <td class="text-center">{{ de.observacion }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+
+    
+
+    <!-- Modal para mostrar el historial de los registros de control de envasados -->
+    <div class="modal fade" id="historialControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="historialControlEnvasadosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg resizable-modal" role="document">
+            <div class="modal-content">
+                <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="labelhistorialControlEnvasados">Historial de registros de control de envasados</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead style="background-color: #FFC107; color: black;">
+                                <tr>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Ver</th>
+                                    <th class="text-center">Descargar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if historial_envasados %}
+                                    {% for he in historial_envasados %}
+                                        <tr>   
+                                            <td class="text-center">{{ he.mes }} del {{ he.anio }} </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ he.id_registro_control_envasados }})" style="background-color: #FFC107;">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('control_envasados.download_formato', formato_id=he.id_registro_control_envasados) }}"
+                                                    class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FF8C00; color: white;">
+                                                    <i class="fas fa-download"></i> Descargar Formato
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay registros disponibles.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar los detalles de los registros para el control de envasados -->
+    <div class="modal fade" id="registroControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="registroControlEnvasadosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="registroControlEnvasadosLabel">Detalle del registro y control de envasados</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleContenido">
+                        <!-- Aquí se mostrarán los detalles obtenidos de la consulta -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 
+
+<script src="{{ url_for('static', filename='js/registro_control_envasados.js') }}"></script>
+
 {% endblock %}
+

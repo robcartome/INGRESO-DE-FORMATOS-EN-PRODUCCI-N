@@ -156,4 +156,63 @@ JOIN
     condiciones_ambientales ca ON ca.idcondicionambiental = d.fk_idcondicion_ambiental;
 
 
+
+CREATE OR REPLACE VIEW v_historial_registros_controles_envasados AS
+SELECT
+    TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
+    f.anio,
+    f.fk_idtipoformato,
+    f.estado,
+	f.id_registro_control_envasados
+FROM
+    registros_controles_envasados f
+WHERE 
+	f.fk_idtipoformato = 5 AND estado = 'CERRADO'
+ORDER BY
+	f.id_registro_control_envasados DESC;
+
+SELECT * FROM v_historial_registros_controles_envasados
+
 SELECT * FROM public.registros_controles_envasados
+
+SELECT * FROM public.productos
+
+SELECT idproveedor, nom_empresa FROM proveedores
+
+
+public.proveedores
+
+SELECT * FROM public.detalles_registros_controles_envasados
+
+SELECT * FROM public.trabajadores
+
+CREATE OR REPLACE VIEW v_registros_controles_envasados AS
+SELECT
+	ce.id_detalle_registro_controles_envasados,
+	t.nombres || ' ' || t.apellidos AS responsable,
+	p.descripcion_producto,
+	ce.cantidad_producida,
+	pr.nom_empresa,
+	ce.lote_proveedor,
+	ce.lote_asignado,
+	ce.fecha_vencimiento,
+	ce.observacion,
+	rce.estado,
+	rce.id_registro_control_envasados
+FROM
+	detalles_registros_controles_envasados ce
+JOIN
+	trabajadores t ON t.idtrabajador = ce.fk_idtrabajador
+JOIN
+	productos p ON p.idproducto = ce.fk_idproducto
+JOIN
+	proveedores pr ON pr.idproveedor = ce.fk_idproveedor
+JOIN
+	registros_controles_envasados rce ON rce.id_registro_control_envasados = ce.fk_id_registro_control_envasado
+ORDER BY
+	ce.id_detalle_registro_controles_envasados
+DESC;
+
+
+
+SELECT * FROM v_registros_controles_envasados
