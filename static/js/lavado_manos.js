@@ -70,27 +70,50 @@ function generarFormatoLavadoManos() {
     });
 }
 
-function finalarRegistroLavado(){
-    $.post('/lavado_Manos/finalizar_lavado_manos', function(response){
-        if (response.status === 'success'){
-            Swal.fire({
-                icon: 'success',
-                title: 'Se finalizo',
-                text: 'Se finalizo correctamente el formato de lavado de manos.',
-                showConfirmButton: false,
-                timer: 500
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Hubo un error al generar un formato de lavado de manos. Por favor, inténtelo nuevamente.',
+function finalarRegistroLavado() {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/lavado_Manos/finalizar_lavado_manos',
+                type: 'POST',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire(
+                            'Finalizado',
+                            'Se finalizo el registro.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error',
+                            response.message || 'Hubo un error al finalizar el registro. Por favor, inténtelo nuevamente.',
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire(
+                        'Error',
+                        'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                        'error'
+                    );
+                }
             });
         }
     });
 }
+
 
 function historialLavadoManos(){
     $.get('/lavado_Manos/historialLavadoManos', function(data){

@@ -201,7 +201,8 @@ CREATE TABLE IF NOT EXISTS public.Registros_Controles_Envasados (
 	id_Registro_Control_Envasados SERIAL PRIMARY KEY,
 	mes VARCHAR(11) NOT NULL,
 	anio VARCHAR(4) NOT NULL,
-	estado VARCHAR(30) NULL 
+	estado VARCHAR(30) NULL,
+	fk_idTipoFormato INT REFERENCES public.TiposFormatos(idTipoFormato) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.Detalles_Registros_Controles_Envasados (

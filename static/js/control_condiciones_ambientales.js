@@ -117,7 +117,7 @@ function verDetallesCondicionesAmbientales(idcondicionambiental, detalle_area, m
             });
         } else {
             // Si no hay datos, mostrar un mensaje
-            var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
+            var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este control de condiciones ambientales.</td></tr>';
             tableBody.append(noDataRow);
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
@@ -180,7 +180,7 @@ function verDetallesCondicionesAmbientalesFinalizadas(idcondicionambiental, deta
             });
         } else {
             // Si no hay datos, mostrar un mensaje
-            var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
+            var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este control de condiciones ambientales.</td></tr>';
             tableBody.append(noDataRow);
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
