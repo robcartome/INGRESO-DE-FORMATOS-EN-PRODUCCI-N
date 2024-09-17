@@ -218,6 +218,7 @@ def descargar_formato_kardex(id_kardex):
         title_manual=BPM,
         title_report=title_report,
         format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
         info=detalles_formateados,
         kardex=kardex[0]
