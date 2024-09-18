@@ -1,205 +1,113 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function () {
     setDefaultFechaKardex();
-    // Manejar los registros de productos 
-    $('#formRegistrarProductos').on('submit', function(event) {
+
+    // Manejar los registros de productos
+    document.getElementById('formRegistrarProductos').addEventListener('submit', function (event) {
         event.preventDefault();
         
         var formElement = document.getElementById('formRegistrarProductos');
         var formData = new FormData(formElement);
 
-        $.ajax({
-            url: '/kardex/agregar_producto',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Producto Agregado!',
-                        text: 'El producto se registro correctamente.',
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        location.reload();  // Recargar la página para mostrar los cambios
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message || 'Hubo un error al registrar el producto. Por favor, inténtelo nuevamente.',
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
+        fetch('/kardex/agregar_producto', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Producto Agregado!',
+                    text: 'El producto se registró correctamente.',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                    text: data.message || 'Hubo un error al registrar el producto. Por favor, inténtelo nuevamente.',
                 });
             }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+            });
+            console.error('Error en la solicitud:', error);
         });
     });
 
     // Controlar el registro de kardex
-    $('#formAgregarKardex').on('submit', function(event) {
+    document.getElementById('formAgregarKardex').addEventListener('submit', function (event) {
         event.preventDefault();
+        
         var formElement = document.getElementById('formAgregarKardex');
         var formData = new FormData(formElement);
 
-        $.ajax({
-            url: '/kardex',
-            type: 'POST',
-            data: formData,
-            processData: false,  // Evitar que jQuery procese los datos
-            contentType: false,  // Evitar que jQuery establezca el content-type
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Kardex creado!',
-                        text: 'Se creó un kardex para este producto satisfactoriamente.',
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        location.reload();  // Recargar la página tras el éxito
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message,  // Mostrar el mensaje de error enviado desde el servidor
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error en la solicitud AJAX:', error);
-                
-                // Verificar si la respuesta contiene datos en formato JSON
-                var response = xhr.responseJSON;
-                
-                if (response && response.message) {
-                    // Mostrar el mensaje de error enviado por el servidor
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message,  // Mensaje de error desde el servidor
-                    });
-                } else {
-                    // Mostrar un mensaje genérico si no hay detalles en la respuesta
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Ocurrió un error inesperado.',
-                    });
-                }
+        fetch('/kardex/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Kardex creado!',
+                    text: 'Se creó un kardex para este producto satisfactoriamente.',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Hubo un error al crear el kardex. Por favor, inténtelo nuevamente.',
+                });
             }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+            });
+            console.error('Error en la solicitud:', error);
         });
     });
 });
 
 function setDefaultFechaKardex() {
-    const today = new Date().toISOString().split('T')[0];  // Obtiene la fecha actual en formato YYYY-MM-DD
-    document.getElementById('fecha_kardex').value = today;  // Asigna la fecha al campo de fecha
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha_kardex').value = today;
 }
-
-function verDetallesKardexCerrado(idKardex, descripcionProducto, mes, anio) {
-    // Ocultar la lista de todos los kardex
-    document.getElementById('listaKardex').style.display = 'none';
-
-    // Mostrar la sección de detalles
-    document.getElementById('detallesKardex').style.display = 'block';
-
-    // Actualizar el título con la información del producto y la fecha
-    document.getElementById('tituloDetallesKardex').innerText = `Detalles del Kardex para ${descripcionProducto} - ${mes}/${anio}`;
-
-    // Asignar el idKardex al input hidden
-    document.getElementById('idkardex_hidden').value = idKardex;
-
-    // Asignar la descripcion_producto al input hidden
-    document.getElementById('descripcion_hidden').value = descripcionProducto;
-
-    // Asignar el idKardex al input hidden
-    document.getElementById('mesKardex').value = mes;
-
-    // Asignar la descripcion_producto al input hidden
-    document.getElementById('anioKardex').value = anio;
-
-    // Aquí pasamos el id para mostrarlo en la tabla de detalles del Kardex
-    $.get('/kardex/detalle_kardex_table/' + idKardex, function(data) {
-        var tableBody = $('#tablaDetallesKardex');
-        tableBody.empty();
-
-        // Verificar si los datos recibidos son un array y tienen contenido
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(function(item) {
-                var row = '<tr>' +
-                    '<td class="text-center">' + item.fecha + '</td>' +
-                    '<td class="text-center">' + item.lote + '</td>' +
-                    '<td class="text-center">' + item.saldo_inicial + '</td>' +
-                    '<td class="text-center">' + item.ingreso + '</td>' +
-                    '<td class="text-center">' + item.salida + '</td>' +
-                    '<td class="text-center">' + item.saldo_final + '</td>' +
-                    '<td class="text-center">' + item.observaciones + '</td>' +
-                    '</tr>';
-                tableBody.append(row);
-            });
-        } else {
-            // Si no hay datos, mostrar un mensaje
-            var noDataRow = '<tr><td colspan="7" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
-            tableBody.append(noDataRow);
-        }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error("Error al cargar los detalles del kardex:", textStatus, errorThrown);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error al cargar detalles',
-            text: 'Ocurrió un error al cargar los detalles del kardex. Inténtalo de nuevo más tarde.',
-        });
-    });
-}
-
 
 function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
-    // Ocultar la lista de todos los kardex
     document.getElementById('listaKardex').style.display = 'none';
-
-    // Mostrar la sección de detalles
     document.getElementById('llenarFormularioKardex').style.display = 'block';
-
-    // Mostrar la sección de detalles
     document.getElementById('detallesKardex').style.display = 'block';
 
-    // Actualizar el título con la información del producto y la fecha
     document.getElementById('tituloDetallesKardex').innerText = `Detalles del Kardex para ${descripcionProducto} - ${mes}/${anio}`;
-
-    // Asignar el idKardex al input hidden
     document.getElementById('idkardex_hidden').value = idKardex;
-
-    // Asignar la descripcion_producto al input hidden
     document.getElementById('descripcion_hidden').value = descripcionProducto;
-
-    // Asignar el mes al input hidden
     document.getElementById('mesKardex').value = mes;
-
-    // Asignar el año al input hidden
     document.getElementById('anioKardex').value = anio;
 
-    // Hacer una solicitud AJAX para obtener el stock (saldoInicial) usando el idKardex
     fetch('/kardex/get_stock', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idkardex: idKardex })
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            // Colocar el valor del stock en el campo saldoInicial
             document.getElementById('saldoInicial').value = data.stock;
         } else {
             console.error('Error al obtener el stock:', data.message);
@@ -207,39 +115,230 @@ function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     })
     .catch(error => console.error('Error en la solicitud del stock:', error));
 
-    // Aquí pasamos el id para mostrarlo en la tabla de detalles del Kardex
-    $.get('/kardex/detalle_kardex_table/' + idKardex, function(data) {
-        var tableBody = $('#tablaDetallesKardex');
-        tableBody.empty();
+    fetch(`/kardex/detalle_kardex_table/${idKardex}`)
+    .then(response => response.json())
+    .then(data => {
+        var tableBody = document.getElementById('tablaDetallesKardex');
+        tableBody.innerHTML = '';
 
-        // Verificar si los datos recibidos son un array y tienen contenido
         if (Array.isArray(data) && data.length > 0) {
             data.forEach(function(item) {
-                var row = '<tr>' +
-                    '<td class="text-center">' + item.fecha + '</td>' +
-                    '<td class="text-center">' + item.lote + '</td>' +
-                    '<td class="text-center">' + item.saldo_inicial + '</td>' +
-                    '<td class="text-center">' + item.ingreso + '</td>' +
-                    '<td class="text-center">' + item.salida + '</td>' +
-                    '<td class="text-center">' + item.saldo_final + '</td>' +
-                    '<td class="text-center">' + item.observaciones + '</td>' +
-                    '</tr>';
-                tableBody.append(row);
+                var row = `<tr>
+                    <td class="text-center">${item.fecha}</td>
+                    <td class="text-center">${item.lote}</td>
+                    <td class="text-center">${item.saldo_inicial}</td>
+                    <td class="text-center">${item.ingreso}</td>
+                    <td class="text-center">${item.salida}</td>
+                    <td class="text-center">${item.saldo_final}</td>
+                    <td class="text-center">${item.observaciones}</td>
+                </tr>`;
+                tableBody.insertAdjacentHTML('beforeend', row);
             });
         } else {
-            // Si no hay datos, mostrar un mensaje
             var noDataRow = '<tr><td colspan="7" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
-            tableBody.append(noDataRow);
+            tableBody.insertAdjacentHTML('beforeend', noDataRow);
         }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error("Error al cargar los detalles del kardex:", textStatus, errorThrown);
+    })
+    .catch(error => {
         Swal.fire({
             icon: 'error',
             title: 'Error al cargar detalles',
             text: 'Ocurrió un error al cargar los detalles del kardex. Inténtalo de nuevo más tarde.',
         });
+        console.error('Error al cargar los detalles del kardex:', error);
     });
 }
+
+function registrarDetalleKardex() {
+    var idkardex = document.getElementById('idkardex_hidden').value;
+    var fecha = document.getElementById('fecha_kardex').value;
+    var lote = document.getElementById('loteKardex').value;
+    var saldo_inicial = parseFloat(document.getElementById('saldoInicial').value);
+    var ingreso = parseFloat(document.getElementById('ingresoKardex').value);
+    var salida = parseFloat(document.getElementById('salidaKardex').value);
+    var observaciones = document.getElementById('observaciones').value;
+
+    var descripcion_producto = document.getElementById('descripcion_hidden').value;
+    var mes = document.getElementById('mesKardex').value; 
+    var anio = document.getElementById('anioKardex').value;
+
+    if (!fecha || isNaN(saldo_inicial) || isNaN(ingreso) || isNaN(salida)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Campos incompletos',
+            text: 'Por favor, completa todos los campos obligatorios antes de enviar.',
+        });
+        return;
+    }
+
+    fetch('/kardex/registrar_lote_kardex', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idkardex, fecha, lote, saldo_inicial, ingreso, salida, observaciones })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Lote agregado',
+                text: 'Se agregó exitosamente este lote al kardex.',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+
+                // Guardar los valores en sessionStorage antes de recargar la página
+                sessionStorage.setItem('idKardex', idkardex);
+                sessionStorage.setItem('descripcionProducto', descripcion_producto);
+                sessionStorage.setItem('mes', mes);
+                sessionStorage.setItem('anio', anio);
+                
+                // Recargar la página
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message,
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en la solicitud',
+            text: 'Ocurrió un error al enviar la solicitud.',
+        });
+        console.error('Error en la solicitud:', error);
+    });
+}
+
+async function descargarFormatoKardex() {
+    var idkardex = document.getElementById('idkardex_hidden').value;
+    const endpoint = `/kardex/descargar_formato_kardex/${idkardex}`;
+
+    try {
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+            throw new Error("Error al generar el reporte");
+        }
+
+        const blob = await response.blob();
+        const contentDisposition = response.headers.get("Content-Disposition");
+        const fileNameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/);
+        const fileName = fileNameMatch ? fileNameMatch[1] : "reporte_kardex.pdf";
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Error al generar el reporte:", error);
+    }
+}
+
+function finalizarKardex(idKardex) {
+    fetch('/kardex/finalizar_kardex', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idKardex })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Se finalizó',
+                text: 'El estado del kardex fue modificado a Finalizado.',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message,
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en la solicitud',
+            text: 'Ocurrió un error al enviar la solicitud.',
+        });
+        console.error('Error en la solicitud:', error);
+    });
+}
+
+// Filtros
+function filterKardexOpenProduct() {
+    let input = document.getElementById('filtrarProductoKardex');
+    let filter = input.value.toLowerCase();
+    let table = document.getElementById('kardexTableOpen');
+    let tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td')[0];
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+            tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+        }
+    }
+}
+
+function filterKardexCloseProduct() {
+    let input = document.getElementById('filtrarProductoKardexClose');
+    let filter = input.value.toLowerCase();
+    let table = document.getElementById('tableCloseKardex');
+    let tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td')[0];
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+            tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+        }
+    }
+}
+
+
+function volverListaKardex() {
+    // Ocultar la sección de detalles
+    document.getElementById('detallesKardex').style.display = 'none';
+
+    // Mostrar la sección de detalles
+    document.getElementById('llenarFormularioKardex').style.display = 'none';
+
+    // Mostrar la lista de todos los kardex
+    document.getElementById('listaKardex').style.display = 'block';
+}
+
+window.onload = function() {
+    // Verificar si hay datos en sessionStorage
+    var idKardex = sessionStorage.getItem('idKardex');
+    var descripcionProducto = sessionStorage.getItem('descripcionProducto');
+    var mes = sessionStorage.getItem('mes');
+    var anio = sessionStorage.getItem('anio');
+
+    if (idKardex && descripcionProducto && mes && anio) {
+        // Llamar a verDetallesKardex con los valores almacenados
+        verDetallesKardex(idKardex, descripcionProducto, mes, anio);
+
+        // Limpiar los datos de sessionStorage para evitar que se use de nuevo accidentalmente
+        sessionStorage.removeItem('idKardex');
+        sessionStorage.removeItem('descripcionProducto');
+        sessionStorage.removeItem('mes');
+        sessionStorage.removeItem('anio');
+    }
+};
 
 // Filtrar la tabla de detalle del kardex por la fecha seleccionada
 function filterTableDetalleKardex() {
@@ -292,225 +391,61 @@ function formatDate(dateString) {
 }
 
 
+function verDetallesKardexCerrado(idKardex, descripcionProducto, mes, anio) {
+    document.getElementById('listaKardex').style.display = 'none';
+    document.getElementById('detallesKardex').style.display = 'block';
 
-function volverListaKardex() {
-    // Ocultar la sección de detalles
-    document.getElementById('detallesKardex').style.display = 'none';
+    document.getElementById('tituloDetallesKardex').innerText = `Detalles del Kardex para ${descripcionProducto} - ${mes}/${anio}`;
+    document.getElementById('idkardex_hidden').value = idKardex;
+    document.getElementById('descripcion_hidden').value = descripcionProducto;
+    document.getElementById('mesKardex').value = mes;
+    document.getElementById('anioKardex').value = anio;
 
-    // Mostrar la sección de detalles
-    document.getElementById('llenarFormularioKardex').style.display = 'none';
+    fetch('/kardex/get_stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idkardex: idKardex })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('saldoInicial').value = data.stock;
+        } else {
+            console.error('Error al obtener el stock:', data.message);
+        }
+    })
+    .catch(error => console.error('Error en la solicitud del stock:', error));
 
-    // Mostrar la lista de todos los kardex
-    document.getElementById('listaKardex').style.display = 'block';
-}
+    fetch(`/kardex/detalle_kardex_table/${idKardex}`)
+    .then(response => response.json())
+    .then(data => {
+        var tableBody = document.getElementById('tablaDetallesKardex');
+        tableBody.innerHTML = '';
 
-function registrarDetalleKardex() {
-    var idkardex = document.getElementById('idkardex_hidden').value;
-    var fecha = document.getElementById('fecha_kardex').value;
-    var lote = document.getElementById('loteKardex').value;
-    var saldo_inicial = document.getElementById('saldoInicial').value;
-    var ingreso = document.getElementById('ingresoKardex').value;
-    var salida = document.getElementById('salidaKardex').value;
-    var observaciones = document.getElementById('observaciones').value;
-
-    var descripcion_producto = document.getElementById('descripcion_hidden').value;
-    var mes = document.getElementById('mesKardex').value; 
-    var anio = document.getElementById('anioKardex').value;
-
-    
-    // Validar que los campos obligatorios no estén vacíos
-    if (!fecha || !lote || !saldo_inicial || !ingreso || !salida) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Campos incompletos',
-            text: 'Por favor, completa todos los campos obligatorios antes de enviar.',
-        });
-        return;
-    }
-
-    // Convertir valores a números si es necesario
-    saldo_inicial = parseFloat(saldo_inicial);
-    ingreso = parseFloat(ingreso);
-    salida = parseFloat(salida);
-
-    // Verificar si los valores numéricos son válidos
-    if (isNaN(saldo_inicial) || isNaN(ingreso) || isNaN(salida)) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Valores numéricos inválidos',
-            text: 'Saldo inicial, ingreso y salida deben ser números válidos.',
-        });
-        return;
-    }
-
-    $.post('/kardex/registrar_lote_kardex', {
-        idkardex: idkardex, 
-        fecha: fecha, 
-        lote: lote,
-        saldo_inicial: saldo_inicial, 
-        ingreso: ingreso, 
-        salida: salida, 
-        observaciones: observaciones
-    }, function(response) {
-        if (response.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Lote agregado',
-                text: 'Se agregó exitosamente este lote al kardex.',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                // Guardar los valores en sessionStorage antes de recargar la página
-                sessionStorage.setItem('idKardex', idkardex);
-                sessionStorage.setItem('descripcionProducto', descripcion_producto);
-                sessionStorage.setItem('mes', mes);
-                sessionStorage.setItem('anio', anio);
-
-                // Recargar la página
-                location.reload();
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(function(item) {
+                var row = `<tr>
+                    <td class="text-center">${item.fecha}</td>
+                    <td class="text-center">${item.lote}</td>
+                    <td class="text-center">${item.saldo_inicial}</td>
+                    <td class="text-center">${item.ingreso}</td>
+                    <td class="text-center">${item.salida}</td>
+                    <td class="text-center">${item.saldo_final}</td>
+                    <td class="text-center">${item.observaciones}</td>
+                </tr>`;
+                tableBody.insertAdjacentHTML('beforeend', row);
             });
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: response.message,
-            });
+            var noDataRow = '<tr><td colspan="7" class="text-center">No hay detalles disponibles para este kardex.</td></tr>';
+            tableBody.insertAdjacentHTML('beforeend', noDataRow);
         }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
+    })
+    .catch(error => {
         Swal.fire({
             icon: 'error',
-            title: 'Error en la solicitud',
-            text: 'Ocurrió un error al enviar la solicitud: ' + textStatus,
+            title: 'Error al cargar detalles',
+            text: 'Ocurrió un error al cargar los detalles del kardex. Inténtalo de nuevo más tarde.',
         });
+        console.error('Error al cargar los detalles del kardex:', error);
     });
-}
-
-window.onload = function() {
-    // Verificar si hay datos en sessionStorage
-    var idKardex = sessionStorage.getItem('idKardex');
-    var descripcionProducto = sessionStorage.getItem('descripcionProducto');
-    var mes = sessionStorage.getItem('mes');
-    var anio = sessionStorage.getItem('anio');
-
-    if (idKardex && descripcionProducto && mes && anio) {
-        // Llamar a verDetallesKardex con los valores almacenados
-        verDetallesKardex(idKardex, descripcionProducto, mes, anio);
-
-        // Limpiar los datos de sessionStorage para evitar que se use de nuevo accidentalmente
-        sessionStorage.removeItem('idKardex');
-        sessionStorage.removeItem('descripcionProducto');
-        sessionStorage.removeItem('mes');
-        sessionStorage.removeItem('anio');
-    }
-};
-
-
-async function descargarFormatoKardex() {
-    var idkardex = document.getElementById('idkardex_hidden').value;
-    const endpoint = `/kardex/descargar_formato_kardex/${idkardex}`;
-
-    try {
-      const response = await fetch(endpoint, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        }
-      });
-
-      // Verificar si la respuesta es exitosa
-      if (!response.ok) {
-        throw new Error("Error al generar el reporte");
-      }
-
-      // Obtener el archivo blob de la respuesta
-      const blob = await response.blob();
-      // Obtener el nombre del archivo desde los headers
-      const contentDisposition = response.headers.get("Content-Disposition");
-      // Extraer el nombre del archivo si está presente en los headers
-      const fileNameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/);
-      const fileName = fileNameMatch ? fileNameMatch[1] : "reporte_kardex.pdf";
-
-      // Crear una URL para el blob y preparar la descarga
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url); // Revocar la URL creada
-    } catch (error) {
-      console.error("Error generating report:", error);
-    }
-  }
-
-
-function finalizarKardex(idKardex) {
-    $.post('/kardex/finalizar_kardex', {
-        idKardex: idKardex
-    }, function(response) {
-        if (response.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Se finalizo',
-                text: 'el estado del kardex fue modificado a Finalizado.',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: response.message,
-            });
-        }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error en la solicitud',
-            text: 'Ocurrió un error al enviar la solicitud: ' + textStatus,
-        });
-    });
-}
-
-//Para filtrar kardex activos
-function filterKardexOpenProduct() {
-    let input = document.getElementById('filtrarProductoKardex');
-    let filter = input.value.toLowerCase();
-    let table = document.getElementById('kardexTableOpen');
-    let tr = table.getElementsByTagName('tr');
-
-    for (let i = 1; i < tr.length; i++) {
-        let td = tr[i].getElementsByTagName('td')[0];
-        if (td) {
-            let txtValue = td.textContent || td.innerText;
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
-        }
-    }
-}
-
-//Para filtrar kardex finalizados
-function filterKardexCloseProduct() {
-    let input = document.getElementById('filtrarProductoKardexClose');
-    let filter = input.value.toLowerCase();
-    let table = document.getElementById('tableCloseKardex');
-    let tr = table.getElementsByTagName('tr');
-
-    for (let i = 1; i < tr.length; i++) {
-        let td = tr[i].getElementsByTagName('td')[0];
-        if (td) {
-            let txtValue = td.textContent || td.innerText;
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
-        }
-    }
 }
