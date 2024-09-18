@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Higiene del personal{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Estilo para hacer el modal más ancho en pantallas grandes */
+    @media (min-width: 992px) { /* Para pantallas grandes como laptops y PC */
+        .modal-xl {
+            max-width: 90%; /* Ajusta el porcentaje según lo necesites */
+        }
+    }
+
+    /* Estilo para pantallas más pequeñas como tablets y móviles */
+    @media (max-width: 991px) {
+        .modal-dialog {
+            max-width: 100%; /* Mantiene el modal ajustado al ancho de la pantalla */
+            margin: 10px; /* Un poco de margen para que no toque los bordes */
+        }
+
+        .modal-content {
+            border-radius: 0.5rem; /* Bordes redondeados para una mejor estética */
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Control de aseo e higiene del personal</h1>
+
+    <!-- Botón para generar el formato -->
+    {% if not control_higiene_personal %}
+        <div class="form-row mb-4 text-center">
+            <!-- Botón de Generar Formato -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FF7043; color: white; border-radius: 10px;" 
+                    onclick="generarFormatoControlHigienePersonal()">
+                    <i class="fas fa-file-alt fa-lg mr-2"></i> GENERAR FORMATO
+                </button>
+            </div>
+        
+            <!-- Botón de Historial -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FFDAB9; color: #FF8C00; border: 2px solid #FF8C00; border-radius: 10px;" 
+                    data-toggle="modal" data-target="#historialControlHigienePersonal">
+                    <i class="fas fa-history fa-lg mr-2"></i> HISTORIAL
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if control_higiene_personal %}
+        <!-- Formulario de Registro -->
+        <form id="formHigienePersonal" enctype="multipart/form-data">
+            <div class="form-row mb-3">
+                <div class="form-group col-md-6">
+                    <label for="fecha_higiene_personal" style="color: #FF8C00;">Ingresa la fecha:</label>
+                    <input type="date" id="fecha_higiene_personal" class="form-control" name="fecha_higiene_personal" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="selectTrabajador" style="color: #FF8C00;">Trabajador:</label>
+                    <select id="selectTrabajador" class="form-control" name="selectTrabajador" required>
+                        <option value="">Seleccione el trabajador</option>
+                        {% for t in trabajador %}
+                            <option value="{{ t.idtrabajador }}">{{ t.nombres + ' ' + t.apellidos}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <h6 class="mb-4" style="color: #FF8C00;">Evaluación Previa</h6>
+            <div class="form-row mb-3">
+                <div class="form-group col-md-4">
+                    <div class="form-check text-center">
+                        <input type="checkbox" id="correctaPresentacion" name="correctaPresentacion" class="form-check-input">
+                        <label class="form-check-label" for="correctaPresentacion">Correcta presentación personal</label>
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <div class="form-check text-center">
+                        <input type="checkbox" id="limpiezaManos" name="limpiezaManos" class="form-check-input">
+                        <label class="form-check-label" for="limpiezaManos">Limpieza de manos</label>
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <div class="form-check text-center">
+                        <input type="checkbox" id="habitosHigiene" name="habitosHigiene" class="form-check-input">
+                        <label class="form-check-label" for="habitosHigiene">Hábitos de higiene</label>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="form-row mb-3">
+                <div class="form-group col-md-6">
+                    <label for="observaciones" style="color: #FF8C00;">Observaciones:</label>
+                    <input type="text" id="observaciones" class="form-control" name="observaciones" placeholder="Observaciones" autocomplete="off">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="accionesCorrectivas" style="color: #FF8C00;">Acciones correctivas:</label>
+                    <select id="accionesCorrectivas" class="form-control" name="accionesCorrectivas" required>
+                        <option value="">Seleccione la acción correctiva</option>
+                        <option value="1">1. Persona no apta para ingresar al área de trabajo</option>
+                        <option value="2">2. Solicitar al trabajador repetir los procedimientos de limpieza hasta el nivel de aceptación</option>
+                        <option value="3">3. Reentrenamiento del manipulador</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="registrarDetalleHigienePersonal()">
+                    <i class="fas fa-plus-circle"></i> AGREGAR REGISTRO 
+                </button>
+            </div>
+        </form>
+        
+        <!-- Botones de Historial y Finalizar Registro -->
+        <div class="form-row mb-4">
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;" data-toggle="modal" data-target="#historialControlEnvasados">
+                    <i class="fas fa-history"></i> HISTORIAL
+                </button>
+            </div>
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalizarControlEnvasados()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
+            </div>
+        </div>
+        
+        <!-- Registro de Lavado de Manos en Formato de Tabla -->
+        <div class="container-fluid mt-4">
+            <!-- Título centrado -->
+            <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Detalle del control de aseo e higiene del personal</h3>
+            
+            <!-- Tabla resizable -->
+            <div class="table-responsive mt-5">
+                <table class="table table-bordered">
+                    <thead style="background-color: #FF8C00; color: white;">
+                        <tr>
+                            <th class="text-center">Fecha</th>
+                            <th class="text-center">Trabajador</th>
+                            <th class="text-center">PP</th>
+                            <th class="text-center">LM</th>
+                            <th class="text-center">HH</th>
+                            <th class="text-center">Observaciones</th>
+                            <th class="text-center">Acciones Correctivas</th>
+                            <th class="text-center">Validar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hp in detalle_higiene_personal %}
+                        <tr>
+                            <td class="text-center">{{ hp.fecha }}</td>
+                            <td class="text-center">{{ hp.trabajador }}</td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ hp.cantidad_producida }}</td>
+                            <td class="text-center">{{ hp.nom_empresa }}</td>
+                            <td class="text-center">{{ hp.lote_proveedor }}</td>
+                            <td class="text-center">{{ hp.lote_asignado }}</td>
+                            <td class="text-center">{{ hp.fecha_vencimiento }}</td>
+                            <td class="text-center">{{ hp.observacion }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+
+    
+
+    <!-- Modal para mostrar el historial de los registros de control de envasados -->
+    <div class="modal fade" id="historialControlHigienePersonal" tabindex="-1" role="dialog" aria-labelledby="historialControlHigienePersonalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg resizable-modal" role="document">
+            <div class="modal-content">
+                <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="labelhistorialControlHigienePersonal">Historial de control de aseo e higiene del personal</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead style="background-color: #FFC107; color: black;">
+                                <tr>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Ver</th>
+                                    <th class="text-center">Descargar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if historial_higiene_personal %}
+                                    {% for hp in historial_higiene_personal %}
+                                        <tr>   
+                                            <td class="text-center">{{ hp.mes }} del {{ hp.anio }} </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ hp.id_registro_control_envasados }})" style="background-color: #FFC107;">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('control_envasados.download_formato', formato_id=hp.id_registro_control_envasados) }}"
+                                                    class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FF8C00; color: white;">
+                                                    <i class="fas fa-download"></i> Descargar Formato
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay registros disponibles.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar los detalles de los registros para el control de envasados -->
+    <div class="modal fade" id="registroControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="registroControlEnvasadosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="registroControlEnvasadosLabel">Detalle del registro y control de envasados</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleContenido">
+                        <!-- Aquí se mostrarán los detalles obtenidos de la consulta -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+<script src="{{ url_for('static', filename='js/higiene_personal.js') }}"></script>
+
+{% endblock %}
