@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="12">
+                    <table class="header-table">
+                        <tr class="s1" style="font-weight: bold;">
+                            <td colspan="6" class="border-none">ÁREA: <span style="font-weight: normal;">Productos Terminados</span></td>
+                            <td colspan="6" class="border-none">MES: <span style="font-weight: normal;">SETIEMBRE</span></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- Cabecera del cuerpo del reporte -->
+            <tr class="border">
+                <th class="border" rowspan="2">FECHA</th>
+                <th class="border" rowspan="2">HORA</th>
+                <th class="border" colspan="4">VERIFICACIÓN PREVIA SI (&#x2713;) / NO (X)</th>
+                <th class="border" colspan="2">VERIFICACIÓN DE CONDICIONES AMBIENTALES</th>
+                <th class="border" rowspan="2">OBSERVACIONES / ACCIONES CORRECTIVAS</th>
+                <th class="border" rowspan="2">V° B° A.C.</th>
+            </tr>
+            <tr>
+                <th  class="border s3">LIMPIO</th>
+                <th  class="border s3">ORDENADO</th>
+                <th  class="border s3">PALETAS LIMPIAS</th>
+                <th  class="border s3">PALETAS BUEN ESTADO</th>
+                <th  class="border s3">TEMPERATURA (T°)</th>
+                <th  class="border s3">HUMEDAD RELATIVA (%)</th>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="body-content">
+            {% for record in info %}
+            <tr>
+                <td class="text-center">{{ record['fecha'] }}</td>
+                <td class="text-center">{{ record['hora'] }}</td>
+                {% for i in range(1, 5) %}
+                    {% if record['verificacion_previa'][i] == True %}
+                        <td class="text-center">&#x2713;</td>
+                    {% else %}
+                        <td class="text-center">x</td>
+                    {% endif %}
+                {% endfor %}
+                <td class="text-center">{{ record['temperatura'] }}</td>
+                <td class="text-center">{{ record['humedad'] }}</td>
+                <td class="text-center s3">{{ record['observaciones'] }} / {{ record['detalle_accion_correctiva'] }}</td>
+                <td class="text-center s3">{{ record['estado'] or '' }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" class="border-none">
+                    Frecuencia: {{ frecuencia_registro }}
+                </td>
+            </tr>
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>

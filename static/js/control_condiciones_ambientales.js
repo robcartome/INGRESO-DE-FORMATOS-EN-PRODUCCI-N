@@ -460,15 +460,9 @@ function formatDate(dateString) {
     return dateString;
 }
 
-function descargarFormatoCA() {
-    var idCA = document.getElementById('idcondicionambiental_hidden').value;
-    $.get(`/condiciones_ambientales/descargar_formato_CA/${idCA}`, function(response) {
-        console.log(idkardex)
-    }).fail(function() {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Hubo un error al generar el reporte.',
-        });
-    });
-}
+
+ function descargarFormatoCA() {
+    var idkardex = document.getElementById('idcondicionambiental_hidden').value;
+    const endpoint = `/condiciones_ambientales/descargar_formato_CA/${idkardex}`;
+    fetchDownloadPDF(endpoint, 'condiciones ambientales' )
+ }

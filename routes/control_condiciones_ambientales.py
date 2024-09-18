@@ -1,7 +1,14 @@
+import os
+
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from datetime import datetime
 from datetime import time
+from .utils.constans import BPM
+from .utils.helpers import image_to_base64
+from .utils.helpers import generar_reporte
+from .utils.helpers import get_cabecera_formato
+
 
 condiciones_ambientales = Blueprint('condiciones_ambientales', __name__)
 
@@ -167,9 +174,10 @@ def finalizarDetallesCA():
 @condiciones_ambientales.route('/descargar_formato_CA/<int:idCA>', methods=['GET'])
 def descargar_formato_CA(idCA):
     idCA = int(idCA)
-    
-    # Consulta para obtener el kardex
-    query_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s"
+    cabecera = get_cabecera_formato("condiciones_ambientales", idCA)
+
+    # Consulta
+    query_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY fecha, hora ASC;"
     ConsultCADetails = execute_query(query_CA, (idCA,))
 
 
@@ -179,8 +187,35 @@ def descargar_formato_CA(idCA):
         detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')  # Formato DD/MM/YYYY
         detalles_formateados.append(detalle)
 
-    print(detalles_formateados)
+        # Obtener las asignaciones de verificación previa para cada detalle
+        query_asignaciones = "SELECT fk_idverificacion_previa FROM asignacion_verificacion_previa_condicion_ambiental WHERE fk_iddetalle_condicion_ambiental = %s"
+        asignaciones = execute_query(query_asignaciones, (detalle['iddetalle_ca'],))
 
-    # Empaquetar ambos resultados en un solo diccionario
-    return jsonify({'status': 'success', 'detalles': detalles_formateados})
+        # Crear un diccionario con las verificaciones previas (1-4)
+        verificacion = {1: False, 2: False, 3: False, 4: False}
+        for asignacion in asignaciones:
+            if asignacion['fk_idverificacion_previa'] in verificacion:
+                verificacion[asignacion['fk_idverificacion_previa']] = True
+
+        # Añadir las asignaciones al detalle
+        detalle['verificacion_previa'] = verificacion
+
+    # Generar Template para reporte
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report=cabecera[0]['nombreformato']
+
+    # Renderiza la plantilla de Kardex
+    template = render_template(
+        "reports/reporte_control_condiciones_ambientales.html",
+        title_manual=BPM,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
+        info=detalles_formateados,
+    )
+
+    file_name=f"{title_report}"
+    return generar_reporte(template, file_name)
 
