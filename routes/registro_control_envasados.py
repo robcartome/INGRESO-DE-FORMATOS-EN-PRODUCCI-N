@@ -3,9 +3,10 @@ import os
 from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
 from datetime import datetime
-from collections import defaultdict
-from  .utils.helpers import image_to_base64
-from  .utils.helpers import generar_reporte
+from .utils.constans import BPM
+from .utils.helpers import image_to_base64
+from .utils.helpers import generar_reporte
+from .utils.helpers import get_cabecera_formato
 
 ########## PARA REGISTRO Y CONTROL DE ENVASADOS ###################################################################################
 
@@ -141,6 +142,7 @@ def download_formato():
 
     # Obtener el id del trabajador de los argumentos de la URL
     formato_lavado_id = request.args.get('formato_id')
+    cabecera = get_cabecera_formato("registros_controles_envasados", formato_lavado_id)
 
     #Realizar la consulta para todos los registros y controles de envasados finalizados
     registros_controles_envasados = execute_query(f"SELECT * FROM registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}")
@@ -152,6 +154,23 @@ def download_formato():
 
     print(detalle_registros_controles_envasados)
 
-    
+    # Generar Template para reporte
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report=cabecera[0]['nombreformato']
+
+    # Renderiza la plantilla de Kardex
+    template = render_template(
+        "reports/reporte_control_envasados.html",
+        title_manual=BPM,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
+        info=detalle_registros_controles_envasados,
+    )
+
+    file_name=f"{title_report}"
+    return generar_reporte(template, file_name)
 
     

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="12" class="border-none s1" style="font-weight: bold;">FECHA: <span>01/09/2024</span></td>
+            </tr>
+            <!-- Cabecera del cuerpo del reporte -->
+            <tr class="border">
+                <th class="border" rowspan="2">RESPONSABLE</th>
+                <th class="border" rowspan="2">PRODUCTO</th>
+                <th class="border" rowspan="2">CANTIDAD PRODUCIDA</th>
+                <th class="border" colspan="2">DATOS PROVEEDOR</th>
+                <th class="border" rowspan="2">LOTE ASIGNADO</th>
+                <th class="border" rowspan="2">F. VCTO</th>
+                <th class="border" rowspan="2">OBS</th>
+            </tr>
+            <tr>
+                <th  class="border s3">RAZÓN SOCIAL</th>
+                <th  class="border s3">LOTE</th>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="body-content">
+            <tr class="text-center">
+                <td>Lisset Tiburcio Blas</td>
+                <td>Hojas de laurel</td>
+                <td>100</td>
+                <td>Frutos secos & Especies EIRL</td>
+                <td>LP001</td>
+                <td>LA001</td>
+                <td>01/10/2024</td>
+                <td>Frecuencia: Cada vez que se produce</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="border-none">
+                    Frecuencia: Cada vez que se produce
+                </td>
+            </tr>
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>

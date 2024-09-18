@@ -17,7 +17,8 @@ def get_cabecera_formato(tabla: str, id_formato: str) -> list:
     id_column_map = {
         'lavadosmanos': 'idlavadomano',
         'kardex': 'idkardex',
-        'condiciones_ambientales': 'idcondicionambiental'
+        'condiciones_ambientales': 'idcondicionambiental',
+        'registros_controles_envasados': 'id_registro_control_envasados'
         # Agrega más mapeos según sea necesario para otros formatos
     }
 
