@@ -149,15 +149,16 @@ JOIN
 
 CREATE OR REPLACE VIEW v_historial_registros_controles_envasados AS
 SELECT
-    TO_CHAR(f.fecha, 'DD "de" TMMonth "del" YYYY') AS fecha,
+    TO_CHAR(f.fecha, 'DD/MM/YYYY') AS fecha,
     f.estado,
     f.id_registro_control_envasados
 FROM
     registros_controles_envasados f
 WHERE 
-    f.fk_idtipoformato = 5 AND estado = 'CERRADO'
+    f.fk_idtipoformato = 5 AND f.estado = 'CERRADO'
 ORDER BY
     f.id_registro_control_envasados DESC;
+
 
 SELECT * FROM v_historial_registros_controles_envasados
 
@@ -213,6 +214,7 @@ SELECT
     d.fecha,
     t.nombres || t.apellidos AS trabajador,
     d.observaciones,
+	ac.idaccion_correctiva,
     COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
     d.fk_idcontrol_higiene_personal,
 	hp.id_control_higiene_personal,
@@ -226,6 +228,5 @@ JOIN
 JOIN
     controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
 
-SELECT * FROM controles_higiene_personal
-	
-SELECT * FROM v_historial_higiene_personal
+
+SELECT * FROM 

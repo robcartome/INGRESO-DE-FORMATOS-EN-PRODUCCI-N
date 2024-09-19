@@ -151,19 +151,42 @@
                         <tr>
                             <td class="text-center">{{ hp.fecha }}</td>
                             <td class="text-center">{{ hp.trabajador }}</td>
-                            <td class="text-center"></td>
-                            <td class="text-center">{{ hp.cantidad_producida }}</td>
-                            <td class="text-center">{{ hp.nom_empresa }}</td>
-                            <td class="text-center">{{ hp.lote_proveedor }}</td>
-                            <td class="text-center">{{ hp.lote_asignado }}</td>
-                            <td class="text-center">{{ hp.fecha_vencimiento }}</td>
-                            <td class="text-center">{{ hp.observacion }}</td>
+                            <!-- Comprobación de cada verificación con el id de detalle correspondiente -->
+                            {% set verificaciones = verificacion_higiene_personal | selectattr("fk_iddetalle_control_higiene_personal", "equalto", hp.id_detalle_control_higiene_personal) | list %}
+                            <td class="text-center">
+                                {% if verificaciones and verificaciones[0].fk_idverificacion_previa == 5 %}
+                                    C
+                                {% else %}
+                                    NC
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if verificaciones and verificaciones[0].fk_idverificacion_previa == 6 %}
+                                    C
+                                {% else %}
+                                    NC
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if verificaciones and verificaciones[0].fk_idverificacion_previa == 7 %}
+                                    C
+                                {% else %}
+                                    NC
+                                {% endif %}
+                            </td>
+                            <td class="text-center">{{ hp.observaciones }}</td>
+                            <td class="text-center">{{ hp.acciones_correctivas }}</td>
+                            <td class="text-center">
+                                <!-- Aquí puedes añadir un botón o enlace para validar -->
+                                <button class="btn btn-success btn-sm">Validar</button>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+
     {% endif %}
 
 
