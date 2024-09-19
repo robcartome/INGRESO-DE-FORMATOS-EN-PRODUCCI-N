@@ -181,11 +181,11 @@ CREATE OR REPLACE VIEW v_detalle_higiene_personal AS
 SELECT
     d.id_detalle_control_higiene_personal,
     d.fecha,
-    t.nombres || t.apellidos AS trabajador,
+    t.nombres || ' ' ||t.apellidos AS trabajador,
     d.observaciones,
 	ac.idaccion_correctiva,
     COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
-	ac.estado AS estado_medida_correctiva,
+	COALESCE(ac.estado, '-') AS estado_medida_correctiva,
     d.fk_idcontrol_higiene_personal,
 	hp.estado
 FROM
@@ -197,12 +197,8 @@ JOIN
 JOIN
     controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
 
-DROP VIEW v_detalle_higiene_personal
-	
 SELECT * FROM v_detalle_higiene_personal
-
-SELECT * FROM public.asignacion_verificacion_previa_higiene_personal
 
 SELECT * FROM public.controles_higiene_personal
 
-SELECT * FROM v_historial_higiene_personal
+SELECT * FROM areas;
