@@ -159,7 +159,7 @@ def download_formato():
 
     # Renderiza la plantilla de Kardex
     template = render_template(
-        "reports/reporte_control_envasados.html",
+        "reports/reporte_registro_control_envasados.html",
         title_manual=BPM,
         title_report=title_report,
         format_code_report=cabecera[0]['codigo'],
