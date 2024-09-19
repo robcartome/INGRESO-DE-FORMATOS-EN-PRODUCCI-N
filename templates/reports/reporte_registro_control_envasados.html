@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="12" class="border-none s1" style="font-weight: bold;">FECHA: <span>{{ info['fecha'] }}</span></td>
+            </tr>
+            <!-- Cabecera del cuerpo del reporte -->
+            <tr class="border">
+                <th class="border" rowspan="2">RESPONSABLE</th>
+                <th class="border" rowspan="2">PRODUCTO</th>
+                <th class="border w-15" rowspan="2">CANTIDAD PRODUCIDA</th>
+                <th class="border" colspan="2">DATOS PROVEEDOR</th>
+                <th class="border" rowspan="2">LOTE ASIGNADO</th>
+                <th class="border" rowspan="2">F. VCTO</th>
+                <th class="border" rowspan="2">OBS</th>
+            </tr>
+            <tr>
+                <th  class="border s3">RAZÓN SOCIAL</th>
+                <th  class="border s3">LOTE</th>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="body-content">
+            {% for record in info['detalle'] %}
+            <tr class="text-center">
+                <td>{{ record['responsable'] }}</td>
+                <td>{{ record['descripcion_producto'] }}</td>
+                <td>{{ record['cantidad_producida'] }}</td>
+                <td>{{ record['nom_empresa'] }}</td>
+                <td>{{ record['lote_proveedor'] }}</td>
+                <td>{{ record['lote_asignado'] }}</td>
+                <td>{{ record['fecha_vencimiento'] }}</td>
+                <td>{{ record['observacion'] }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" class="border-none">
+                    Frecuencia: {{ frecuencia_registro }}
+                </td>
+            </tr>
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>
