@@ -427,6 +427,7 @@ function formatDate(dateString) {
     const endpoint = `/condiciones_ambientales/descargar_formato_CA/${idkardex}`;
     fetchDownloadPDF(endpoint, 'condiciones ambientales' )
  }
+ 
 function verDetallesCondicionesAmbientalesFinalizadas(idcondicionambiental, detalle_area, mes, anio) {
     document.getElementById('listaCA').style.display = 'none';
     document.getElementById('detallesCA').style.display = 'block';
