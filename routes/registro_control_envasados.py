@@ -43,6 +43,7 @@ def control_envasados():
 
     elif request.method == 'POST':
         try:
+
             # Obtener datos del formulario
             responsable = request.form.get('selectResponsable')
             producto = request.form.get('selectProducto')
@@ -90,14 +91,12 @@ def generar_formato_envasados():
     try:
         fecha_actual = datetime.now()
 
-        mes_actual = fecha_actual.month
-        anio_actual = fecha_actual.year
-
         # Eliminar el registro relacionado en controles_generales_personal
         query_generar_formato = """
-            INSERT INTO registros_controles_envasados(mes,anio,fk_idtipoformato,estado) VALUES  (%s,%s,%s,%s);
+            INSERT INTO registros_controles_envasados(fecha,fk_idtipoformato,estado) VALUES  (%s,%s,%s);
         """
-        execute_query(query_generar_formato, (mes_actual,anio_actual,5,'CREADO'))
+        
+        execute_query(query_generar_formato, (fecha_actual,5,'CREADO'))
 
         return jsonify({'status': 'success', 'message': 'Se genero el registro.'}), 200
 
@@ -134,7 +133,6 @@ def obtener_detalle_envasados(id_formatos):
         print(f"Error al obtener los detalles: {e}")
         return jsonify({'status': 'error', 'message': 'Hubo un error al obtener los detalles.'}), 500
     
-
 
 @controlEnvasados.route('/download_formato', methods=['GET'])
 def download_formato():

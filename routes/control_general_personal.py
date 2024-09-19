@@ -177,7 +177,10 @@ def update_trabajador():
 @controlGeneral.route('/delete', methods=['POST'])
 def delete_trabajador():
     try:
-        idTrabajador = request.form.get('idTrabajador')
+        data = request.json
+        idTrabajador = data.get('idTrabajador')
+
+        print(idTrabajador)
 
         # Eliminar el registro relacionado en controles_generales_personal
         query_eliminar_control = """

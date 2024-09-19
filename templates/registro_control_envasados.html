@@ -126,10 +126,17 @@
         <div class="container-fluid mt-4">
             <!-- Título centrado -->
             <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Registro de control de envasados</h3>
+            <label for="filterFechaDetalleCA" style="color: #FF8C00;">Filtro:</label>
+            <div class="form-row mb-1">
+                <div class="form-group col-lg-6 col-md-12">
+                    <input type="text" id="filtrarProResRE" class="form-control" name="filtrarProResRE" placeholder="Filtrar por producto o responsable" onkeyup="filtrarProResRE()"  autocomplete="off">
+                </div>
+            </div>
             
+
             <!-- Tabla resizable -->
-            <div class="table-responsive mt-5">
-                <table class="table table-bordered">
+            <div class="table-responsive mt-1">
+                <table class="table table-bordered" id="tableRegisterCE">
                     <thead style="background-color: #FF8C00; color: white;">
                         <tr>
                             <th class="text-center">Responsable</th>
@@ -161,24 +168,26 @@
         </div>
     {% endif %}
 
-
-    
-
     <!-- Modal para mostrar el historial de los registros de control de envasados -->
     <div class="modal fade" id="historialControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="historialControlEnvasadosLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg resizable-modal" role="document">
             <div class="modal-content">
                 <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
-                <div class="modal-header" style="background-color: #FF8C00; color: white;">
-                    <h5 class="modal-title" id="labelhistorialControlEnvasados">Historial de registros de control de envasados</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <div class="modal-header" style="background-color: #FF8C00; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <h5 class="modal-title" id="labelhistorialControlEnvasados" style="font-weight: bold; font-size: 1.5rem;">Historial de Registros de Control de Envasados</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead style="background-color: #FFC107; color: black;">
+                        <div class="input-container mb-3">
+                            <label for="filterFechaCE" style="color: #FF8C00; font-weight: bold;">Filtrar por fecha:</label>
+                            <input type="date" id="filterFechaCE" class="form-control" name="filterFechaCE"
+                            onchange="filterTableFechaControlEnvasados()" style="border-radius: 5px; border: 1px solid #FF8C00;"/>
+                        </div>
+                        <table class="table table-bordered table-hover" id="tablaRegistroCE">
+                            <thead style="background-color: #FF8C00; color: white; font-weight: bold;">
                                 <tr>
                                     <th class="text-center">Fecha</th>
                                     <th class="text-center">Ver</th>
@@ -189,15 +198,15 @@
                                 {% if historial_envasados %}
                                     {% for he in historial_envasados %}
                                         <tr>   
-                                            <td class="text-center">{{ he.mes }} del {{ he.anio }} </td>
+                                            <td class="text-center">{{ he.fecha }}</td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ he.id_registro_control_envasados }})" style="background-color: #FFC107;">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ he.id_registro_control_envasados }})" style="background-color: #FFC107; color: black;">
                                                     <i class="fas fa-eye"></i> Ver
                                                 </button>
                                             </td>
                                             <td class="text-center">
                                                 <a href="{{ url_for('control_envasados.download_formato', formato_id=he.id_registro_control_envasados) }}"
-                                                    class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FF8C00; color: white;">
+                                                    class="btn btn-warning btn-sm" style="background-color: #FF5722; color: white;">
                                                     <i class="fas fa-download"></i> Descargar Formato
                                                 </a>
                                             </td>
@@ -205,7 +214,7 @@
                                     {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td colspan="5" class="text-center">No hay registros disponibles.</td>
+                                        <td colspan="3" class="text-center">No hay registros disponibles.</td>
                                     </tr>
                                 {% endif %}
                             </tbody>
@@ -215,6 +224,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Modal para mostrar los detalles de los registros para el control de envasados -->
     <div class="modal fade" id="registroControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="registroControlEnvasadosLabel" aria-hidden="true">

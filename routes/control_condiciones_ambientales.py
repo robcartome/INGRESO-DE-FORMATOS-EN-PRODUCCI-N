@@ -23,7 +23,7 @@ def condicionesAmbientales():
             query_vista_condiciones_ambientales = "SELECT * FROM v_condiciones_ambientales WHERE estado = 'CREADO'"
             v_condiciones_ambientales = execute_query(query_vista_condiciones_ambientales)
 
-            query_ca_finalizados = "SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO'"
+            query_ca_finalizados = "SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC"
             v_finalizados_CA = execute_query(query_ca_finalizados)
 
             return render_template('control_condiciones_ambientales.html', areas=areas, v_condiciones_ambientales=v_condiciones_ambientales, v_finalizados_CA=v_finalizados_CA)
@@ -60,18 +60,19 @@ def condicionesAmbientales():
 @condiciones_ambientales.route('/registrar_condiciones_ambientales', methods=['POST'])
 def registrar_condiciones_ambientales():
     try:
+        data = request.json
         # Extracción de los datos del formulario
-        idcondicionambiental = request.form['idcondicionambiental']
-        fecha = request.form['fecha']
-        hora = request.form['hora']
-        limpio = request.form.get('limpio') == 'true'
-        ordenado = request.form.get('ordenado') == 'true'
-        paletasLimpias = request.form.get('paletasLimpias') == 'true'
-        paletasBuenEstado = request.form.get('paletasBuenEstado') == 'true'
-        temperatura = request.form['temperatura']
-        humedadRelativa = request.form['humedadRelativa']
-        observaciones = request.form['observaciones'] or "-"
-        accionesCorrectivas = request.form['accionesCorrectivas'] or "-"
+        idcondicionambiental = data['idcondicionambiental']
+        fecha = data['fecha']
+        hora = data['hora']
+        limpio = data.get('limpio') == 'true'
+        ordenado = data.get('ordenado') == 'true'
+        paletasLimpias = data.get('paletasLimpias') == 'true'
+        paletasBuenEstado = data.get('paletasBuenEstado') == 'true'
+        temperatura = data['temperatura']
+        humedadRelativa = data['humedadRelativa']
+        observaciones = data['observaciones'] or "-"
+        accionesCorrectivas = data['accionesCorrectivas'] or "-"
 
         idaccion_correctiva = None
         if accionesCorrectivas != "-":
@@ -159,8 +160,9 @@ def estadoAC(id_ca):
 @condiciones_ambientales.route('/finalizarDetallesCA', methods=['POST'])
 def finalizarDetallesCA():
     try:
+        data = request.json
         # Extracción de los datos del formulario
-        idcondicionambiental = request.form['idcondicionambiental']
+        idcondicionambiental = data['idcondicionambiental']
 
         query_update_estado_CA = "UPDATE condiciones_ambientales SET estado = %s WHERE idcondicionambiental = %s"
         execute_query(query_update_estado_CA,('CERRADO', idcondicionambiental))

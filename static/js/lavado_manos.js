@@ -1,60 +1,62 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function () {
     setDefaultFechaKardex();
-    $('#formControlGeneralPersona').on('submit', function(event) {
+
+    document.getElementById('formControlGeneralPersona').addEventListener('submit', function (event) {
         event.preventDefault();
         var formElement = document.getElementById('formControlGeneralPersona');
         var formData = new FormData(formElement);
 
-        $.ajax({
-            url: '/lavado_Manos',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            contentType: false,  // Importante para enviar FormData
-            processData: false,  // Importante para enviar FormData
-            success: function(response) {
-                if (response.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Registrado!',
-                        text: 'Se registró el lavado de manos correctamente.',
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message || 'Hubo un error al registrar el lavado de manos.',
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error en la solicitud AJAX:', error);
+        fetch('/lavado_Manos/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Registrado!',
+                    text: 'Se registró el lavado de manos correctamente.',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                    text: data.message || 'Hubo un error al registrar el lavado de manos.',
                 });
             }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+            });
         });
     });
 });
 
 function setDefaultFechaKardex() {
-    const today = new Date().toISOString().split('T')[0];  // Obtiene la fecha actual en formato YYYY-MM-DD
-    document.getElementById('fechaLavado').value = today;  // Asigna la fecha al campo de fecha
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaLavado').value = today;
 }
 
 function generarFormatoLavadoManos() {
-    $.post('/lavado_Manos/generar_formato_lavado', function(response) {
-        if (response.status === 'success') {
+    fetch('/lavado_Manos/generar_formato_lavado', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
             Swal.fire({
                 icon: 'success',
                 title: 'Formato generado',
-                text: 'Se genero un formato de lavado de manos.',
+                text: 'Se generó un formato de lavado de manos.',
                 showConfirmButton: false,
                 timer: 500
             }).then(() => {
@@ -67,10 +69,17 @@ function generarFormatoLavadoManos() {
                 text: 'Hubo un error al generar un formato de lavado de manos. Por favor, inténtelo nuevamente.',
             });
         }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error en la solicitud. Por favor, inténtelo nuevamente.',
+        });
     });
 }
 
-function finalarRegistroLavado() {
+function finalizarRegistroLavado() {
     Swal.fire({
         title: '¿Estás seguro?',
         text: "No podrás revertir esta acción",
@@ -82,52 +91,56 @@ function finalarRegistroLavado() {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            $.ajax({
-                url: '/lavado_Manos/finalizar_lavado_manos',
-                type: 'POST',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        Swal.fire(
-                            'Finalizado',
-                            'Se finalizo el registro.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Error',
-                            response.message || 'Hubo un error al finalizar el registro. Por favor, inténtelo nuevamente.',
-                            'error'
-                        );
-                    }
-                },
-                error: function(xhr, status, error) {
+            fetch('/lavado_Manos/finalizar_lavado_manos', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire(
+                        'Finalizado',
+                        'Se finalizó el registro.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
                     Swal.fire(
                         'Error',
-                        'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                        data.message || 'Hubo un error al finalizar el registro. Por favor, inténtelo nuevamente.',
                         'error'
                     );
                 }
+            })
+            .catch(error => {
+                Swal.fire(
+                    'Error',
+                    'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                    'error'
+                );
             });
         }
     });
 }
 
-
-function historialLavadoManos(){
-    $.get('/lavado_Manos/historialLavadoManos', function(data){
-        var tableBody = $('#historialLavadoManosBody');
-        tableBody.empty();
+function historialLavadoManos() {
+    fetch('/lavado_Manos/historialLavadoManos')
+    .then(response => response.json())
+    .then(data => {
+        var tableBody = document.getElementById('historialLavadoManosBody');
+        tableBody.innerHTML = '';  // Limpiar el contenido del cuerpo de la tabla
+        // Aquí puedes agregar el código para mostrar los datos en la tabla
+    })
+    .catch(error => {
+        console.error('Error al obtener el historial:', error);
     });
 }
 
-
 function verDetalleHistorial(idFormatos) {
-    // Realiza una solicitud GET para obtener los detalles del registro
-    $.get('/lavado_Manos/obtener_detalle_lavado/' + idFormatos, function(response) {
-        if (response.status === 'success') {
-            // Construye el contenido del modal con los detalles obtenidos
+    fetch(`/lavado_Manos/obtener_detalle_lavado/${idFormatos}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
             let detalles = `
                 <table class="table table-bordered">
                     <thead style="background-color: #FFC107; color: white;">
@@ -140,8 +153,7 @@ function verDetalleHistorial(idFormatos) {
                     <tbody>
             `;
 
-            // Iterar a través de los detalles y agregarlos a la tabla
-            response.detalles.forEach(function(detalle) {
+            data.detalles.forEach(detalle => {
                 detalles += `
                     <tr>
                         <td>${detalle.fecha}</td>
@@ -156,20 +168,17 @@ function verDetalleHistorial(idFormatos) {
                 </table>
             `;
 
-            // Inserta los detalles en el contenido del modal
-            $('#detalleContenido').html(detalles);
-            // Muestra el modal con los detalles del registro
+            document.getElementById('detalleContenido').innerHTML = detalles;
             $('#detalleLavadoManos').modal('show');
         } else {
-            // Muestra un mensaje de error si no se pudieron obtener los detalles
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: 'No se pudieron obtener los detalles del registro. Por favor, inténtelo nuevamente.',
             });
         }
-    }).fail(function() {
-        // Muestra un mensaje de error en caso de fallo en la solicitud
+    })
+    .catch(error => {
         Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -177,8 +186,6 @@ function verDetalleHistorial(idFormatos) {
         });
     });
 }
-
-
 
 function registrarMedidasCorrectivas() {
     Swal.fire({
@@ -199,44 +206,45 @@ function registrarMedidasCorrectivas() {
     }).then((result) => {
         if (result.isConfirmed) {
             const medidaCorrectiva = result.value;
-            $.ajax({
-                url: '/lavado_Manos/registrar_medidas_correctivas',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    medida_correctiva: medidaCorrectiva
-                }),
-                success: function(response) {
-                    if (response.status === 'success') {
-                        Swal.fire(
-                            'Guardado',
-                            'La medida correctiva ha sido registrada con éxito.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Error',
-                            response.message || 'Hubo un error al registrar la medida correctiva. Por favor, inténtelo nuevamente.',
-                            'error'
-                        );
-                    }
+            fetch('/lavado_Manos/registrar_medidas_correctivas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-                error: function(xhr, status, error) {
+                body: JSON.stringify({
+                    medida_correctiva: medidaCorrectiva
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire(
+                        'Guardado',
+                        'La medida correctiva ha sido registrada con éxito.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
                     Swal.fire(
                         'Error',
-                        'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                        data.message || 'Hubo un error al registrar la medida correctiva. Por favor, inténtelo nuevamente.',
                         'error'
                     );
                 }
+            })
+            .catch(error => {
+                Swal.fire(
+                    'Error',
+                    'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                    'error'
+                );
             });
         }
     });
 }
 
-
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function () {
     $('#selectTrabajador').select2({
         placeholder: "Seleccione el colaborador a registrar",
         allowClear: true,

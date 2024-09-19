@@ -7,54 +7,37 @@ $(document).ready(function() {
         var formElement = document.getElementById('formCondicionAmbiental');
         var formData = new FormData(formElement);
 
-        $.ajax({
-            url: '/condiciones_ambientales',
-            type: 'POST',
-            data: formData,
-            processData: false,  // Evitar que jQuery procese los datos
-            contentType: false,  // Evitar que jQuery establezca el content-type
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Control creado!',
-                        text: 'Se registro el control de condiciones ambientales correctamente.',
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        location.reload();  // Recargar la página tras el éxito
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message,  // Mostrar el mensaje de error enviado desde el servidor
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error en la solicitud AJAX:', error);
-                
-                // Verificar si la respuesta contiene datos en formato JSON
-                var response = xhr.responseJSON;
-                
-                if (response && response.message) {
-                    // Mostrar el mensaje de error enviado por el servidor
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message,  // Mensaje de error desde el servidor
-                    });
-                } else {
-                    // Mostrar un mensaje genérico si no hay detalles en la respuesta
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Ocurrió un error inesperado.',
-                    });
-                }
+        fetch('/condiciones_ambientales/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Control creado!',
+                    text: 'Se registro el control de condiciones ambientales correctamente.',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    location.reload();  // Recargar la página tras el éxito
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message,  // Mostrar el mensaje de error enviado desde el servidor
+                });
             }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error inesperado.',
+            });
         });
     });
 });
@@ -65,168 +48,96 @@ function setDefaultFechaKardex() {
 }
 
 function verDetallesCondicionesAmbientales(idcondicionambiental, detalle_area, mes, anio) {
-    // Ocultar la lista de todos los CA
     document.getElementById('listaCA').style.display = 'none';
-
-    // Mostrar la sección de detalles
     document.getElementById('llenarFormularioCA').style.display = 'block';
-
-    // Mostrar la sección de detalles
     document.getElementById('detallesCA').style.display = 'block';
-
-    // Actualizar el título con la información del producto y la fecha
     document.getElementById('tituloDetallesCA').innerText = `Detalles de ${detalle_area} - ${mes}/${anio}`;
-
-    // Asignar los valores a los inputs hidden
     document.getElementById('idcondicionambiental_hidden').value = idcondicionambiental;
     document.getElementById('detallearea_hidden').value = detalle_area;
     document.getElementById('mesCA').value = mes;
     document.getElementById('anioCA').value = anio;
 
-    // Obtener los detalles de la condición ambiental
-    $.get('/condiciones_ambientales/detalles_condiciones_ambientales/' + idcondicionambiental, function(data) {
-        var tableBody = $('#tablaDetallesCA');
-        tableBody.empty();
-    
-        // Verificar si los datos recibidos son un array y tienen contenido
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(function(item) {
-                var verificacionPrevia = item.verificacion_previa;
+    fetch(`/condiciones_ambientales/detalles_condiciones_ambientales/${idcondicionambiental}`)
+        .then(response => response.json())
+        .then(data => {
+            var tableBody = $('#tablaDetallesCA');
+            tableBody.empty();
 
-                var estadoColor = item.estado === "PENDIENTE" ? 'color: red;' : 'color: green;';
-    
-                var row = `
-                    <tr>
-                        <td class="text-center">${item.fecha}</td>
-                        <td class="text-center">${item.hora}</td>
-                        <td class="text-center">${verificacionPrevia[1] ? '✅' : '❌'}</td>
-                        <td class="text-center">${verificacionPrevia[2] ? '✅' : '❌'}</td>
-                        <td class="text-center">${verificacionPrevia[3] ? '✅' : '❌'}</td>
-                        <td class="text-center">${verificacionPrevia[4] ? '✅' : '❌'}</td>
-                        <td class="text-center">${item.temperatura}</td>
-                        <td class="text-center">${item.humedad}</td>
-                        <td class="text-center">${item.observaciones}</td>
-                        <td class="text-center" style="${estadoColor}">${item.detalle_accion_correctiva}</td>
-                        <td class="text-center">
-                            <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC(${item.idaccion_correctiva})">
-                                <i class="fas fa-check-circle"></i>
-                            </button>
-                        </td>
-                    </tr>`;
-                tableBody.append(row);
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(function(item) {
+                    var verificacionPrevia = item.verificacion_previa;
+                    var estadoColor = item.estado === "PENDIENTE" ? 'color: red;' : 'color: green;';
+
+                    var row = `
+                        <tr>
+                            <td class="text-center">${item.fecha}</td>
+                            <td class="text-center">${item.hora}</td>
+                            <td class="text-center">${verificacionPrevia[1] ? '✅' : '❌'}</td>
+                            <td class="text-center">${verificacionPrevia[2] ? '✅' : '❌'}</td>
+                            <td class="text-center">${verificacionPrevia[3] ? '✅' : '❌'}</td>
+                            <td class="text-center">${verificacionPrevia[4] ? '✅' : '❌'}</td>
+                            <td class="text-center">${item.temperatura}</td>
+                            <td class="text-center">${item.humedad}</td>
+                            <td class="text-center">${item.observaciones}</td>
+                            <td class="text-center" style="${estadoColor}">${item.detalle_accion_correctiva}</td>
+                            <td class="text-center">
+                                <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC(${item.idaccion_correctiva})">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                    tableBody.append(row);
+                });
+            } else {
+                var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este control de condiciones ambientales.</td></tr>';
+                tableBody.append(noDataRow);
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar los detalles de control de condiciones ambientales:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al cargar detalles',
+                text: 'Ocurrió un error al cargar los detalles de control de condiciones ambientales. Inténtalo de nuevo más tarde.',
             });
-        } else {
-            // Si no hay datos, mostrar un mensaje
-            var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este control de condiciones ambientales.</td></tr>';
-            tableBody.append(noDataRow);
-        }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error("Error al cargar los detalles de control de condiciones ambientales:", textStatus, errorThrown);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error al cargar detalles',
-            text: 'Ocurrió un error al cargar los detalles de control de condiciones ambientales. Inténtalo de nuevo más tarde.',
         });
-    });
 }
-
-function verDetallesCondicionesAmbientalesFinalizadas(idcondicionambiental, detalle_area, mes, anio) {
-    // Ocultar la lista de todos los CA
-    document.getElementById('listaCA').style.display = 'none';
-
-    // Mostrar la sección de detalles
-    document.getElementById('detallesCA').style.display = 'block';
-
-    // Actualizar el título con la información del producto y la fecha
-    document.getElementById('tituloDetallesCA').innerText = `Detalles de ${detalle_area} - ${mes}/${anio}`;
-
-    // Asignar los valores a los inputs hidden
-    document.getElementById('idcondicionambiental_hidden').value = idcondicionambiental;
-    document.getElementById('detallearea_hidden').value = detalle_area;
-    document.getElementById('mesCA').value = mes;
-    document.getElementById('anioCA').value = anio;
-
-    // Obtener los detalles de la condición ambiental
-    $.get('/condiciones_ambientales/detalles_condiciones_ambientales/' + idcondicionambiental, function(data) {
-        var tableBody = $('#tablaDetallesCA');
-        tableBody.empty();
-    
-        // Verificar si los datos recibidos son un array y tienen contenido
-        if (Array.isArray(data) && data.length > 0) {
-            data.forEach(function(item) {
-                var verificacionPrevia = item.verificacion_previa;
-
-                var estadoColor = item.estado === "PENDIENTE" ? 'color: red;' : 'color: green;';
-    
-                var row = `
-                    <tr>
-                        <td class="text-center">${item.fecha}</td>
-                        <td class="text-center">${item.hora}</td>
-                        <td class="text-center">${verificacionPrevia[1] ? '✅' : '❌'}</td>
-                        <td class="text-center">${verificacionPrevia[2] ? '✅' : '❌'}</td>
-                        <td class="text-center">${verificacionPrevia[3] ? '✅' : '❌'}</td>
-                        <td class="text-center">${verificacionPrevia[4] ? '✅' : '❌'}</td>
-                        <td class="text-center">${item.temperatura}</td>
-                        <td class="text-center">${item.humedad}</td>
-                        <td class="text-center">${item.observaciones}</td>
-                        <td class="text-center" style="${estadoColor}">${item.detalle_accion_correctiva}</td>
-                        <td class="text-center">
-                            <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC(${item.idaccion_correctiva})">
-                                <i class="fas fa-check-circle"></i>
-                            </button>
-                        </td>
-                    </tr>`;
-                tableBody.append(row);
-            });
-        } else {
-            // Si no hay datos, mostrar un mensaje
-            var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este control de condiciones ambientales.</td></tr>';
-            tableBody.append(noDataRow);
-        }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error("Error al cargar los detalles de control de condiciones ambientales:", textStatus, errorThrown);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error al cargar detalles',
-            text: 'Ocurrió un error al cargar los detalles de control de condiciones ambientales. Inténtalo de nuevo más tarde.',
-        });
-    });
-}
-
 
 function modificarEstadoAC(idAC) {
     var idcondicionambiental = document.getElementById('idcondicionambiental_hidden').value;
     var detallearea = document.getElementById('detallearea_hidden').value;
     var mes = document.getElementById('mesCA').value; 
     var anio = document.getElementById('anioCA').value;
-    
-    $.post('/condiciones_ambientales/estadoAC/' + idAC, function(response) {
-        if (response.status === 'success') {
+
+    fetch(`/condiciones_ambientales/estadoAC/${idAC}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
             Swal.fire({
                 icon: 'success',
                 title: 'Registrado',
-                text: 'Se registro la correción de la observación.',
+                text: 'Se registró la corrección de la observación.',
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                // Guardar los valores en sessionStorage
                 sessionStorage.setItem('idcondicionambiental', idcondicionambiental);
                 sessionStorage.setItem('detallearea', detallearea);
                 sessionStorage.setItem('mes', mes);
                 sessionStorage.setItem('anio', anio);
-
-                // Mostrar los detalles sin recargar la página
                 verDetallesCondicionesAmbientales(idcondicionambiental, detallearea, mes, anio);
             });
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: response.message,
+                text: data.message,
             });
         }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error("Error al modificar el estado de la acción correctiva:", textStatus, errorThrown);
+    })
+    .catch(error => {
+        console.error("Error al modificar el estado de la acción correctiva:", error);
         Swal.fire({
             icon: 'error',
             title: 'Error al modificar estado',
@@ -235,25 +146,22 @@ function modificarEstadoAC(idAC) {
     });
 }
 
-
 function registrarDetalleCA() {
     var idcondicionambiental = document.getElementById('idcondicionambiental_hidden').value;
     var fecha = document.getElementById('fecha_CA').value;
     var hora = document.getElementById('hora_CA').value;
-    var limpio = document.getElementById('limpio').checked;
-    var ordenado = document.getElementById('ordenado').checked;
-    var paletasLimpias = document.getElementById('paletasLimpias').checked;
-    var paletasBuenEstado = document.getElementById('paletasBuenEstado').checked;
+    var limpio = document.getElementById('limpio').checked ? 'true' : 'false';
+    var ordenado = document.getElementById('ordenado').checked ? 'true' : 'false';
+    var paletasLimpias = document.getElementById('paletasLimpias').checked ? 'true' : 'false';
+    var paletasBuenEstado = document.getElementById('paletasBuenEstado').checked ? 'true' : 'false';
     var temperatura = document.getElementById('temperatura').value;
     var humedadRelativa = document.getElementById('humedadRelativa').value;
     var observaciones = document.getElementById('observaciones').value || "-";
     var accionesCorrectivas = document.getElementById('accionesCorrectivas').value || "-";
-
     var detallearea = document.getElementById('detallearea_hidden').value;
     var mes = document.getElementById('mesCA').value; 
     var anio = document.getElementById('anioCA').value;
 
-    // Validar que los campos obligatorios no estén vacíos
     if (!fecha || !hora || !temperatura || !humedadRelativa) {
         Swal.fire({
             icon: 'warning',
@@ -263,20 +171,28 @@ function registrarDetalleCA() {
         return;
     }
 
-    $.post('/condiciones_ambientales/registrar_condiciones_ambientales', {
-        idcondicionambiental: idcondicionambiental, 
-        fecha: fecha, 
-        hora: hora,
-        limpio: limpio ? 'true' : 'false',  // Enviar como 'true' o 'false'
-        ordenado: ordenado ? 'true' : 'false',
-        paletasLimpias: paletasLimpias ? 'true' : 'false',
-        paletasBuenEstado: paletasBuenEstado ? 'true' : 'false',
-        temperatura: temperatura,
-        humedadRelativa: humedadRelativa,
-        observaciones: observaciones,
-        accionesCorrectivas: accionesCorrectivas
-    }, function(response) {
-        if (response.status === 'success') {
+    fetch('/condiciones_ambientales/registrar_condiciones_ambientales', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            idcondicionambiental: idcondicionambiental,
+            fecha: fecha,
+            hora: hora,
+            limpio: limpio,
+            ordenado: ordenado,
+            paletasLimpias: paletasLimpias,
+            paletasBuenEstado: paletasBuenEstado,
+            temperatura: temperatura,
+            humedadRelativa: humedadRelativa,
+            observaciones: observaciones,
+            accionesCorrectivas: accionesCorrectivas
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
             Swal.fire({
                 icon: 'success',
                 title: 'Agregado',
@@ -284,13 +200,10 @@ function registrarDetalleCA() {
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                // Guardar los valores en sessionStorage
                 sessionStorage.setItem('idcondicionambiental', idcondicionambiental);
                 sessionStorage.setItem('detallearea', detallearea);
                 sessionStorage.setItem('mes', mes);
                 sessionStorage.setItem('anio', anio);
-
-                // Mostrar los detalles sin recargar la página
                 verDetallesCondicionesAmbientales(idcondicionambiental, detallearea, mes, anio);
                 location.reload();
             });
@@ -298,16 +211,94 @@ function registrarDetalleCA() {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: response.message,
+                text: data.message,
             });
         }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
+    })
+    .catch(error => {
         Swal.fire({
             icon: 'error',
             title: 'Error en la solicitud',
-            text: 'Ocurrió un error al enviar la solicitud: ' + textStatus,
+            text: 'Ocurrió un error al enviar la solicitud: ' + error,
         });
     });
+}
+
+function finalizarDetallesCondicionesAmbientales(idcondicionambiental) {
+    fetch('/condiciones_ambientales/finalizarDetallesCA', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            idcondicionambiental: idcondicionambiental
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Se finalizo',
+                text: 'El estado de la condición ambiental fue modificado a Finalizado.',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message,
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en la solicitud',
+            text: 'Ocurrió un error al enviar la solicitud: ' + error,
+        });
+    });
+}
+
+async function descargarFormatoCA() {
+    const idCA = document.getElementById('idcondicionambiental_hidden').value;
+    const endpoint = `/condiciones_ambientales/descargar_formato_CA/${idCA}`;
+
+    try {
+        const response = await fetch(endpoint, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Error al generar el reporte");
+        }
+
+        const blob = await response.blob();
+        const contentDisposition = response.headers.get("Content-Disposition");
+        const fileNameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/);
+        const fileName = fileNameMatch ? fileNameMatch[1] : "reporte_condiciones_ambientales.pdf";
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url); // Revocar la URL creada
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error al generar el reporte.',
+        });
+    }
 }
 
 function volverListaCA() {
@@ -339,36 +330,6 @@ window.onload = function() {
         sessionStorage.removeItem('anio');
     }
 };
-
-function finalizarDetallesCondicionesAmbientales(idcondicionambiental) {
-    $.post('/condiciones_ambientales/finalizarDetallesCA', {
-        idcondicionambiental: idcondicionambiental
-    }, function(response) {
-        if (response.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Se finalizo',
-                text: 'El estado de la condición ambiental fue modificado a Finalizado.',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: response.message,
-            });
-        }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error en la solicitud',
-            text: 'Ocurrió un error al enviar la solicitud: ' + textStatus,
-        });
-    });
-}
 
 //Para filtrar kardex activos
 function filterCAOpenArea() {
@@ -466,3 +427,57 @@ function formatDate(dateString) {
     const endpoint = `/condiciones_ambientales/descargar_formato_CA/${idkardex}`;
     fetchDownloadPDF(endpoint, 'condiciones ambientales' )
  }
+function verDetallesCondicionesAmbientalesFinalizadas(idcondicionambiental, detalle_area, mes, anio) {
+    document.getElementById('listaCA').style.display = 'none';
+    document.getElementById('detallesCA').style.display = 'block';
+    document.getElementById('tituloDetallesCA').innerText = `Detalles de ${detalle_area} - ${mes}/${anio}`;
+    document.getElementById('idcondicionambiental_hidden').value = idcondicionambiental;
+    document.getElementById('detallearea_hidden').value = detalle_area;
+    document.getElementById('mesCA').value = mes;
+    document.getElementById('anioCA').value = anio;
+
+    fetch(`/condiciones_ambientales/detalles_condiciones_ambientales/${idcondicionambiental}`)
+        .then(response => response.json())
+        .then(data => {
+            var tableBody = $('#tablaDetallesCA');
+            tableBody.empty();
+
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(function(item) {
+                    var verificacionPrevia = item.verificacion_previa;
+                    var estadoColor = item.estado === "PENDIENTE" ? 'color: red;' : 'color: green;';
+
+                    var row = `
+                        <tr>
+                            <td class="text-center">${item.fecha}</td>
+                            <td class="text-center">${item.hora}</td>
+                            <td class="text-center">${verificacionPrevia[1] ? '✅' : '❌'}</td>
+                            <td class="text-center">${verificacionPrevia[2] ? '✅' : '❌'}</td>
+                            <td class="text-center">${verificacionPrevia[3] ? '✅' : '❌'}</td>
+                            <td class="text-center">${verificacionPrevia[4] ? '✅' : '❌'}</td>
+                            <td class="text-center">${item.temperatura}</td>
+                            <td class="text-center">${item.humedad}</td>
+                            <td class="text-center">${item.observaciones}</td>
+                            <td class="text-center" style="${estadoColor}">${item.detalle_accion_correctiva}</td>
+                            <td class="text-center">
+                                <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC(${item.idaccion_correctiva})">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                    tableBody.append(row);
+                });
+            } else {
+                var noDataRow = '<tr><td colspan="11" class="text-center">No hay detalles disponibles para este control de condiciones ambientales.</td></tr>';
+                tableBody.append(noDataRow);
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar los detalles de control de condiciones ambientales:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al cargar detalles',
+                text: 'Ocurrió un error al cargar los detalles de control de condiciones ambientales. Inténtalo de nuevo más tarde.',
+            });
+        });
+}
