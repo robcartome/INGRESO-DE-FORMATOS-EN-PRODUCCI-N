@@ -148,9 +148,10 @@ def download_formato():
     # Realizar la consulta para el detalle de todos los registros y controles de envasados finalizados
     detalle_registros_controles_envasados = execute_query(f"SELECT * FROM v_registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}")
 
-    print(registros_controles_envasados)
-
-    print(detalle_registros_controles_envasados)
+    # Crear info para el Template
+    info={}
+    info['fecha'] = registros_controles_envasados[0]['fecha'].strftime('%d/%m/%Y')
+    info['detalle'] = detalle_registros_controles_envasados
 
     # Generar Template para reporte
     logo_path = os.path.join('static', 'img', 'logo.png')
@@ -165,7 +166,7 @@ def download_formato():
         format_code_report=cabecera[0]['codigo'],
         frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
-        info=detalle_registros_controles_envasados,
+        info=info
     )
 
     file_name=f"{title_report}"

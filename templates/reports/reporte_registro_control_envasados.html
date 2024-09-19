@@ -13,13 +13,13 @@
             </tr>
             <!-- Información subtitulo -->
             <tr>
-                <td colspan="12" class="border-none s1" style="font-weight: bold;">FECHA: <span>01/09/2024</span></td>
+                <td colspan="12" class="border-none s1" style="font-weight: bold;">FECHA: <span>{{ info['fecha'] }}</span></td>
             </tr>
             <!-- Cabecera del cuerpo del reporte -->
             <tr class="border">
                 <th class="border" rowspan="2">RESPONSABLE</th>
                 <th class="border" rowspan="2">PRODUCTO</th>
-                <th class="border" rowspan="2">CANTIDAD PRODUCIDA</th>
+                <th class="border w-15" rowspan="2">CANTIDAD PRODUCIDA</th>
                 <th class="border" colspan="2">DATOS PROVEEDOR</th>
                 <th class="border" rowspan="2">LOTE ASIGNADO</th>
                 <th class="border" rowspan="2">F. VCTO</th>
@@ -33,19 +33,21 @@
 
         <!-- Cuerpo del reporte -->
         <tbody class="body-content">
+            {% for record in info['detalle'] %}
             <tr class="text-center">
-                <td>Lisset Tiburcio Blas</td>
-                <td>Hojas de laurel</td>
-                <td>100</td>
-                <td>Frutos secos & Especies EIRL</td>
-                <td>LP001</td>
-                <td>LA001</td>
-                <td>01/10/2024</td>
-                <td>Frecuencia: Cada vez que se produce</td>
+                <td>{{ record['responsable'] }}</td>
+                <td>{{ record['descripcion_producto'] }}</td>
+                <td>{{ record['cantidad_producida'] }}</td>
+                <td>{{ record['nom_empresa'] }}</td>
+                <td>{{ record['lote_proveedor'] }}</td>
+                <td>{{ record['lote_asignado'] }}</td>
+                <td>{{ record['fecha_vencimiento'] }}</td>
+                <td>{{ record['observacion'] }}</td>
             </tr>
+            {% endfor %}
             <tr>
                 <td colspan="4" class="border-none">
-                    Frecuencia: Cada vez que se produce
+                    Frecuencia: {{ frecuencia_registro }}
                 </td>
             </tr>
         </tbody>
