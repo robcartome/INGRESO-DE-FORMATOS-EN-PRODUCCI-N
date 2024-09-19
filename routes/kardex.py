@@ -132,15 +132,15 @@ def detalles_kardex(id_kardex):
 @kardex.route('/registrar_lote_kardex', methods=['POST'])
 def registrar_lote_kardex():
     try:
-
+        data = request.json
         # Extracción de los datos del formulario
-        id_kardex = request.form['idkardex']
-        fecha = request.form['fecha']
-        lote = request.form['lote']
-        saldo_inicial = request.form['saldo_inicial']
-        ingreso = request.form['ingreso']
-        salida = request.form['salida']
-        observaciones = request.form['observaciones']
+        id_kardex = data['idkardex']
+        fecha = data['fecha']
+        lote = data['lote']
+        saldo_inicial = data['saldo_inicial']
+        ingreso = data['ingreso']
+        salida = data['salida']
+        observaciones = data['observaciones']
 
         # Validación de datos
         if not all([id_kardex, fecha, lote, saldo_inicial, ingreso, salida]):
@@ -232,7 +232,8 @@ def descargar_formato_kardex(id_kardex):
 def finalizar_kardex():
     try:
         # Extracción de los datos del formulario
-        id_kardex = request.form['idKardex']
+        data = request.json
+        id_kardex = data['idKardex']
 
         query_update_estado_kardex = "UPDATE kardex SET estado = %s WHERE idkardex = %s"
         execute_query(query_update_estado_kardex,('CERRADO', id_kardex))
