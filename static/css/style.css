@@ -163,3 +163,10 @@ html, body {
 }
 
 
+.texto-pendiente {
+  color: red;
+}
+
+.texto-solucionado {
+  color: green;
+}

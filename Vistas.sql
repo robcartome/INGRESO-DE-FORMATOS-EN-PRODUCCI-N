@@ -30,37 +30,6 @@ JOIN
 ORDER BY 
     dlv.fecha DESC;
 
-DROP VIEW detalle_lavados_manos
-
-SELECT * FROM detalle_lavados_manos
-
-SELECT * FROM trabajadores
-
-SELECT * FROM v_lavados_manos
-	
-SELECT 
-    idformatos,
-    TO_CHAR(TO_DATE(mes || ' ' || anio, 'MM YYYY'), 'TMMonth') AS mes,
-    anio,
-    fk_idtipoformato,
-    estado
-FROM 
-    formatos 
-WHERE 
-    fk_idtipoformato = 2 
-    AND estado = 'CERRADO';
-
-
-SELECT 
-	idformatos,
-	TO_CHAR(TO_DATE(mes || ' ' || anio, 'MM YYYY'), 'TMMonth') AS mes,
-	anio,
-	fk_idtipoformato,
-	estado
-FROM 
-	formatos 
-WHERE 
-	idformatos = 2
 
 CREATE OR REPLACE VIEW v_historial_lavado_manos AS
 SELECT
@@ -155,10 +124,9 @@ SELECT
 FROM
     registros_controles_envasados f
 WHERE 
-    f.fk_idtipoformato = 5 AND f.estado = 'CERRADO'
+    f.fk_idtipoformatos = 5 AND f.estado = 'CERRADO'
 ORDER BY
     f.id_registro_control_envasados DESC;
-
 
 SELECT * FROM v_historial_registros_controles_envasados
 
@@ -189,22 +157,23 @@ ORDER BY
 	ce.id_detalle_registro_controles_envasados DESC;
 
 
-
 -- CONTROL DE ASEO E HIGIENE PERSONAL --
 
 CREATE OR REPLACE VIEW v_historial_higiene_personal AS
 SELECT
     TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
     f.anio,
-    f.fk_idtipoformato,
+    f.fk_idtipoformatos,
     f.estado,
 	f.id_control_higiene_personal
 FROM
     controles_higiene_personal f
 WHERE
-	f.fk_idtipoformato = 6 AND estado = 'CERRADO'
+	f.fk_idtipoformatos = 6 AND estado = 'CERRADO'
 ORDER BY
 	f.id_control_higiene_personal DESC;
+
+DROP VIEW v_historial_higiene_personal
 
 SELECT * FROM public.asignacion_verificacion_previa_higiene_personal
 
@@ -216,8 +185,8 @@ SELECT
     d.observaciones,
 	ac.idaccion_correctiva,
     COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
+	ac.estado AS estado_medida_correctiva,
     d.fk_idcontrol_higiene_personal,
-	hp.id_control_higiene_personal,
 	hp.estado
 FROM
     detalles_controles_higiene_personal d
@@ -228,5 +197,12 @@ JOIN
 JOIN
     controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
 
+DROP VIEW v_detalle_higiene_personal
+	
+SELECT * FROM v_detalle_higiene_personal
 
-SELECT * FROM 
+SELECT * FROM public.asignacion_verificacion_previa_higiene_personal
+
+SELECT * FROM public.controles_higiene_personal
+
+SELECT * FROM v_historial_higiene_personal

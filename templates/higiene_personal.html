@@ -117,12 +117,12 @@
         <!-- Botones de Historial y Finalizar Registro -->
         <div class="form-row mb-4">
             <div class="form-group col-lg-6 col-md-6">
-                <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;" data-toggle="modal" data-target="#historialControlEnvasados">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;" data-toggle="modal" data-target="#historialControlHigienePersonal">
                     <i class="fas fa-history"></i> HISTORIAL
                 </button>
             </div>
             <div class="form-group col-lg-6 col-md-6">
-                <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalizarControlEnvasados()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
+                <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalizarHigienePersonal()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
             </div>
         </div>
         
@@ -130,10 +130,17 @@
         <div class="container-fluid mt-4">
             <!-- Título centrado -->
             <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Detalle del control de aseo e higiene del personal</h3>
-            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" id="filtroTrabajadorDetalle" class="form-control" placeholder="Filtrar por trabajador...">
+                </div>
+                <div class="col-md-6">
+                    <input type="date" id="filtroFechaDetalle" class="form-control" placeholder="Filtrar por fecha...">
+                </div>
+            </div>
             <!-- Tabla resizable -->
-            <div class="table-responsive mt-5">
-                <table class="table table-bordered">
+            <div class="table-responsive mt-2">
+                <table class="table table-bordered" id="detalle_table_HP">
                     <thead style="background-color: #FF8C00; color: white;">
                         <tr>
                             <th class="text-center">Fecha</th>
@@ -141,45 +148,59 @@
                             <th class="text-center">PP</th>
                             <th class="text-center">LM</th>
                             <th class="text-center">HH</th>
-                            <th class="text-center">Observaciones</th>
-                            <th class="text-center">Acciones Correctivas</th>
+                            <th class="text-center">Observaciones/AC</th>
                             <th class="text-center">Validar</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for hp in detalle_higiene_personal %}
                         <tr>
-                            <td class="text-center">{{ hp.fecha }}</td>
+                            <td class="text-center">{{ hp.fecha.strftime('%d/%m/%Y') }}</td>
                             <td class="text-center">{{ hp.trabajador }}</td>
                             <!-- Comprobación de cada verificación con el id de detalle correspondiente -->
                             {% set verificaciones = verificacion_higiene_personal | selectattr("fk_iddetalle_control_higiene_personal", "equalto", hp.id_detalle_control_higiene_personal) | list %}
+
+                            <!-- Verificación PP -->
                             <td class="text-center">
-                                {% if verificaciones and verificaciones[0].fk_idverificacion_previa == 5 %}
+                                {% set pp_verificacion = verificaciones | selectattr("fk_idverificacion_previa", "equalto", 5) | list %}
+                                {% if pp_verificacion and pp_verificacion|length > 0 %}
                                     C
                                 {% else %}
                                     NC
                                 {% endif %}
                             </td>
+
+                            <!-- Verificación LM -->
                             <td class="text-center">
-                                {% if verificaciones and verificaciones[0].fk_idverificacion_previa == 6 %}
+                                {% set lm_verificacion = verificaciones | selectattr("fk_idverificacion_previa", "equalto", 6) | list %}
+                                {% if lm_verificacion and lm_verificacion|length > 0 %}
                                     C
                                 {% else %}
                                     NC
                                 {% endif %}
                             </td>
+
+                            <!-- Verificación HH -->
                             <td class="text-center">
-                                {% if verificaciones and verificaciones[0].fk_idverificacion_previa == 7 %}
+                                {% set hh_verificacion = verificaciones | selectattr("fk_idverificacion_previa", "equalto", 7) | list %}
+                                {% if hh_verificacion and hh_verificacion|length > 0 %}
                                     C
                                 {% else %}
                                     NC
                                 {% endif %}
                             </td>
-                            <td class="text-center">{{ hp.observaciones }}</td>
-                            <td class="text-center">{{ hp.acciones_correctivas }}</td>
-                            <td class="text-center">
-                                <!-- Aquí puedes añadir un botón o enlace para validar -->
-                                <button class="btn btn-success btn-sm">Validar</button>
+                            <td class="text-center" 
+                                style="{% if hp.estado_medida_correctiva == 'PENDIENTE' %} color: red; 
+                                    {% elif hp.estado_medida_correctiva == 'SOLUCIONADO' %} color: green; 
+                                    {% endif %}">
+                                {{ hp.observaciones ~ " / " ~ hp.detalle_accion_correctiva }}
                             </td>
+                            <td class="text-center">
+                                <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC({{ hp.idaccion_correctiva }})">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            </td>
+
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -187,18 +208,16 @@
             </div>
         </div>
 
+
     {% endif %}
 
 
-    
-
-    <!-- Modal para mostrar el historial de los registros de control de envasados -->
+    <!-- Modal para mostrar el historial de los registros de control de higiene -->
     <div class="modal fade" id="historialControlHigienePersonal" tabindex="-1" role="dialog" aria-labelledby="historialControlHigienePersonalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg resizable-modal" role="document">
             <div class="modal-content">
-                <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
                 <div class="modal-header" style="background-color: #FF8C00; color: white;">
-                    <h5 class="modal-title" id="labelhistorialControlHigienePersonal">Historial de control de aseo e higiene del personal</h5>
+                    <h5 class="modal-title" id="historialControlHigienePersonalLabel">Historial de control de aseo e higiene del personal</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -219,12 +238,12 @@
                                         <tr>   
                                             <td class="text-center">{{ hp.mes }} del {{ hp.anio }} </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ hp.id_registro_control_envasados }})" style="background-color: #FFC107;">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ hp.id_control_higiene_personal }})" style="background-color: #FFC107;">
                                                     <i class="fas fa-eye"></i> Ver
                                                 </button>
                                             </td>
                                             <td class="text-center">
-                                                <a href="{{ url_for('control_envasados.download_formato', formato_id=hp.id_registro_control_envasados) }}"
+                                                <a href="{{ url_for('higiene_personal.download_formato', formato_id=hp.id_control_higiene_personal) }}"
                                                     class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FF8C00; color: white;">
                                                     <i class="fas fa-download"></i> Descargar Formato
                                                 </a>
@@ -244,12 +263,12 @@
         </div>
     </div>
 
-    <!-- Modal para mostrar los detalles de los registros para el control de envasados -->
-    <div class="modal fade" id="registroControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="registroControlEnvasadosLabel" aria-hidden="true">
+    <!-- Modal para mostrar los detalles específicos del registro de control de higiene -->
+    <div class="modal fade" id="detalleHistorialControlHigienePersonal" tabindex="-1" role="dialog" aria-labelledby="detalleHistorialControlHigienePersonalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header" style="background-color: #FF8C00; color: white;">
-                    <h5 class="modal-title" id="registroControlEnvasadosLabel">Detalle del registro y control de envasados</h5>
+                    <h5 class="modal-title" id="detalleHistorialControlHigienePersonalLabel">Detalle del control de aseo e higiene del personal</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

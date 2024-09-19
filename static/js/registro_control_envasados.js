@@ -275,8 +275,10 @@ function filterTableFechaControlEnvasados() {
 
             // Mostrar u ocultar la fila basado en la comparación con el filtro
             if (formattedCellDate === filter || filter === "") {
+                // Si coinciden o no hay filtro, mostrar la fila
                 tr[i].style.display = "";
             } else {
+                // Si no coinciden, ocultar la fila
                 tr[i].style.display = "none";
             }
         }
