@@ -199,9 +199,8 @@ CREATE TABLE IF NOT EXISTS public.asignacion_verificacion_previa_condicion_ambie
 
 CREATE TABLE IF NOT EXISTS public.Registros_Controles_Envasados (
 	id_Registro_Control_Envasados SERIAL PRIMARY KEY,
-	mes VARCHAR(11) NOT NULL,
-	anio VARCHAR(4) NOT NULL,
-	estado VARCHAR(30) NULL,
+	fecha DATE NULL,
+	estado VARCHAR(20) NULL,
 	fk_idTipoFormato INT REFERENCES public.TiposFormatos(idTipoFormato) NOT NULL
 );
 
@@ -218,3 +217,27 @@ CREATE TABLE IF NOT EXISTS public.Detalles_Registros_Controles_Envasados (
 	fk_id_registro_control_envasado INT REFERENCES public.Registros_Controles_Envasados(id_Registro_Control_Envasados)
 );
 
+-- << CONTROL DE HIGIENE PERSONAL >> --
+
+CREATE TABLE IF NOT EXISTS public.Controles_higiene_personal (
+	id_control_higiene_personal SERIAL PRIMARY KEY,
+	mes VARCHAR(11) NOT NULL,
+	anio VARCHAR(4) NOT NULL,
+	estado VARCHAR(30) NULL,
+	fk_idTipoFormato INT REFERENCES public.TiposFormatos(idTipoFormato) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.Detalles_controles_higiene_personal (
+	id_detalle_control_higiene_personal SERIAL PRIMARY KEY,
+	fecha DATE NOT NULL,
+	fk_idtrabajador INT REFERENCES public.trabajadores(idtrabajador) NOT NULL,
+	observaciones VARCHAR(60) NULL,
+	fk_idaccion_correctiva INT REFERENCES public.acciones_correctivas(idaccion_correctiva) NULL,
+	fk_idControl_higiene_personal INT REFERENCES public.Controles_higiene_personal(id_control_higiene_personal) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.asignacion_verificacion_previa_higiene_personal (
+	id_asignacion_verificacion_previa_higiene_personal SERIAL PRIMARY KEY,
+	fk_idVerificacion_previa INT REFERENCES public.verificacion_previa(idverificacion_previa) NOT NULL,
+	fk_idDetalle_control_higiene_personal INT REFERENCES public.Detalles_controles_higiene_personal(id_detalle_control_higiene_personal) NOT NULL
+);

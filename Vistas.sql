@@ -50,7 +50,6 @@ WHERE
     fk_idtipoformato = 2 
     AND estado = 'CERRADO';
 
-SELECT * FROM v_lavados_manos
 
 SELECT 
 	idformatos,
@@ -92,7 +91,6 @@ ORDER BY
 	kr.idkardex
 DESC;
 
-SELECT * FROM public.tiposformatos
 
 SELECT 
 	c.idcontrolgeneral,t.idtrabajador, t.dni, t.nombres, t.apellidos, 
@@ -117,11 +115,7 @@ JOIN
 JOIN
 	trabajadores t ON t.idtrabajador = c.fk_idtrabajador;
 
-SELECT * FROM areas;
-
-SELECT * FROM public.tiposformatos
-
-SELECT * FROM public.condiciones_ambientales
+-- CONTROL DE CONDICIONES AMBIENTALES
 
 CREATE OR REPLACE VIEW v_condiciones_ambientales AS
 SELECT
@@ -130,10 +124,6 @@ FROM
 	condiciones_ambientales ca
 JOIN
 	areas a ON a.idarea = ca.fk_idarea;
-
-SELECT * FROM public.detalle_condiciones_ambientales
-
-SELECT * FROM public.verificacion_previa
 
 
 CREATE OR REPLACE VIEW v_detalle_control_CA AS
@@ -155,36 +145,21 @@ LEFT JOIN
 JOIN
     condiciones_ambientales ca ON ca.idcondicionambiental = d.fk_idcondicion_ambiental;
 
-
+-- REGISTRO Y CONTROL DE ENVASADOS
 
 CREATE OR REPLACE VIEW v_historial_registros_controles_envasados AS
 SELECT
-    TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
-    f.anio,
-    f.fk_idtipoformato,
+    TO_CHAR(f.fecha, 'DD "de" TMMonth "del" YYYY') AS fecha,
     f.estado,
-	f.id_registro_control_envasados
+    f.id_registro_control_envasados
 FROM
     registros_controles_envasados f
 WHERE 
-	f.fk_idtipoformato = 5 AND estado = 'CERRADO'
+    f.fk_idtipoformato = 5 AND estado = 'CERRADO'
 ORDER BY
-	f.id_registro_control_envasados DESC;
+    f.id_registro_control_envasados DESC;
 
 SELECT * FROM v_historial_registros_controles_envasados
-
-SELECT * FROM public.registros_controles_envasados
-
-SELECT * FROM public.productos
-
-SELECT idproveedor, nom_empresa FROM proveedores
-
-
-public.proveedores
-
-SELECT * FROM public.detalles_registros_controles_envasados
-
-SELECT * FROM public.trabajadores
 
 CREATE OR REPLACE VIEW v_registros_controles_envasados AS
 SELECT
@@ -195,7 +170,7 @@ SELECT
 	pr.nom_empresa,
 	ce.lote_proveedor,
 	ce.lote_asignado,
-	ce.fecha_vencimiento,
+	TO_CHAR(ce.fecha_vencimiento, 'DD/MM/YYYY') AS fecha_vencimiento,
 	ce.observacion,
 	rce.estado,
 	rce.id_registro_control_envasados
@@ -210,9 +185,47 @@ JOIN
 JOIN
 	registros_controles_envasados rce ON rce.id_registro_control_envasados = ce.fk_id_registro_control_envasado
 ORDER BY
-	ce.id_detalle_registro_controles_envasados
-DESC;
+	ce.id_detalle_registro_controles_envasados DESC;
 
 
 
-SELECT * FROM v_registros_controles_envasados
+-- CONTROL DE ASEO E HIGIENE PERSONAL --
+
+CREATE OR REPLACE VIEW v_historial_higiene_personal AS
+SELECT
+    TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
+    f.anio,
+    f.fk_idtipoformato,
+    f.estado,
+	f.id_control_higiene_personal
+FROM
+    controles_higiene_personal f
+WHERE
+	f.fk_idtipoformato = 6 AND estado = 'CERRADO'
+ORDER BY
+	f.id_control_higiene_personal DESC;
+
+SELECT * FROM public.asignacion_verificacion_previa_higiene_personal
+
+CREATE OR REPLACE VIEW v_detalle_higiene_personal AS
+SELECT
+    d.id_detalle_control_higiene_personal,
+    d.fecha,
+    t.nombres || t.apellidos AS trabajador,
+    d.observaciones,
+    COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
+    d.fk_idcontrol_higiene_personal,
+	hp.id_control_higiene_personal,
+	hp.estado
+FROM
+    detalles_controles_higiene_personal d
+LEFT JOIN
+    acciones_correctivas ac ON ac.idaccion_correctiva = d.fk_idaccion_correctiva
+JOIN	
+	trabajadores t ON t.idtrabajador = d.fk_idtrabajador
+JOIN
+    controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
+
+SELECT * FROM controles_higiene_personal
+	
+SELECT * FROM v_historial_higiene_personal
