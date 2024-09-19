@@ -56,7 +56,7 @@ def control_envasados():
             observacionesEnvasados = request.form.get('observacionesEnvasados')
 
             # Verificar si hay un formato 'CREADO' para el tipo de formato 2
-            query_formatos = "SELECT id_registro_control_envasados FROM registros_controles_envasados WHERE fk_idtipoformato = 5 AND estado = 'CREADO'"
+            query_formatos = "SELECT id_registro_control_envasados FROM registros_controles_envasados WHERE fk_idtipoformatos = 5 AND estado = 'CREADO'"
             registroEnvasado = execute_query(query_formatos)
 
             if not registroEnvasado:
@@ -94,7 +94,7 @@ def generar_formato_envasados():
 
         # Eliminar el registro relacionado en controles_generales_personal
         query_generar_formato = """
-            INSERT INTO registros_controles_envasados(fecha,fk_idtipoformato,estado) VALUES  (%s,%s,%s);
+            INSERT INTO registros_controles_envasados(fecha,fk_idtipoformatos,estado) VALUES  (%s,%s,%s);
         """
         
         execute_query(query_generar_formato, (fecha_actual,5,'CREADO'))

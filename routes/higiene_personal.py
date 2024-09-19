@@ -21,14 +21,14 @@ def higiene_personal():
             detalle_higiene_personal = execute_query("SELECT * FROM v_detalle_higiene_personal")
 
             #Obtener la verifiacion el 
-            query_verificacion_higiene_personal = "SELECT fk_idverificacion_previa FROM asignacion_verificacion_previa_higiene_personal)"
-            verificacion_higiene_personal = execute_query(query_verificacion_higiene_personal, ())
+            query_verificacion_higiene_personal = "SELECT * FROM asignacion_verificacion_previa_higiene_personal"
+            verificacion_higiene_personal = execute_query(query_verificacion_higiene_personal)
 
             #Obtener el historial de los registros de controles ambientales
             query_historial_higiene_personal = "SELECT * FROM v_historial_higiene_personal"
             historial_higiene_personal  = execute_query(query_historial_higiene_personal)
 
-            return render_template('higiene_personal.html', historial_higiene_personal=historial_higiene_personal, control_higiene_personal=control_higiene_personal, trabajador=trabajador, detalle_higiene_personal=detalle_higiene_personal)
+            return render_template('higiene_personal.html', historial_higiene_personal=historial_higiene_personal, control_higiene_personal=control_higiene_personal, trabajador=trabajador, detalle_higiene_personal=detalle_higiene_personal, verificacion_higiene_personal=verificacion_higiene_personal)
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('higiene_personal.html')
@@ -44,7 +44,7 @@ def generar_formato_higiene():
 
         # Eliminar el registro relacionado en controles_generales_personal
         query_generar_formato = """
-            INSERT INTO controles_higiene_personal(mes,anio,fk_idtipoformato,estado) VALUES  (%s,%s,%s,%s);
+            INSERT INTO controles_higiene_personal(mes,anio,fk_idtipoformatos,estado) VALUES  (%s,%s,%s,%s);
         """
         execute_query(query_generar_formato, (mes_actual,anio_actual,6,'CREADO'))
 
