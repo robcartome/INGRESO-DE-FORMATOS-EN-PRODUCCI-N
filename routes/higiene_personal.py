@@ -3,6 +3,10 @@ import os
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from datetime import datetime
+from .utils.constans import BPM
+from .utils.helpers import image_to_base64
+from .utils.helpers import generar_reporte
+from .utils.helpers import get_cabecera_formato
 
 higienePersona = Blueprint('higiene_personal', __name__)
 
@@ -170,36 +174,62 @@ def obtener_detalle_HP(id_formatos):
     
 @higienePersona.route('/download_formato', methods=['GET'])
 def download_formato():
+    ID_VERIFICACION_PRESENTACION_PERSONAL=5
+    ID_VERIFICACION_LIMPIEZA_MANOS=6
+    ID_VERIFICACION_HABITOS_HIGIENE=7
 
     # Obtener el id del trabajador de los argumentos de la URL
     formato_lavado_id = request.args.get('formato_id')
-    # cabecera = get_cabecera_formato("registros_controles_envasados", formato_lavado_id)
-
-    #Realizar la consulta para todos los registros y controles de envasados finalizados
-    registros_controles_envasados = execute_query(f"SELECT * FROM controles_higiene_personal WHERE id_control_higiene_personal = {formato_lavado_id}")
+    cabecera = get_cabecera_formato("controles_higiene_personal", formato_lavado_id)
 
     # Realizar la consulta para el detalle de todos los registros y controles de envasados finalizados
-    detalle_registros_controles_envasados = execute_query(f"SELECT * FROM v_detalle_higiene_personal WHERE fk_idcontrol_higiene_personal = {formato_lavado_id}")
+    detalle_controles_higiene_personal = execute_query(f"SELECT * FROM v_detalle_higiene_personal WHERE fk_idcontrol_higiene_personal = {formato_lavado_id}")
 
-    print(registros_controles_envasados)
+    # Obtener todas las verificaciones en una sola consulta
+    query_verificacion_higiene_personal = "SELECT * FROM asignacion_verificacion_previa_higiene_personal"
+    verificacion_higiene_personal = execute_query(query_verificacion_higiene_personal)
 
-    print(detalle_registros_controles_envasados)
+    # Crear un diccionario con las verificaciones agrupadas por 'fk_iddetalle_control_higiene_personal'
+    verificacion_dict = {}
+    for verificacion in verificacion_higiene_personal:
+        detalle_id = verificacion['fk_iddetalle_control_higiene_personal']
+        if detalle_id not in verificacion_dict:
+            verificacion_dict[detalle_id] = []
+        verificacion_dict[detalle_id].append(verificacion)
 
-    # # Generar Template para reporte
-    # logo_path = os.path.join('static', 'img', 'logo.png')
-    # logo_base64 = image_to_base64(logo_path)
-    # title_report=cabecera[0]['nombreformato']
+    # Crear info para el Template
+    info={}
+    for detalle in detalle_controles_higiene_personal:
+        detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')
+        detalle['pp'] = 'NC'
+        detalle['lm'] = 'NC'
+        detalle['hh'] = 'NC'
+        # Obtener las verificaciones correspondientes al detalle actual
+        if detalle['id_detalle_control_higiene_personal'] in verificacion_dict:
+            for verificacion_previa in verificacion_dict[detalle['id_detalle_control_higiene_personal']]:
+                if verificacion_previa['fk_idverificacion_previa'] == ID_VERIFICACION_PRESENTACION_PERSONAL:
+                    detalle['pp'] = 'C'
+                elif verificacion_previa['fk_idverificacion_previa'] == ID_VERIFICACION_LIMPIEZA_MANOS:
+                    detalle['lm'] = 'C'
+                elif verificacion_previa['fk_idverificacion_previa'] == ID_VERIFICACION_HABITOS_HIGIENE:
+                    detalle['hh'] = 'C'
+    info['detalle'] =detalle_controles_higiene_personal
 
-    # # Renderiza la plantilla de Kardex
-    # template = render_template(
-    #     "reports/reporte_registro_control_envasados.html",
-    #     title_manual=BPM,
-    #     title_report=title_report,
-    #     format_code_report=cabecera[0]['codigo'],
-    #     frecuencia_registro=cabecera[0]['frecuencia'],
-    #     logo_base64=logo_base64,
-    #     info=detalle_registros_controles_envasados,
-    # )
+    # Generar Template para reporte
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report=cabecera[0]['nombreformato']
 
-    # file_name=f"{title_report}"
-    # return generar_reporte(template, file_name)
+    # Renderiza la plantilla
+    template = render_template(
+        "reports/reporte_control_aseo_higiene_personal.html",
+        title_manual=BPM,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
+        info=info,
+    )
+
+    file_name=f"{title_report}"
+    return generar_reporte(template, file_name)
