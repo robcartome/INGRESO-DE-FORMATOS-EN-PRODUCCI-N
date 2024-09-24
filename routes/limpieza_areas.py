@@ -120,7 +120,7 @@ def obtener_categorias_area(id_area):
         elif id_area == 7:
             query_categorias = """SELECT * 
                                     FROM categorias_limpieza_desinfeccion 
-                                    WHERE id_categorias_limpieza_desinfeccion IN (1, 2, 3, 14, 4, 15, 16, 17, 9);"""
+                                    WHERE id_categorias_limpieza_desinfeccion IN (1, 2, 3, 14, 4, 5, 15, 16, 17, 9);"""
             categorias = execute_query(query_categorias, (id_area,))
             return jsonify({'status': 'success', 'categorias': categorias}), 200
         elif id_area == 8:

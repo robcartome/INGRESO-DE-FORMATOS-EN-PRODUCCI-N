@@ -181,11 +181,11 @@ CREATE OR REPLACE VIEW v_detalle_higiene_personal AS
 SELECT
     d.id_detalle_control_higiene_personal,
     d.fecha,
-    t.nombres || ' ' ||t.apellidos AS trabajador,
+    t.nombres || t.apellidos AS trabajador,
     d.observaciones,
 	ac.idaccion_correctiva,
     COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
-	COALESCE(ac.estado, '-') AS estado_medida_correctiva,
+	ac.estado AS estado_medida_correctiva,
     d.fk_idcontrol_higiene_personal,
 	hp.estado
 FROM
@@ -197,12 +197,75 @@ JOIN
 JOIN
     controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
 
-DROP VIEW v_detalle_higiene_personal
-	
-SELECT * FROM v_detalle_higiene_personal
+-- << PARA LIMPIEZA Y DESINFECCIÓN DE LAS ÁREAS >> --
 
-SELECT * FROM public.asignacion_verificacion_previa_higiene_personal
+CREATE OR REPLACE VIEW v_verificacion_limpieza_desinfeccion_areas AS
+SELECT
+	la.id_verificacion_limpieza_desinfeccion_area,
+	a.detalle_area_produccion,
+	a.id_area_produccion,
+	TO_CHAR(TO_DATE(la.mes || ' ' || la.anio, 'MM YYYY'), 'TMMonth') AS mes,
+	la.anio,
+	la.estado
+FROM
+	verificacion_limpieza_desinfeccion_areas la
+JOIN
+	areas_produccion a ON a.id_area_produccion = la.fk_idarea_produccion;
 
-SELECT * FROM public.controles_higiene_personal
 
-SELECT * FROM v_historial_higiene_personal
+CREATE OR REPLACE VIEW v_detalles_verificacion_limpieza_desinfeccion_areas AS
+SELECT
+	d.id_detalle_verificacion_limpieza_desinfeccion_area,
+	TO_CHAR(d.fecha, 'DD/MM/YYYY') AS fecha,
+	v.id_verificacion_limpieza_desinfeccion_area,
+	c.id_categorias_limpieza_desinfeccion,
+	c.detalles_categorias_limpieza_desinfeccion,
+	c.frecuencia
+FROM
+	detalles_verificacion_limpieza_desinfeccion_areas d
+JOIN
+	verificacion_limpieza_desinfeccion_areas v ON v.id_verificacion_limpieza_desinfeccion_area = d.fk_id_verificacion_limpieza_desinfeccion_area
+JOIN
+	categorias_limpieza_desinfeccion c ON c.id_categorias_limpieza_desinfeccion = d.fk_id_categorias_limpieza_desinfeccion;
+
+SELECT * FROM v_detalles_verificacion_limpieza_desinfeccion_areas
+-- Creación de vista para mostrar las asignaciones de medidas correctivas para la limpieza de las áreas
+
+CREATE OR REPLACE VIEW v_asingaciones_observaciones_acCorrec_limpieza_areas AS
+SELECT DISTINCT ON (o.idmedidacorrectivaob)
+    o.idmedidacorrectivaob,
+    o.detalledemedidacorrectiva,
+    TO_CHAR(o.fecha, 'DD/MM/YYYY') AS fecha,
+    ac.idaccion_correctiva,
+    ac.detalle_accion_correctiva,
+    ac.estado
+FROM
+    asignaciones_medidas_correctivas_limpieza_areas ala
+JOIN
+    medidascorrectivasobservaciones o ON o.idmedidacorrectivaob = ala.fk_idmedidacorrectivaob
+JOIN
+    acciones_correctivas ac ON ac.idaccion_correctiva = o.fk_id_accion_correctiva
+WHERE
+    EXTRACT(MONTH FROM o.fecha) = EXTRACT(MONTH FROM CURRENT_DATE) AND
+    EXTRACT(YEAR FROM o.fecha) = EXTRACT(YEAR FROM CURRENT_DATE)
+ORDER BY
+    o.idmedidacorrectivaob, o.fecha DESC;
+
+SELECT * FROM v_asingaciones_observaciones_acCorrec_limpieza_areas
+
+SELECT * FROM public.asignaciones_medidas_correctivas_limpieza_areas
+
+SELECT 
+	mes, anio, 
+	json_agg(json_build_object('id_verificacion_limpieza_desinfeccion_area', id_verificacion_limpieza_desinfeccion_area, 
+							   'detalle_area_produccion', detalle_area_produccion,
+							   'estado', estado,
+							   'id_area_produccion', id_area_produccion)) AS registros
+FROM v_verificacion_limpieza_desinfeccion_areas 
+WHERE estado = 'CERRADO' 
+GROUP BY mes, anio
+ORDER BY anio DESC, mes DESC
+
+SELECT * FROM public.categorias_limpieza_desinfeccion
+
+SELECT * FROM public.areas_produccion
