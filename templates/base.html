@@ -40,7 +40,10 @@
                             <img src="{{ url_for('static', filename='img/lavado_manos.png') }}" alt="Lavado de manos" width="20" height="20" class="mr-2">
                             Lavado de manos
                         </a>
-                        <a class="dropdown-item" href="{{ url_for('home.principal') }}">Formato 2 POES</a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('limpieza_areas.limpiezaAreas') }}">
+                            <img src="{{ url_for('static', filename='img/limpieza.png') }}" alt="Lavado de manos" width="20" height="20" class="mr-2">
+                            Limpieza y desinfección de las áreas
+                        </a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -53,19 +56,19 @@
                             Control general del personal
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('kardex.kardex_info') }}">
-                            <img src="{{ url_for('static', filename='img/kardex.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/kardex.png') }}" alt="Kardex" width="20" height="20" class="mr-2">
                             Kardex
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('condiciones_ambientales.condicionesAmbientales') }}">
-                            <img src="{{ url_for('static', filename='img/ambiental.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/ambiental.png') }}" alt="Control de condiciones ambientales" width="20" height="20" class="mr-2">
                             Control de condiciones ambientales
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('control_envasados.control_envasados') }}">
-                            <img src="{{ url_for('static', filename='img/envasados.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/envasados.png') }}" alt="Registro y control de envasados" width="20" height="20" class="mr-2">
                             Registro y control de envasados
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('higiene_personal.higiene_personal') }}">
-                            <img src="{{ url_for('static', filename='img/higiene.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/higiene.png') }}" alt="Control de aseo e higiene del personal" width="20" height="20" class="mr-2">
                             Control de aseo e higiene del personal
                         </a>
                     </div>

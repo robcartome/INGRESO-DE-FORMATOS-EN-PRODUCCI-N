@@ -241,3 +241,44 @@ CREATE TABLE IF NOT EXISTS public.asignacion_verificacion_previa_higiene_persona
 	fk_idVerificacion_previa INT REFERENCES public.verificacion_previa(idverificacion_previa) NOT NULL,
 	fk_idDetalle_control_higiene_personal INT REFERENCES public.Detalles_controles_higiene_personal(id_detalle_control_higiene_personal) NOT NULL
 );
+
+
+-- << PARA VERIFICACIÓN DE LIMPIEZA Y DESINFECCIÓN DE LAS ÁREAS >> --
+
+CREATE TABLE IF NOT EXISTS public.areas_produccion (
+	id_area_produccion SERIAL PRIMARY KEY,
+	detalle_area_produccion VARCHAR(45)
+);
+
+CREATE TABLE IF NOT EXISTS public.verificacion_limpieza_desinfeccion_areas (
+	id_verificacion_limpieza_desinfeccion_area SERIAL PRIMARY KEY,
+	mes VARCHAR(2) NOT NULL,
+	anio VARCHAR(4) NOT NULL,
+	fk_idarea_produccion INT REFERENCES public.areas_produccion(id_area_produccion) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.categorias_limpieza_desinfeccion (
+	id_categorias_limpieza_desinfeccion SERIAL PRIMARY KEY,
+	detalles_categorias_limpieza_desinfeccion VARCHAR(45) NOT NULL,
+	frecuencia VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS public.detalles_verificacion_limpieza_desinfeccion_areas (
+	id_detalle_verificacion_limpieza_desinfeccion_area SERIAL PRIMARY KEY,
+	fecha DATE NOT NULL,
+	fk_id_verificacion_limpieza_desinfeccion_area INT REFERENCES public.verificacion_limpieza_desinfeccion_areas(id_verificacion_limpieza_desinfeccion_area),
+	fk_id_categorias_limpieza_desinfeccion INT REFERENCES public.categorias_limpieza_desinfeccion(id_categorias_limpieza_desinfeccion)
+);
+
+ALTER TABLE public.MedidasCorrectivasObservaciones
+ADD COLUMN fk_id_accion_correctiva INT REFERENCES public.acciones_correctivas(idaccion_correctiva) NULL;
+
+ALTER TABLE public.verificacion_limpieza_desinfeccion_areas
+ADD COLUMN fk_idarea_produccion INT REFERENCES public.areas_produccion(id_area_produccion) NOT NULL;
+
+CREATE TABLE IF NOT EXISTS public.asignaciones_medidas_correctivas_limpieza_areas (
+	id_asignacion_medida_correctiva_limpieza_area SERIAL PRIMARY KEY,
+	fk_id_verificacion_limpieza_desinfeccion_area INT REFERENCES public.verificacion_limpieza_desinfeccion_areas(id_verificacion_limpieza_desinfeccion_area) NOT NULL,
+	fk_idmedidacorrectivaob INT REFERENCES public.medidascorrectivasobservaciones(idmedidacorrectivaob) NOT NULL
+);
+

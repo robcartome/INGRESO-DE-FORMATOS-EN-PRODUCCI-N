@@ -170,3 +170,49 @@ html, body {
 .texto-solucionado {
   color: green;
 }
+
+/* Estilos adicionales para mejorar la apariencia */
+.card {
+  border-radius: 10px;
+}
+
+.card-header {
+  border-radius: 10px 10px 0 0;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.btn-outline-light {
+  border: 2px solid white;
+}
+
+.btn-outline-light:hover {
+  background-color: white;
+  color: #ffc107;
+}
+
+.input-group-text {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  cursor: pointer;
+}
+
+/* Espacio entre las tarjetas */
+.row-cols-1 > .col, .row-cols-md-2 > .col {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Asegurar que las tarjetas ocupen todo el ancho del contenedor */
+.tarjeta-categoria {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* Ajuste adicional para el campo de búsqueda */
+#buscarCategoria {
+  width: 100%;
+  margin-bottom: 1rem;
+}
