@@ -282,3 +282,9 @@ CREATE TABLE IF NOT EXISTS public.asignaciones_medidas_correctivas_limpieza_area
 	fk_idmedidacorrectivaob INT REFERENCES public.medidascorrectivasobservaciones(idmedidacorrectivaob) NOT NULL
 );
 
+
+ALTER TABLE public.verificacion_limpieza_desinfeccion_areas
+ADD COLUMN fk_idtipoformato INT REFERENCES public.tiposformatos(idtipoformato) NULL;
+
+
+
