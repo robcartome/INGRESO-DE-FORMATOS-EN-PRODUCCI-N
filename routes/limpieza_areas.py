@@ -15,22 +15,41 @@ limpieza_areas = Blueprint('limpieza_areas', __name__)
 @limpieza_areas.route('/', methods=['GET'])
 def limpiezaAreas():
     try:
-        # Obtener toas las áreas
+        # Obtener todas las áreas
         query_areas = "SELECT * FROM areas_produccion"
         areas = execute_query(query_areas)
 
+        # Obtener los registros de verificación de limpieza y desinfección creados
         query_vista_limpieza_areas = "SELECT * FROM v_verificacion_limpieza_desinfeccion_areas WHERE estado = 'CREADO' ORDER BY id_verificacion_limpieza_desinfeccion_area DESC"
         v_limpieza_areas = execute_query(query_vista_limpieza_areas)
 
-        query_la_finalizados = "SELECT * FROM v_verificacion_limpieza_desinfeccion_areas WHERE estado = 'CERRADO' ORDER BY id_verificacion_limpieza_desinfeccion_area DESC"
+        # Obtener los registros finalizados, agrupados por mes y año
+        query_la_finalizados = """
+            SELECT 
+                mes, anio, 
+                json_agg(json_build_object('id_verificacion_limpieza_desinfeccion_area', id_verificacion_limpieza_desinfeccion_area, 
+                                           'detalle_area_produccion', detalle_area_produccion,
+                                           'estado', estado,
+                                           'id_area_produccion', id_area_produccion)) AS registros
+            FROM v_verificacion_limpieza_desinfeccion_areas 
+            WHERE estado = 'CERRADO' 
+            GROUP BY mes, anio
+            ORDER BY anio DESC, mes DESC
+        """
         v_finalizados_LA = execute_query(query_la_finalizados)
         
+        # Obtener las observaciones y acciones correctivas
         asignacion_observaciones_limpieza_areas = execute_query("SELECT * FROM v_asingaciones_observaciones_acCorrec_limpieza_areas")
 
-        return render_template('limpieza_areas.html', areas=areas, v_limpieza_areas=v_limpieza_areas, v_finalizados_LA=v_finalizados_LA, asignacion_observaciones_limpieza_areas=asignacion_observaciones_limpieza_areas)
+        return render_template('limpieza_areas.html', 
+                               areas=areas, 
+                               v_limpieza_areas=v_limpieza_areas, 
+                               v_finalizados_LA=v_finalizados_LA, 
+                               asignacion_observaciones_limpieza_areas=asignacion_observaciones_limpieza_areas)
     except Exception as e:
         print(f"Error al obtener datos: {e}")
         return render_template('limpieza_areas.html')
+
         
 @limpieza_areas.route('/agregar_registro_limpieza_areas/<int:selectArea>', methods=['POST'])
 def agregar_registro_limpieza_areas(selectArea):

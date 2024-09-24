@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-1">
     <h1 class="mb-4 text-center" style="color: #FF8C00;">Verificación de Limpieza y Desinfección de las Áreas</h1>
     
     <!-- Formulario para agregar una nueva condición ambiental -->
@@ -47,10 +47,10 @@
                 </div>
                 <!-- Botón de observaciones -->
                 <div class="col-12 mb-3">
-                    <button type="button" class="btn btn-lg btn-block shadow-sm" 
-                        style="background-color: #FFDAB9; color: #FF8C00;" 
+                    <button type="button" class="btn btn-lg btn-block shadow-sm"
+                        style="background-color: #FFDAB9; color: #FF8C00;"
                         data-toggle="modal" data-target="#observacionesRegistradas" onclick="cargarObservacionesLimpiezaAreas()">
-                    <i class="fas fa-history fa-lg mr-2"></i> Observaciones
+                    <i class="fas fa-history"></i> Observaciones
                 </button>
                 </div>
                 <div class="table-responsive">
@@ -96,43 +96,74 @@
                 <h5 class="mb-0">Registros de Verificación de Limpieza y Desinfección de las Áreas Finalizados</h5>
             </div>
             <div class="card-body">
+                <!-- Filtro por área -->
                 <div class="form-group col-md-6">
                     <label for="filtrarAraeLACLOSE" style="color: #FF8C00;">Filtrar por área:</label>
-                    <input type="text" id="filtrarAraeLACLOSE" class="form-control" name="filtrarAraeLACLOSE" placeholder="Filtrar el registro de verificación de limpieza y desinfección de las áreas por área" onkeyup="filterLACloseArea()"  autocomplete="off">
+                    <input type="text" id="filtrarAraeLACLOSE" class="form-control" name="filtrarAraeLACLOSE" placeholder="Filtrar por área" onkeyup="filterLACloseArea()" autocomplete="off">
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="tableCloseLA">
-                        <thead class="text-white" style="background-color: #ff0000;">
-                            <tr class="text-center">
-                                <th>Área</th>
-                                <th>Mes</th>
-                                <th>Año</th>
-                                <th>Estado</th>
-                                <th>Ver</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for fla in v_finalizados_LA %}
-                            <tr class="text-center">
-                                <td>{{ fla.detalle_area_produccion }}</td>
-                                <td>{{ fla.mes }}</td>
-                                <td>{{ fla.anio }}</td>
-                                <td>{{ fla.estado }}</td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm" onclick="verDetallesVerificacionLimpiezaAreas('{{ fla.id_verificacion_limpieza_desinfeccion_area }}', '{{ fla.id_area_produccion }}', '{{ fla.detalle_area_produccion }}', '{{ fla.mes }}', '{{ fla.anio }}', '{{ fla.estado }}')">
-                                        <i class="fas fa-arrow-circle-right"></i> Ver
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+
+                <!-- Listado agrupado por mes y año -->
+                <div id="accordionFinalizados">
+                    {% for grupo in v_finalizados_LA %}
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
+                            <div>
+                                <button class="btn btn-link text-dark font-weight-bold p-0" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
+                                    {{ grupo.mes }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)
+                                </button>
+                            </div>
+                            <div>
+                                <!-- Botón para descargar formato del área -->
+                                <button class="btn btn-info btn-sm mr-2" onclick="descargarFormatoArea()">
+                                    <i class="fas fa-file-download"></i> Descargar Formato Áreas
+                                </button>
+                                <!-- Botón para descargar observaciones -->
+                                <button class="btn btn-success btn-sm" onclick="descargarObservaciones()">
+                                    <i class="fas fa-file-alt"></i> Descargar Observaciones
+                                </button>
+                            </div>
+                        </div>
+
+                            <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
+                                
+                                <div class="card-body">
+                                    
+                                    <!-- Tabla de registros finalizados -->
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mb-3">
+                                            <thead class="text-white" style="background-color: #ff0000;">
+                                                <tr class="text-center">
+                                                    <th>Área</th>
+                                                    <th>Estado</th>
+                                                    <th>Ver</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for reg in grupo.registros %}
+                                                <tr class="text-center">
+                                                    <td>{{ reg.detalle_area_produccion }}</td>
+                                                    <td>{{ reg.estado }}</td>
+                                                    <td>
+                                                        <button class="btn btn-warning btn-sm" onclick="verDetallesVerificacionLimpiezaAreas('{{ reg.id_verificacion_limpieza_desinfeccion_area }}', '{{ reg.id_area_produccion }}', '{{ reg.detalle_area_produccion }}', '{{ grupo.mes }}', '{{ grupo.anio }}', '{{ reg.estado }}')">
+                                                            <i class="fas fa-arrow-circle-right"></i> Ver
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
+
     </div>
 
-    <!-- Contenedor que se muestra al ver los detalles de una área específica -->
+    <!-- Contenedor para mostrar los detalles de una área específica -->
     <div id="detallesLimpiezaAreas" style="display: none;">
         <!-- Campos ocultos para almacenar información -->
         <input type="hidden" id="id_limpieza_area_hidden">
@@ -141,64 +172,80 @@
         <input type="hidden" id="mesLA">
         <input type="hidden" id="anioLA">
 
-
+        <!-- Tarjeta de Detalles -->
+        <div class="card shadow-sm border-0">
             <!-- Encabezado de la Tarjeta con el Título y Botón de Volver -->
-            <div class="card-header bg-warning text-white d-flex align-items-center justify-content-between">
+            <div class="card-header d-flex align-items-center justify-content-between" style="background-color: #FF8C00; color: white;">
                 <h5 class="mb-0" id="tituloDetallesLa"></h5>
-                <button class="btn btn-light btn-sm" onclick="volverListaCA()">
+                <button class="btn btn-outline-light btn-sm" onclick="volverListaCA()">
                     <i class="fas fa-arrow-left"></i> Volver
                 </button>
             </div>
 
-            <!-- Campo de Búsqueda de Categorías -->
-            <div class="input-group my-4 px-4">
-                <input type="text" id="buscarCategoria" class="form-control" placeholder="Buscar categoría..." onkeyup="filtrarPorTexto()">
+            <!-- Campo de Búsqueda de Categorías con tamaño ajustado -->
+            <div class="input-group my-4 mx-4 col-md-6">
+                <input type="text" id="buscarCategoria" class="form-control rounded-pill shadow-sm" placeholder="Buscar categoría..." onkeyup="filtrarPorTexto()">
             </div>
 
-            <!-- Cuerpo de la Tarjeta -->
-            <div class="card-body p-2">
+            <!-- Cuerpo de la Tarjeta con las Categorías -->
+            <div class="card-body p-1">
                 <!-- Contenedor para las categorías -->
-                <div id="contenedorCategorias" class="row gy-4"></div>
+                <div id="contenedorCategorias" class="row gy-4 px-3">
+                    <!-- Aquí se mostrarán las tarjetas de las categorías dinámicamente con JavaScript -->
+                </div>
             </div>
-
+        </div>
     </div>
+
+
 
 
     <!-- Modal para mostrar los detalles de los registros para el control de envasados -->
     <div class="modal fade" id="observacionesRegistradas" tabindex="-1" role="dialog" aria-labelledby="observacionesRegistradasLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header" style="background-color: #FF8C00; color: white;">
-                    <h5 class="modal-title" id="observacionesRegistradasLabel">Observaciones realizadas en este mes</h5>
+            <div class="modal-content border-0 shadow-lg">
+                <!-- Encabezado del Modal -->
+                <div class="modal-header text-white" style="background-color: #FF8C00; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    <h5 class="modal-title font-weight-bold" id="observacionesRegistradasLabel">Observaciones realizadas en este mes</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                
+                <!-- Cuerpo del Modal -->
+                <div class="modal-body p-4">
+                    <!-- Formulario de Observaciones y Acciones Correctivas -->
                     <div class="form-row mb-3">
                         <div class="form-group col-md-6">
-                            <label for="observacionLimpiezaAreas" style="color: #FF8C00;">Observacion:</label>
-                            <input type="text" id="observacionLimpiezaAreas" class="form-control" name="observacionLimpiezaAreas" placeholder="Ingrese la observación">
+                            <label for="observacionLimpiezaAreas" style="color: #FF8C00;">Observación:</label>
+                            <input type="text" id="observacionLimpiezaAreas" class="form-control rounded-pill shadow-sm" name="observacionLimpiezaAreas" placeholder="Ingrese la observación">
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="accionCorrectivaLimpiezaAreas" style="color: #FF8C00;">Acción correctiva:</label>
-                            <input type="text" id="accionCorrectivaLimpiezaAreas" class="form-control" name="accionCorrectivaLimpiezaAreas" placeholder="Ingrese la acción correctiva">
+                            <label for="accionCorrectivaLimpiezaAreas" style="color: #FF8C00;">Acción Correctiva:</label>
+                            <input type="text" id="accionCorrectivaLimpiezaAreas" class="form-control rounded-pill shadow-sm" name="accionCorrectivaLimpiezaAreas" placeholder="Ingrese la acción correctiva">
                         </div>
                     </div>
-                    <div class="form-row mb-3">
-                        <button class="form-group col-md-12" style="background-color: #FF8C00;" onclick="verRegistrarObservacionesLimpiezaAreas()">
+
+                    <!-- Botón para Registrar -->
+                    <div class="form-row mb-4">
+                        <button class="btn btn-block btn-lg rounded-pill shadow-sm text-white" 
+                            style="background-color: #FF8C00; transition: all 0.3s ease;"
+                            onmouseover="this.style.backgroundColor='#FF5722';" 
+                            onmouseout="this.style.backgroundColor='#FF8C00';" 
+                            onclick="verRegistrarObservacionesLimpiezaAreas()">
                             <i class="fas fa-save"></i> Registrar
                         </button>
                     </div>
-                    <!-- Tabla resizable -->
-                    <div class="table-responsive mt-1">
+
+                    <!-- Tabla para Mostrar las Observaciones -->
+                    <div class="table-responsive">
                         <table class="table table-bordered" id="tableRegisterCE">
-                            <thead style="background-color: #FF8C00; color: white;">
-                                <tr>
-                                    <th class="text-center">Observaciones</th>
-                                    <th class="text-center">Fecha de registro</th>
-                                    <th class="text-center">Acciones Correctivas</th>
-                                    <th class="text-center">Validar</th>
+                            <thead class="text-white" style="background-color: #FF8C00;">
+                                <tr class="text-center">
+                                    <th>Observaciones</th>
+                                    <th>Fecha de Registro</th>
+                                    <th>Acciones Correctivas</th>
+                                    <th>Validar</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaDetallesObservacionesHistorial">
@@ -210,6 +257,7 @@
             </div>
         </div>
     </div>
+
     
 
 

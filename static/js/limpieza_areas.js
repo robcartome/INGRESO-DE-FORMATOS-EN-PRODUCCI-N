@@ -491,7 +491,7 @@ function cargarObservacionesLimpiezaAreas() {
                         <td class="text-center">${observacion.fecha}</td>
                         <td class="text-center ${observacion.estado === 'SOLUCIONADO' ? 'text-success' : 'text-danger'}">${observacion.detalle_accion_correctiva}</td>
                         <td class="text-center">
-                            <button type="button" class="btn d-block w-100 mb-1" onclick="modificarEstadoAC('${observacion.idaccion_correctiva}')">
+                            <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC('${observacion.idaccion_correctiva}')">
                                 <i class="fas fa-check-circle"></i>
                             </button>
                         </td>
@@ -500,7 +500,7 @@ function cargarObservacionesLimpiezaAreas() {
                 tableBody.append(row); // Método jQuery para añadir contenido
             });
         } else {
-            let noDataRow = '<tr><td colspan="4" class="text-center">No hay observaciones disponibles para este control de condiciones ambientales.</td></tr>';
+            let noDataRow = '<tr><td colspan="4" class="text-center">No hay observaciones disponibles para este mes.</td></tr>';
             tableBody.html(noDataRow); // Método jQuery para añadir HTML cuando no hay datos
         }
     })
