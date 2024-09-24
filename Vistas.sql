@@ -197,8 +197,12 @@ JOIN
 JOIN
     controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
 
+DROP VIEW v_detalle_higiene_personal
+	
 SELECT * FROM v_detalle_higiene_personal
+
+SELECT * FROM public.asignacion_verificacion_previa_higiene_personal
 
 SELECT * FROM public.controles_higiene_personal
 
-SELECT * FROM areas;
+SELECT * FROM v_historial_higiene_personal

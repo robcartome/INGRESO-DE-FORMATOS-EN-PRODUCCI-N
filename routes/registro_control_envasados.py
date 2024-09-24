@@ -158,7 +158,7 @@ def download_formato():
     logo_base64 = image_to_base64(logo_path)
     title_report=cabecera[0]['nombreformato']
 
-    # Renderiza la plantilla de Kardex
+    # Renderiza la plantilla
     template = render_template(
         "reports/reporte_registro_control_envasados.html",
         title_manual=BPM,
@@ -172,4 +172,3 @@ def download_formato():
     file_name=f"{title_report}"
     return generar_reporte(template, file_name)
 
-    

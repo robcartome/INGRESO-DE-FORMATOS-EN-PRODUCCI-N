@@ -39,9 +39,10 @@ def condicionesAmbientales():
             anio_actual = fecha_actual.year
 
             mes_consultar = str(mes_actual)
+            anio_consultar = str(anio_actual)
             
-            consult_eviromental_condition_month =  "SELECT * FROM condiciones_ambientales WHERE mes = %s AND fk_idarea = %s AND estado = 'CREADO'" 
-            verificar_producto = execute_query(consult_eviromental_condition_month, (mes_consultar, area))
+            consult_eviromental_condition_month =  "SELECT * FROM condiciones_ambientales WHERE mes = %s AND anio = %s AND fk_idarea = %s AND estado = 'CREADO'" 
+            verificar_producto = execute_query(consult_eviromental_condition_month, (mes_consultar, anio_consultar, area))
             
             if not verificar_producto:
                 query_crear_formato = """

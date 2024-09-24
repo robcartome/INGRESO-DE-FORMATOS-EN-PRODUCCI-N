@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Verificación de limpieza y desinfección de las áreas{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Verificación de Limpieza y Desinfección de las Áreas</h1>
+    
+    <!-- Formulario para agregar una nueva condición ambiental -->
+    <div id="listaLimpiezaArea">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Agregar Registro de Limpieza</h5>
+            </div>
+            <div class="card-body">
+                <form id="formCondicionAmbiental" method="POST" action="javascript:void(0);">
+                    <div class="form-row align-items-end">
+                        <div class="form-group col-lg-10 col-md-8">
+                            <label for="selectArea" class="font-weight-bold text-warning">Áreas en producción:</label>
+                            <select id="selectArea" class="form-control" name="selectArea">
+                                <option value="">Seleccione el Área</option>
+                                {% for a in areas %}
+                                    <option value="{{ a.id_area_produccion }}">{{ a.detalle_area_produccion }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-2 col-md-2">
+                            <button type="button" class="btn btn-warning text-white w-100" onclick="agregarRegistroLimpiezaAreas()">
+                                <i class="fas fa-plus-circle"></i> Agregar Registro
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sección para mostrar la lista de todos los registros de verificación de limpieza y desinfección de las áreas activas -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header text-white" style="background-color: #FF8C00;" >
+                <h5 class="mb-0">Registros de Verificación de Limpieza y Desinfección de las Áreas</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-group col-md-6">
+                    <label for="filtrarAraeLA" style="color: #FF8C00;">Filtrar por área:</label>
+                    <input type="text" id="filtrarAraeLA" class="form-control" name="filtrarAraeLA" placeholder="Filtrar el registro de verificación de limpieza y desinfección de las áreas por área" onkeyup="filterLAOpenArea()"  autocomplete="off">
+                </div>
+                <!-- Botón de observaciones -->
+                <div class="col-12 mb-3">
+                    <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                        style="background-color: #FFDAB9; color: #FF8C00;" 
+                        data-toggle="modal" data-target="#observacionesRegistradas" onclick="cargarObservacionesLimpiezaAreas()">
+                    <i class="fas fa-history fa-lg mr-2"></i> Observaciones
+                </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="LATableOpen">
+                        <thead class="text-white" style="background-color: #FF8C00;">
+                            <tr class="text-center">
+                                <th>Área</th>
+                                <th>Mes</th>
+                                <th>Año</th>
+                                <th>Estado</th>
+                                <th>Ver</th>
+                                <th>Finalizar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for la in v_limpieza_areas %}
+                            <tr class="text-center">
+                                <td>{{ la.detalle_area_produccion }}</td>
+                                <td>{{ la.mes }}</td>
+                                <td>{{ la.anio }}</td>
+                                <td>{{ la.estado }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="verDetallesVerificacionLimpiezaAreas('{{ la.id_verificacion_limpieza_desinfeccion_area }}', '{{ la.id_area_produccion }}', '{{ la.detalle_area_produccion }}', '{{ la.mes }}', '{{ la.anio }}', '{{ la.estado }}')">
+                                        <i class="fas fa-arrow-circle-right"></i> Ver
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="finalizarVerificacionLimpiezaAreas('{{ la.id_verificacion_limpieza_desinfeccion_area }}')" style="background-color: #ff0000;">
+                                        <i class="fas fa-check-circle"></i> Finalizar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección para mostrar la lista de todos los registros de limpieza finalizados -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header text-white" style="background-color: #ff0000;">
+                <h5 class="mb-0">Registros de Verificación de Limpieza y Desinfección de las Áreas Finalizados</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-group col-md-6">
+                    <label for="filtrarAraeLACLOSE" style="color: #FF8C00;">Filtrar por área:</label>
+                    <input type="text" id="filtrarAraeLACLOSE" class="form-control" name="filtrarAraeLACLOSE" placeholder="Filtrar el registro de verificación de limpieza y desinfección de las áreas por área" onkeyup="filterLACloseArea()"  autocomplete="off">
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tableCloseLA">
+                        <thead class="text-white" style="background-color: #ff0000;">
+                            <tr class="text-center">
+                                <th>Área</th>
+                                <th>Mes</th>
+                                <th>Año</th>
+                                <th>Estado</th>
+                                <th>Ver</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fla in v_finalizados_LA %}
+                            <tr class="text-center">
+                                <td>{{ fla.detalle_area_produccion }}</td>
+                                <td>{{ fla.mes }}</td>
+                                <td>{{ fla.anio }}</td>
+                                <td>{{ fla.estado }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="verDetallesVerificacionLimpiezaAreas('{{ fla.id_verificacion_limpieza_desinfeccion_area }}', '{{ fla.id_area_produccion }}', '{{ fla.detalle_area_produccion }}', '{{ fla.mes }}', '{{ fla.anio }}', '{{ fla.estado }}')">
+                                        <i class="fas fa-arrow-circle-right"></i> Ver
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor que se muestra al ver los detalles de una área específica -->
+    <div id="detallesLimpiezaAreas" style="display: none;">
+        <!-- Campos ocultos para almacenar información -->
+        <input type="hidden" id="id_limpieza_area_hidden">
+        <input type="hidden" id="id_area">
+        <input type="hidden" id="detallearea_hidden">
+        <input type="hidden" id="mesLA">
+        <input type="hidden" id="anioLA">
+
+
+            <!-- Encabezado de la Tarjeta con el Título y Botón de Volver -->
+            <div class="card-header bg-warning text-white d-flex align-items-center justify-content-between">
+                <h5 class="mb-0" id="tituloDetallesLa"></h5>
+                <button class="btn btn-light btn-sm" onclick="volverListaCA()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+
+            <!-- Campo de Búsqueda de Categorías -->
+            <div class="input-group my-4 px-4">
+                <input type="text" id="buscarCategoria" class="form-control" placeholder="Buscar categoría..." onkeyup="filtrarPorTexto()">
+            </div>
+
+            <!-- Cuerpo de la Tarjeta -->
+            <div class="card-body p-2">
+                <!-- Contenedor para las categorías -->
+                <div id="contenedorCategorias" class="row gy-4"></div>
+            </div>
+
+    </div>
+
+
+    <!-- Modal para mostrar los detalles de los registros para el control de envasados -->
+    <div class="modal fade" id="observacionesRegistradas" tabindex="-1" role="dialog" aria-labelledby="observacionesRegistradasLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="observacionesRegistradasLabel">Observaciones realizadas en este mes</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row mb-3">
+                        <div class="form-group col-md-6">
+                            <label for="observacionLimpiezaAreas" style="color: #FF8C00;">Observacion:</label>
+                            <input type="text" id="observacionLimpiezaAreas" class="form-control" name="observacionLimpiezaAreas" placeholder="Ingrese la observación">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="accionCorrectivaLimpiezaAreas" style="color: #FF8C00;">Acción correctiva:</label>
+                            <input type="text" id="accionCorrectivaLimpiezaAreas" class="form-control" name="accionCorrectivaLimpiezaAreas" placeholder="Ingrese la acción correctiva">
+                        </div>
+                    </div>
+                    <div class="form-row mb-3">
+                        <button class="form-group col-md-12" style="background-color: #FF8C00;" onclick="verRegistrarObservacionesLimpiezaAreas()">
+                            <i class="fas fa-save"></i> Registrar
+                        </button>
+                    </div>
+                    <!-- Tabla resizable -->
+                    <div class="table-responsive mt-1">
+                        <table class="table table-bordered" id="tableRegisterCE">
+                            <thead style="background-color: #FF8C00; color: white;">
+                                <tr>
+                                    <th class="text-center">Observaciones</th>
+                                    <th class="text-center">Fecha de registro</th>
+                                    <th class="text-center">Acciones Correctivas</th>
+                                    <th class="text-center">Validar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaDetallesObservacionesHistorial">
+                                <!-- Aquí se llenarán los datos de observaciones con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+
+
+</div>
+
+<script src="{{ url_for('static', filename='js/limpieza_areas.js') }}"></script>
+
+{% endblock %}

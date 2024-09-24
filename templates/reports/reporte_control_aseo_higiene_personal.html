@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="12">
+                    <table class="body-table s3">
+                        <tr>
+                            <th rowspan="3" style="line-height: 10pt;">PARÁMETROS A MONITOREAR</th>
+                            <td>Correcta presentación personal <b>(PP)</b></td>
+                            <td>Uso correcto de vestimenta de trabajo y limpia, cabello amarrado y cofia correctamente puesta, sin maquillaje, sin accesorio, uso de mascarilla</td>
+                        </tr>
+                        <tr>
+                            <td>Limpieza de manos <b>(LM)</b></td>
+                            <td>Correcta limpieza de manos (uñas cortas y manos limpias)</td>
+                        </tr>
+                        <tr>
+                            <td>Hábitos de higiene <b>(HH)</b></td>
+                            <td>Cumplir con BPM y conductas de trabajo básicas (orden, limpieza, cuidado del área de trabajo y de sus implementos) y con estado de salud óptimo.</td>
+                        </tr>
+                        <tr>
+                            <th rowspan="2" style="line-height: 10pt;">Nivel de Aceptación y rechazo</th>
+                            <td>Cumple: <b>(C)</b></td>
+                            <td>Cumplimiento de los parámetros a monitorear</td>
+                        </tr>
+                        <tr>
+                            <td>No cumple: <b>(NC)</b></td>
+                            <td>Incumplimiento de los parámetros ya mencionados.</td>
+                        </tr>
+                        <tr>
+                            <th rowspan="3" style="line-height: 10pt;">Acciones Correctivas (AC)</th>
+                            <td colspan="2">1. Persona no apta para ingresar al área de trabajo (enferma o uniforme sucio)</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">2. Solicitar al trabajador repetir los procedimientos de limpieza hasta el nivel de aceptación</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">3. Reentrenamiento del manipulador</td>
+                        </tr>
+                        <tr>
+                            <th style="line-height: 10pt;">Verificación de AC</th>
+                            <td colspan="2">El supervisor verifica que se realice la acción correctiva adoptada</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- Cabecera del cuerpo del reporte -->
+            <tr class="border">
+                <th class="border" rowspan="2">FECHA</th>
+                <th class="border" rowspan="2">NOMBRE DEL TRABAJADOR</th>
+                <th class="border" colspan="3">ITEM EVALUADO</th>
+                <th class="border" rowspan="2">OBSERVACIONES / ACCIONES CORRECTIVAS</th>
+                <th class="border" rowspan="2">V°B° AC</th>
+            </tr>
+            <tr>
+                <th  class="border s3">PP</th>
+                <th  class="border s3">LM</th>
+                <th  class="border s3">HH</th>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="body-content">
+            {% for record in info['detalle'] %}
+            <tr class="text-center">
+                <td>{{ record['fecha'] }}</td>
+                <td>{{ record['trabajador'] }}</td>
+                <td>{{ record['pp'] }}</td>
+                <td>{{ record['lm'] }}</td>
+                <td>{{ record['hh'] }}</td>
+                <td>{{ record['observaciones'] }}</td>
+                <td>{{ record['estado_medida_correctiva'] }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" class="border-none">
+                    Frecuencia: {{ frecuencia_registro }}
+                </td>
+            </tr>
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>

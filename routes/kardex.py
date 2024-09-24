@@ -38,9 +38,10 @@ def kardex_info():
             anio_actual = fecha_actual.year
 
             mes_consultar = str(mes_actual)
+            anio_consultar = str(anio_actual)
             
-            consult_product_kardex_month =  "SELECT * FROM kardex WHERE mes = %s AND fk_idproducto = %s AND estado = 'CREADO'" 
-            verificar_producto = execute_query(consult_product_kardex_month, (mes_consultar, producto,))
+            consult_product_kardex_month =  "SELECT * FROM kardex WHERE mes = %s AND anio = %s AND fk_idproducto = %s AND estado = 'CREADO'" 
+            verificar_producto = execute_query(consult_product_kardex_month, (mes_consultar, anio_consultar, producto,))
             
             if not verificar_producto:
                 query_crear_formato = """
