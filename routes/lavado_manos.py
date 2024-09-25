@@ -4,8 +4,8 @@ from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
 from datetime import datetime
 from collections import defaultdict
-from datetime import time, date
 from .utils.constans import POES
+from .utils.constans import MESES_BY_NUM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
@@ -187,6 +187,12 @@ def download_formato():
     # Estructura de diccionarios anidados
     agrupado_por_fecha = defaultdict(lambda: defaultdict(list))
 
+    # Set fecha, mes y año
+    fecha = detalle_lavado_manos[0]['fecha'].strftime("%d/%m/%Y")
+    _fecha = datetime.strptime(fecha, '%d/%m/%Y')
+    mes=MESES_BY_NUM[_fecha.month].capitalize()
+    anio=_fecha.year
+
     # Rellenar el diccionario anidado con datos formateados
     for registro in detalle_lavado_manos:
         # Formatear la fecha como "DD/MM/YYYY"
@@ -249,10 +255,10 @@ def download_formato():
         logo_base64=logo_base64,
         info=agrupado_por_fecha,
         medidas_correctivas = medidas_correctivas_agrupadas,
-        mes='SETIEMBRE',
-        anio='2024'
+        mes=mes,
+        anio=anio
     )
 
-    filename=f"REPORTE DE LAVADO DE MANOS - {(detalle_lavado_manos[0]['fecha']).strftime('%m/%Y')}"
+    filename=f"REPORTE DE LAVADO DE MANOS - {mes} - {anio}"
     return generar_reporte(template, filename)
 

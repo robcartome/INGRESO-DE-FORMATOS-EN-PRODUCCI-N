@@ -323,8 +323,7 @@ def download_formato():
     # pprint.pprint(areas)
 
     # Crear un diccionario info para almacenar los datos
-    info = defaultdict(lambda: defaultdict(
-        lambda: {"dias": [], "frecuencia": ""}))
+    info = defaultdict(lambda: defaultdict(lambda: {"dias": [], "frecuencia": ""}))
 
     for id_area, detalle_area in areas.items():
         # Realizar una consulta para obtener los detalles específicos de cada área
@@ -351,7 +350,7 @@ def download_formato():
         info[detalle_area] = dict(sub_info)
 
     # Mostrar el resultado
-    pprint.pprint(info)
+    # pprint.pprint(info)
 
     # Generar Template para reporte
     logo_path = os.path.join('static', 'img', 'logo.png')
@@ -371,7 +370,7 @@ def download_formato():
         anio=registros[0]['anio']
     )
 
-    file_name = f"{title_report}"
+    file_name = f"{title_report} - {mes}"
     return generar_reporte(template, file_name)
 
 
@@ -419,5 +418,5 @@ def download_formato_obs():
         info=registros,
     )
 
-    file_name = f"{title_report}"
+    file_name = f"{title_report} - {mes}"
     return generar_reporte(template, file_name)

@@ -15,3 +15,5 @@ MESES = {
     'noviembre': 11,
     'diciembre': 12
 }
+
+MESES_BY_NUM  = {v: k for k, v in MESES.items()}
