@@ -114,20 +114,22 @@
                             </div>
                             <div>
                                 <!-- Botón para descargar formato del área -->
-                                <button class="btn btn-info btn-sm mr-2" onclick="descargarFormatoArea()">
-                                    <i class="fas fa-file-download"></i> Descargar Formato Áreas
-                                </button>
+                                <a
+                                    href="{{ url_for('limpieza_areas.download_formato', mes=grupo.mes) }}"
+                                    class="btn btn-info btn-sm mr-2">
+                                        <i class="fas fa-file-download"></i> Descargar Formato Áreas
+                                </a>
                                 <!-- Botón para descargar observaciones -->
-                                <button class="btn btn-success btn-sm" onclick="descargarObservaciones()">
-                                    <i class="fas fa-file-alt"></i> Descargar Observaciones
-                                </button>
+                                <a
+                                    href="{{ url_for('limpieza_areas.download_formato_obs', mes=grupo.mes) }}"
+                                    class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-alt"></i> Descargar Observaciones
+                                </a>
                             </div>
                         </div>
 
                             <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
-                                
                                 <div class="card-body">
-                                    
                                     <!-- Tabla de registros finalizados -->
                                     <div class="table-responsive">
                                         <table class="table table-bordered mb-3">

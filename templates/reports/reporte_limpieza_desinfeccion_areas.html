@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="4">
+                    <table class="header-table">
+                        <tr class="s2">
+                            <td colspan="1" class="border-none">Fecha</td>
+                            <td colspan="4" class="border-none w-15">Mes: {{ mes }}</td>
+                            <td colspan="7" class="border-none">Año: {{ anio }}</td>
+                            <td class="border-none text-right">Frecuencia de Registro
+                                <span class="border" style="font-weight: 600; padding: 4pt 12pt;">{{ frecuencia_registro }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody>
+            <tr>
+                <td colspan="12">
+                    <!-- Bucle para cada ambiente en el diccionario 'info' -->
+                    {% for ambiente, data in info.items() %}
+                    <table class="body-table">
+                        <!-- Cabecera con el nombre del ambiente -->
+                        <tr>
+                            <td colspan="33" class="text-center"><b>{{ ambiente }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>Día</th>
+                            <!-- Generar números de día -->
+                            {% for i in range(1, 32) %}
+                                <th>{% if i < 10 %}0{{ i }}{% else %}{{ i }}{% endif %}</th>
+                            {% endfor %}
+                            <th>Frecuencia</th>
+                        </tr>
+
+                        <!-- Generar filas dinámicas para cada item del ambiente -->
+                        {% for area, items in data.items() %}
+                            <tr>
+                                <td>{{ area }}</td>
+                                {% for i in range(1, 32) %}
+                                    <td>
+                                        {% if i in items["dias"] %}
+                                            &#x2713;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                <td>{{ items["frecuencia"].capitalize() }}</td>
+                            </tr>
+                        {% endfor %}
+
+                    </table>
+                    {% endfor %}
+                </td>
+            </tr>
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>
