@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="body-content text-center">
+            <tr>
+                <th>Observación N°</th>
+                <th>Fecha</th>
+                <th>Acción Correctiva</th>
+            </tr>
+
+            {% for record in info %}
+            <tr>
+                <td>{{ record['detalledemedidacorrectiva'] }}</td>
+                <td>{{ record['fecha'] }}</td>
+                <td>{{ record['detalle_accion_correctiva'] }} / {{ record['estado'] }}</td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>

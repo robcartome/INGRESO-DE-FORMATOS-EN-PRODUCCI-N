@@ -1,10 +1,13 @@
 import os
+import pprint
 
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
+from collections import defaultdict
 from datetime import datetime
 from datetime import time
-from .utils.constans import BPM
+from .utils.constans import POES
+from .utils.constans import MESES
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
@@ -300,3 +303,121 @@ def get_observaciones_limpieza_areas():
         print(f"Error al obtener observaciones: {e}")
         return jsonify({'status': 'error', 'message': 'Error al obtener observaciones.'}), 500
 
+
+@limpieza_areas.route('/download_formato', methods=['GET'])
+def download_formato():
+
+    # Obtener el id del trabajador de los argumentos de la URL
+    formato_id=1 # request.args.get('formato_id') # Por el momento cumple para todos los reportes
+    mes=request.args.get('mes') # 'Setiembre'
+    cabecera=get_cabecera_formato("verificacion_limpieza_desinfeccion_areas", formato_id)
+
+    # Realizar la consulta para todos los registros y controles de envasados finalizados
+    registros = execute_query(f"""SELECT id_verificacion_limpieza_desinfeccion_area, detalle_area_produccion, id_area_produccion, mes, anio, estado
+	FROM public.v_verificacion_limpieza_desinfeccion_areas
+	WHERE mes = '{mes}' AND estado = 'CERRADO'""")
+
+    # Crear un diccionario para mapear cada 'id_area_produccion' con su 'detalle_area_produccion'
+    areas = {registro['id_area_produccion']: registro['detalle_area_produccion'] for registro in registros}
+
+    # pprint.pprint(areas)
+
+    # Crear un diccionario info para almacenar los datos
+    info = defaultdict(lambda: defaultdict(
+        lambda: {"dias": [], "frecuencia": ""}))
+
+    for id_area, detalle_area in areas.items():
+        # Realizar una consulta para obtener los detalles específicos de cada área
+        detalles_limpieza_area = execute_query(f"""SELECT id_detalle_verificacion_limpieza_desinfeccion_area, fecha, id_verificacion_limpieza_desinfeccion_area, id_categorias_limpieza_desinfeccion, detalles_categorias_limpieza_desinfeccion, frecuencia
+        FROM public.v_detalles_verificacion_limpieza_desinfeccion_areas
+        WHERE id_verificacion_limpieza_desinfeccion_area={id_area}""")
+
+        # Crear el subdiccionario para esta área
+        sub_info = defaultdict(lambda: {"dias": [], "frecuencia": ""})
+        # Procesar cada registro en 'detalles' para llenar 'sub_info'
+        for detalle in detalles_limpieza_area:
+            categoria = detalle['detalles_categorias_limpieza_desinfeccion']
+            fecha = detalle['fecha']
+            dia = datetime.strptime(fecha, '%d/%m/%Y').day
+            frecuencia = detalle['frecuencia']
+
+            # Agregar el día a la lista de días de esta categoría
+            sub_info[categoria]["dias"].append(dia)
+            # Establecer la frecuencia si aún no se ha asignado
+            if not sub_info[categoria]["frecuencia"]:
+                sub_info[categoria]["frecuencia"] = frecuencia.lower()
+
+        # Agregar el subdiccionario al diccionario principal 'info'
+        info[detalle_area] = dict(sub_info)
+
+    # Mostrar el resultado
+    pprint.pprint(info)
+
+    # Generar Template para reporte
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report = cabecera[0]['nombreformato']
+
+    # Renderiza la plantilla
+    template = render_template(
+        "reports/reporte_limpieza_desinfeccion_areas.html",
+        title_manual=POES,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
+        info=info,
+        mes=registros[0]['mes'],
+        anio=registros[0]['anio']
+    )
+
+    file_name = f"{title_report}"
+    return generar_reporte(template, file_name)
+
+
+@limpieza_areas.route('/download_formato_obs', methods=['GET'])
+def download_formato_obs():
+
+    # Obtener el id del trabajador de los argumentos de la URL
+    formato_id=1  # request.args.get('formato_id')
+    nombre_mes=request.args.get('mes').lower()
+    mes=MESES.get(nombre_mes, 0) # 9
+    # Validar que el mes sea correcto
+    if mes == 0:
+        raise ValueError(f"Nombre de mes inválido: {nombre_mes}")
+
+    cabecera = get_cabecera_formato("verificacion_limpieza_desinfeccion_areas", formato_id)
+
+    # Realizar la consulta para todos los registros y controles de envasados finalizados
+    registros = execute_query(f"""SELECT DISTINCT ON (o.idmedidacorrectivaob)
+        o.idmedidacorrectivaob,
+        o.detalledemedidacorrectiva,
+        to_char(o.fecha::timestamp with time zone, 'DD/MM/YYYY') AS fecha,
+        ac.detalle_accion_correctiva,
+        ac.estado
+    FROM asignaciones_medidas_correctivas_limpieza_areas ala
+    JOIN medidascorrectivasobservaciones o
+        ON o.idmedidacorrectivaob = ala.fk_idmedidacorrectivaob
+    JOIN acciones_correctivas ac
+        ON ac.idaccion_correctiva = o.fk_id_accion_correctiva
+    WHERE EXTRACT(MONTH FROM o.fecha) = {mes}
+    ORDER BY o.idmedidacorrectivaob, o.fecha DESC;""")
+
+    # Generar Template para reporte
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report = f"{cabecera[0]['nombreformato']} - OBSERVACIONES"
+
+    # Renderiza la plantilla
+    template = render_template(
+        "reports/reporte_limpieza_desinfeccion_areas_obs.html",
+        title_manual=POES,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
+        info=registros,
+    )
+
+    file_name = f"{title_report}"
+    return generar_reporte(template, file_name)
