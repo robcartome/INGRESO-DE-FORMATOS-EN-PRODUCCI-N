@@ -92,20 +92,20 @@
 
     <!-- Sección para mostrar la lista de todos los registros de limpieza de equipos de medición finalizados -->
     <div class="card mb-4 shadow-sm">
-        <div class="card-header text-white" style="background-color: #ff0000;">
+        <div class="card-header text-white" style="background-color: #DC3545;">
             <h5 class="mb-0">Historial de registros de Verificación de limpieza y desinfección de equipos de medición por meses</h5>
         </div>
         <div class="card-body">
             <!-- Filtro por área -->
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 mx-auto mb-4">
                 <label for="filtrarAraeLACLOSE" style="color: #FF8C00;">Filtrar por área:</label>
-                <input type="text" id="filtrarAraeLACLOSE" class="form-control" name="filtrarAraeLACLOSE" placeholder="Filtrar por área" onkeyup="filterLACloseArea()" autocomplete="off">
+                <input type="text" id="filtrarAraeLACLOSE" class="form-control rounded-pill shadow-sm" name="filtrarAraeLACLOSE" placeholder="Filtrar por área" onkeyup="filterLACloseArea()" autocomplete="off">
             </div>
 
             <!-- Listado agrupado por mes y año -->
             <div id="accordionFinalizados">
                 {% for grupo in historial_formatos_creado %}
-                <div class="card">
+                <div class="card mb-2">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
                         <div>
                             <button class="btn btn-link text-dark font-weight-bold p-0" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
@@ -114,21 +114,21 @@
                         </div>
                         <div>
                             <!-- Botón para descargar formato del área -->
-                            <button class="btn btn-info btn-sm mr-2" onclick="descargarFormatoArea()">
+                            <button class="btn btn-outline-info btn-sm mr-2 rounded-pill shadow-sm" onclick="descargarFormatoArea()">
                                 <i class="fas fa-file-download"></i> Descargar Formato Áreas
                             </button>
                             <!-- Botón para descargar observaciones -->
-                            <button class="btn btn-success btn-sm" onclick="descargarObservaciones()">
+                            <button class="btn btn-outline-success btn-sm rounded-pill shadow-sm" onclick="descargarObservaciones()">
                                 <i class="fas fa-file-alt"></i> Descargar Observaciones
                             </button>
                         </div>
                     </div>
 
                     <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
-                        <div class="card-body">
+                        <div class="card-body bg-light">
                             {% for categoriaFina in categorias_limpieza_desinfeccion %}
-                            <div class="col-12 tarjeta-categoriaFina" data-categoriaFina="{{ categoriaFina.detalles_categorias_limpieza_desinfeccion }}">
-                                <div class="card">
+                            <div class="col-12 tarjeta-categoriaFina mb-3" data-categoriaFina="{{ categoriaFina.detalles_categorias_limpieza_desinfeccion }}">
+                                <div class="card border-0 shadow-sm">
                                     <div class="card-header bg-warning text-white" id="headingCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}">
                                         <h5 class="mb-0">
                                             <button class="btn btn-link text-white" type="button" data-toggle="collapse" data-target="#collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" aria-expanded="true" aria-controls="collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" onclick="cargarFechasLimpiezaEquiposMedicionFinalizados('{{ categoriaFina.id_categorias_limpieza_desinfeccion }}', '{{ grupo.id_verificacion_equipo_medicion }}')">
@@ -140,7 +140,7 @@
                                         <div class="card-body">
                                             <table class="table table-bordered">
                                                 <thead>
-                                                    <tr>
+                                                    <tr style="background-color: #FF8C00; color: #fff;">
                                                         <th class="text-center">Fechas Registradas</th>
                                                     </tr>
                                                 </thead>
@@ -160,6 +160,7 @@
             </div>
         </div>
     </div>
+
 
 
     <!-- Modal para mostrar las observaciones y acciones correctivas -->
