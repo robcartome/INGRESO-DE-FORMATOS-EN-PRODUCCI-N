@@ -212,6 +212,7 @@ FROM
 JOIN
 	areas_produccion a ON a.id_area_produccion = la.fk_idarea_produccion;
 
+SELECT * FROM v_verificacion_limpieza_desinfeccion_areas
 
 CREATE OR REPLACE VIEW v_detalles_verificacion_limpieza_desinfeccion_areas AS
 SELECT
@@ -251,9 +252,6 @@ WHERE
 ORDER BY
     o.idmedidacorrectivaob, o.fecha DESC;
 
-SELECT * FROM v_asingaciones_observaciones_acCorrec_limpieza_areas
-
-SELECT * FROM public.asignaciones_medidas_correctivas_limpieza_areas
 
 SELECT 
 	mes, anio, 
@@ -266,6 +264,62 @@ WHERE estado = 'CERRADO'
 GROUP BY mes, anio
 ORDER BY anio DESC, mes DESC
 
-SELECT * FROM public.categorias_limpieza_desinfeccion
 
-SELECT * FROM public.areas_produccion
+-- LIMPIEZA Y EQUIPOS DE MEDICIÓN
+
+CREATE OR REPLACE VIEW v_verificaciones_equipos_medicion AS
+SELECT
+	em.id_verificacion_equipo_medicion,
+	TO_CHAR(TO_DATE(em.mes || ' ' || em.anio, 'MM YYYY'), 'TMMonth') AS mes,
+	em.anio,
+	em.estado,
+	em.fk_id_tipo_formato
+FROM
+	verificaciones_equipos_medicion em;  
+
+SELECT * FROM detalles_verificaciones_equipos_medicion
+
+CREATE OR REPLACE VIEW v_detalles_verificaciones_equipos_medicion AS
+SELECT
+    d.id_detalle_verificacion_equipos_medicion,
+    TO_CHAR(d.fecha, 'DD/MM/YYYY') AS fecha,
+    d.estado_verificacion,
+    c.id_categorias_limpieza_desinfeccion,
+    c.detalles_categorias_limpieza_desinfeccion,
+    c.frecuencia,
+    v.id_verificacion_equipo_medicion,
+    v.mes,
+    v.anio,
+    v.estado,
+    v.fk_id_tipo_formato
+FROM
+    detalles_verificaciones_equipos_medicion d
+JOIN
+    categorias_limpieza_desinfeccion c ON c.id_categorias_limpieza_desinfeccion = d.fk_id_categorias_limpieza_desinfeccion
+JOIN
+    verificaciones_equipos_medicion v ON v.id_verificacion_equipo_medicion = d.fk_id_verificacion_equipo_medicion;
+
+select * from v_detalles_verificaciones_equipos_medicion
+
+CREATE OR REPLACE VIEW v_observaciones_acc_correctivas AS
+SELECT
+	ob.idmedidacorrectivaob,
+	ob.detalledemedidacorrectiva,
+	ob.fecha,
+	ob.fk_id_verificacion_equipo_medicion,
+	ac.idaccion_correctiva,
+	ac.detalle_accion_correctiva,
+	ac.estado
+FROM
+	public.medidascorrectivasobservaciones ob
+JOIN
+	public.acciones_correctivas ac ON ac.idaccion_correctiva = ob.fk_id_accion_correctiva;
+
+SELECT * FROM v_observaciones_acc_correctivas
+
+SELECT * FROM v_detalles_verificaciones_equipos_medicion
+	
+SELECT id_detalle_verificacion_equipos_medicion, fecha, id_verificacion_equipo_medicion, estado_verificacion
+            FROM v_detalles_verificaciones_equipos_medicion
+
+SELECT * FROM v_verificaciones_equipos_medicion WHERE estado = 'CERRADO' ORDER BY id_verificacion_equipo_medicion DESC

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Verificación de limpieza y desinfección de equipos de medición{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Verificación de limpieza y desinfección de equipos de medición</h1>
+    
+    <!-- Botón de Generar Formato -->
+    {% if not formatos_creado %}
+        <div class="form-row mb-4 text-center">
+            <!-- Botón de Generar Formato -->
+            <div class="col-lg-12 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FF7043; color: white; border-radius: 10px;" 
+                    onclick="generarFormatoEquiposMedicion()">
+                    <i class="fas fa-file-alt fa-lg mr-2"></i> GENERAR FORMATO
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if formatos_creado %}
+    <div class="card mb-4 shadow-sm">
+        {% for f in formatos_creado %}
+        <div class="card-header text-white" style="background-color: #FF8C00;">
+            <h5 class="mb-0">Registros de Verificación de limpieza y desinfección de equipos de medición del mes de {{ f.mes }}</h5>
+        </div>
+        
+        <div class="card-body">
+            <div id="contenedorCategorias" class="accordion" role="tablist">
+                <!-- Botón de observaciones -->
+                <div class="col-12 mb-3">
+                    <button type="button" class="btn btn-lg btn-block shadow-sm"
+                            style="background-color: #FFDAB9; color: #FF8C00; border-radius: 10px;"
+                            data-toggle="modal" data-target="#observacionesRegistradas" onclick="cargarObservacionesLimpiezaEquiposMedicion()">
+                        <i class="fas fa-history"></i> Observaciones
+                    </button>
+                </div>
+                {% for categoria in categorias_limpieza_desinfeccion %}
+                    <div class="col-12 mb-3">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-warning text-white d-flex align-items-center justify-content-between" id="heading{{ categoria.id_categorias_limpieza_desinfeccion }}">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link text-white p-0" type="button" data-toggle="collapse" data-target="#collapse{{ categoria.id_categorias_limpieza_desinfeccion }}" aria-expanded="true" aria-controls="collapse{{ categoria.id_categorias_limpieza_desinfeccion }}" onclick="cargarFechasLimpiezaEquiposMedicion('{{ categoria.id_categorias_limpieza_desinfeccion }}')">
+                                        {{ categoria.detalles_categorias_limpieza_desinfeccion }} (Frecuencia: {{ categoria.frecuencia }})
+                                    </button>
+                                </h5>
+                                <button class="btn btn-sm btn-outline-light" data-toggle="collapse" data-target="#collapse{{ categoria.id_categorias_limpieza_desinfeccion }}" aria-expanded="true" aria-controls="collapse{{ categoria.id_categorias_limpieza_desinfeccion }}">
+                                    <i class="fas fa-angle-down"></i>
+                                </button>
+                            </div>
+                            <div id="collapse{{ categoria.id_categorias_limpieza_desinfeccion }}" class="collapse" aria-labelledby="heading{{ categoria.id_categorias_limpieza_desinfeccion }}" data-parent="#contenedorCategorias">
+                                <div class="card-body">
+                                    <div class="form-inline d-flex justify-content-between mb-3">
+                                        <input type="date" id="fecha_{{ categoria.id_categorias_limpieza_desinfeccion }}" class="fecha_actual form-control rounded-pill shadow-sm mr-2" style="flex: 2;">
+                                        <button class="btn btn-success btn-sm rounded-pill shadow-sm" style="flex: 1;" onclick="registrarFechaLimpiezaEquiposMedicion('{{ categoria.id_categorias_limpieza_desinfeccion }}')">
+                                            <i class="fas fa-calendar-plus"></i> Registrar
+                                        </button>
+                                    </div>
+                                    <table class="table table-bordered mb-0">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th class="text-center">Fechas Registradas</th>
+                                                <th class="text-center">Registrar Observaciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tablaDetallesCA_{{ categoria.id_categorias_limpieza_desinfeccion }}">
+                                            <!-- Fechas se llenan aquí con JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-group col-md-12">
+                <button class="btn btn-danger btn-lg btn-block rounded-pill shadow-sm mt-4" 
+                        onclick="finalizarVerificacionLimpiezaEquiposMedicion('{{ f.id_verificacion_equipo_medicion }}')" 
+                        style="background-color: #ff0000; font-size: 1.2rem;">
+                    <i class="fas fa-check-circle"></i> Finalizar Verificación
+                </button>
+            </div>            
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+
+    <!-- Sección para mostrar la lista de todos los registros de limpieza de equipos de medición finalizados -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header text-white" style="background-color: #DC3545;">
+            <h5 class="mb-0">Historial de registros de Verificación de limpieza y desinfección de equipos de medición por meses</h5>
+        </div>
+        <div class="card-body">
+            <!-- Filtro por área -->
+            <div class="form-group col-md-6 mx-auto mb-4">
+                <label for="filtrarAraeLACLOSE" style="color: #FF8C00;">Filtrar por área:</label>
+                <input type="text" id="filtrarAraeLACLOSE" class="form-control rounded-pill shadow-sm" name="filtrarAraeLACLOSE" placeholder="Filtrar por área" onkeyup="filterLACloseArea()" autocomplete="off">
+            </div>
+
+            <!-- Listado agrupado por mes y año -->
+            <div id="accordionFinalizados">
+                {% for grupo in historial_formatos_creado %}
+                <div class="card mb-2">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
+                        <div>
+                            <button class="btn btn-link text-dark font-weight-bold p-0" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
+                                {{ grupo.mes }} del {{ grupo.anio }}
+                            </button>
+                        </div>
+                        <div>
+                            <!-- Botón para descargar formato del área -->
+                            <button class="btn btn-outline-info btn-sm mr-2 rounded-pill shadow-sm" onclick="descargarFormatoArea()">
+                                <i class="fas fa-file-download"></i> Descargar Formato Áreas
+                            </button>
+                            <!-- Botón para descargar observaciones -->
+                            <button class="btn btn-outline-success btn-sm rounded-pill shadow-sm" onclick="descargarObservaciones()">
+                                <i class="fas fa-file-alt"></i> Descargar Observaciones
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
+                        <div class="card-body bg-light">
+                            {% for categoriaFina in categorias_limpieza_desinfeccion %}
+                            <div class="col-12 tarjeta-categoriaFina mb-3" data-categoriaFina="{{ categoriaFina.detalles_categorias_limpieza_desinfeccion }}">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-warning text-white" id="headingCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link text-white" type="button" data-toggle="collapse" data-target="#collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" aria-expanded="true" aria-controls="collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" onclick="cargarFechasLimpiezaEquiposMedicionFinalizados('{{ categoriaFina.id_categorias_limpieza_desinfeccion }}', '{{ grupo.id_verificacion_equipo_medicion }}')">
+                                                {{ categoriaFina.detalles_categorias_limpieza_desinfeccion }} (Frecuencia: {{ categoriaFina.frecuencia }})
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div id="collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" class="collapse" aria-labelledby="headingCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" data-parent="#collapse{{ grupo.anio }}{{ grupo.mes }}">
+                                        <div class="card-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr style="background-color: #FF8C00; color: #fff;">
+                                                        <th class="text-center">Fechas Registradas</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tablaDetallesCAFinalizados_{{ categoriaFina.id_categorias_limpieza_desinfeccion }}">
+                                                    <!-- Fechas se llenan aquí con JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal para mostrar las observaciones y acciones correctivas -->
+    <div class="modal fade" id="observacionesRegistradas" tabindex="-1" role="dialog" aria-labelledby="observacionesRegistradasLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg">
+                <!-- Encabezado del Modal -->
+                <div class="modal-header text-white" style="background-color: #FF8C00; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    <h5 class="modal-title font-weight-bold" id="observacionesRegistradasLabel">Observaciones realizadas en este mes</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <!-- Cuerpo del Modal -->
+                <div class="modal-body p-4">
+                    <!-- Tabla para Mostrar las Observaciones -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="tableRegisterCE">
+                            <thead class="text-white" style="background-color: #FF8C00;">
+                                <tr class="text-center">
+                                    <th>Observaciones</th>
+                                    <th>Fecha de Registro</th>
+                                    <th>Acciones Correctivas</th>
+                                    <th>Validar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaDetallesObservaciones">
+                                <!-- Los datos se cargarán aquí dinámicamente con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+<!-- CSS para hacer el modal resizable -->
+<style>
+    .resizable-modal {
+        resize: both; 
+        overflow: auto; 
+        max-width: 90%; 
+        max-height: 90vh; 
+        min-width: 300px;
+        min-height: 200px;
+    }
+</style>
+
+<script src="{{ url_for('static', filename='js/limpieza_equipos_medicion.js') }}"></script>
+{% endblock %}

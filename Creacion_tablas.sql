@@ -282,3 +282,52 @@ CREATE TABLE IF NOT EXISTS public.asignaciones_medidas_correctivas_limpieza_area
 	fk_idmedidacorrectivaob INT REFERENCES public.medidascorrectivasobservaciones(idmedidacorrectivaob) NOT NULL
 );
 
+
+ALTER TABLE public.verificacion_limpieza_desinfeccion_areas
+ADD COLUMN fk_idtipoformato INT REFERENCES public.tiposformatos(idtipoformato) NULL;
+
+
+-- PARA LIMPIEZA DE EQUIPOS DE MEDICIÓN
+
+CREATE TABLE IF NOT EXISTS public.verificaciones_equipos_medicion (
+	id_verificacion_equipo_medicion SERIAL PRIMARY KEY,
+	mes VARCHAR(2) NOT NULL,
+	anio VARCHAR(4) NOT NULL,
+	estado VARCHAR(20) NOT NULL,
+	fk_id_tipo_formato INT REFERENCES public.tiposformatos(idtipoformato) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.detalles_verificaciones_equipos_medicion (
+	id_detalle_verificacion_equipos_medicion SERIAL PRIMARY KEY,
+	fecha DATE NOT NULL,
+	fk_id_categorias_limpieza_desinfeccion INT REFERENCES public.categorias_limpieza_desinfeccion(id_categorias_limpieza_desinfeccion) NOT NULL,
+	fk_id_verificacion_equipo_medicion INT REFERENCES public.verificaciones_equipos_medicion(id_verificacion_equipo_medicion) NOT NULL
+);
+
+-- MONITOREO DE INSECTOS Y ROEDORES
+
+CREATE TABLE IF NOT EXISTS public.registros_monitores_insectos_roedores (
+	id_registro_monitoreo_insecto_roedor SERIAL PRIMARY KEY,
+	mes VARCHAR(2) NOT NULL,
+	anio VARCHAR(4) NOT NULL,
+	estado VARCHAR(20) NOT NULL,
+	fk_id_tipo_formato INT REFERENCES public.tiposformatos(idtipoformato) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.detalles_registros_monitoreos_insectos_roedores (
+	id_detalle_registro_monitoreo_insecto_roedor SERIAL PRIMARY KEY,
+	fecha DATE NOT NULL,
+	hora TIME NOT NULL,
+	observacion VARCHAR(80) NULL,
+	fk_id_accion_correctiva INT REFERENCES public.acciones_correctivas(idaccion_correctiva) NULL,
+	fk_id_registro_monitoreo_insecto_roedor INT REFERENCES public.registros_monitores_insectos_roedores(id_registro_monitoreo_insecto_roedor) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS verificaciones_areas_produccion_insectos_roedores (
+	id_verificacion_area_produccion_insecto SERIAL PRIMARY KEY,
+	fk_id_area_produccion INT REFERENCES public.areas_produccion(id_area_produccion) NOT NULL,
+	fk_id_detalle_registro_monitoreo_insecto_roedor INT REFERENCES public.detalles_registros_monitoreos_insectos_roedores(id_detalle_registro_monitoreo_insecto_roedor) NOT NULL
+);
+
+ALTER TABLE public.medidascorrectivasobservaciones
+ADD COLUMN fk_id_verificacion_equipo_medicion INT REFERENCES public.verificaciones_equipos_medicion(id_verificacion_equipo_medicion) NULL;

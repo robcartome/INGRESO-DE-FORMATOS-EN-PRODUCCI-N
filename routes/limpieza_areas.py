@@ -68,7 +68,7 @@ def agregar_registro_limpieza_areas(selectArea):
         consult_eviromental_condition_month =  "SELECT * FROM verificacion_limpieza_desinfeccion_areas WHERE mes = %s AND anio = %s AND fk_idarea_produccion = %s AND estado = 'CREADO'" 
         verificar_limpieza_area = execute_query(consult_eviromental_condition_month, (mes_consultar, anio_consultar,selectArea))
         if not verificar_limpieza_area:
-            execute_query("INSERT INTO verificacion_limpieza_desinfeccion_areas(mes, anio, estado, fk_idarea_produccion) VALUES (%s,%s,%s,%s)", (mes, anio, 'CREADO', selectArea))
+            execute_query("INSERT INTO verificacion_limpieza_desinfeccion_areas(mes, anio, estado, fk_idarea_produccion, fk_idtipoformato) VALUES (%s,%s,%s,%s,%s)", (mes, anio, 'CREADO', selectArea, 7))
             return jsonify({'status': 'success', 'message': 'Se registro una verificación de limpieza y desinfección para esta área.'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'El formato para esta área ya existe para este mes.'}), 500
@@ -197,40 +197,6 @@ def finalizar_limpieza_areas(id_verificacion):
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al finalizar la verificación de la limpieza y desinfección de esta área.'}), 500
     
 
-@limpieza_areas.route('/observaciones_desinfeccion_areas', methods=['POST'])
-def observaciones_desinfeccion_areas():
-    try:
-        data = request.get_json()
-        medida_correctiva = data.get('observacion')
-        fecha_actual = datetime.now()
-
-        # Ejecutar la consulta SQL para insertar la medida correctiva
-        query = "INSERT INTO medidascorrectivasobservaciones(detalledemedidacorrectiva, fecha) VALUES (%s, %s, %s, %s)"
-        execute_query(query, (medida_correctiva, fecha_actual, idmano))
-        
-        # Ejecuta la consulta para obtener el idlavadomano
-        result = execute_query("SELECT id_verificacion_limpieza_desinfeccion_area FROM verificacion_limpieza_desinfeccion_areas WHERE estado = 'CREADO'")
-        
-        # Verifica si el resultado no está vacío y si es una lista
-        if not result or len(result) == 0:
-            return jsonify({'status': 'error', 'message': 'No hay lavados de manos con estado CREADO.'}), 404
-        
-        for r in result:
-            execute_query("INSERT INTO ")
-        # Accede al primer registro de la lista
-        idmano = result[0]['idlavadomano'] if isinstance(result[0], dict) else result[0]
-        
-        # Verifica que los parámetros necesarios estén presentes
-        if not idmano or not medida_correctiva:
-            return jsonify({'status': 'error', 'message': 'Faltan parámetros necesarios.'}), 400
-
-        
-
-        return jsonify({'status': 'success'}), 200
-
-    except Exception as e:
-        print(f"Error al registrar la medida correctiva: {e}")
-        return jsonify({'status': 'error', 'message': 'Hubo un error.'}), 500
     
 
 @limpieza_areas.route('/registrar_observaciones_limpieza_area', methods=['POST'])
