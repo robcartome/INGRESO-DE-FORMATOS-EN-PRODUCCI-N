@@ -390,6 +390,7 @@ function registrarFechaLimpieza(categoriaId) {
 function verRegistrarObservacionesLimpiezaAreas() {
     var observacionLimpiezaAreas = document.getElementById('observacionLimpiezaAreas').value;
     var accionCorrectivaLimpiezaAreas = document.getElementById('accionCorrectivaLimpiezaAreas').value;
+
     
     if (!observacionLimpiezaAreas || !accionCorrectivaLimpiezaAreas) {
         Swal.fire({
