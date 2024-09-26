@@ -9,18 +9,17 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 
+registro_monitoreo_roedores = Blueprint('registro_monitoreo_roedores', __name__)
 
-registro_monitoreo_insectos = Blueprint('registro_monitoreo_insectos', __name__)
-
-@registro_monitoreo_insectos.route('/', methods=['GET'])
-def registroMonitoreoInsectos():
+@registro_monitoreo_roedores.route('/', methods=['GET'])
+def registroMonitoreoRoedores():
     try:
         # Obtener las verificaciones en estado creado
-        query_control_insectos = "SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 9 ORDER BY id_registro_monitoreo_insecto_roedor DESC"
+        query_control_insectos = "SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 10 ORDER BY id_registro_monitoreo_insecto_roedor DESC"
         formatos_creado = execute_query(query_control_insectos)
 
         # Obtener las verificaciones en estado CERRADO
-        query_control_insectos_finalizados = "SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CERRADO' AND fk_idtipoformatos = 9 ORDER BY id_registro_monitoreo_insecto_roedor DESC"
+        query_control_insectos_finalizados = "SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CERRADO' AND fk_idtipoformatos = 10 ORDER BY id_registro_monitoreo_insecto_roedor DESC"
         formatos_finalizados = execute_query(query_control_insectos_finalizados)
 
         areas = execute_query("SELECT * FROM areas_produccion WHERE id_area_produccion IN (2, 4, 10, 11, 12, 7, 8, 13, 14, 15)")
@@ -29,13 +28,13 @@ def registroMonitoreoInsectos():
         categorias_limpieza_desinfeccion = execute_query(query_categorias_limpieza_desinfeccion)
 
         # Obtener los registros
-        query_registros = "SELECT * FROM v_detalles_registros_monitoreos_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 9 ORDER BY id_detalle_registro_monitoreo_insecto_roedor DESC"
+        query_registros = "SELECT * FROM v_detalles_registros_monitoreos_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 10 ORDER BY id_detalle_registro_monitoreo_insecto_roedor DESC"
         resgistros_control_insecto = execute_query(query_registros)
 
         #obtener las asignaciones de las áreas que estan conforme o no conforme
         verificacion_araes_insectos = execute_query('SELECT fk_id_area_produccion, fk_id_detalle_registro_monitoreo_insecto_roedor FROM verificaciones_areas_produccion_insectos_roedores')
 
-        return render_template('registro_monitoreo_insectos.html',
+        return render_template('registro_monitoreo_roedores.html',
                                formatos_creado=formatos_creado,
                                areas=areas,
                                categorias_limpieza_desinfeccion=categorias_limpieza_desinfeccion,
@@ -44,9 +43,9 @@ def registroMonitoreoInsectos():
                                formatos_finalizados=formatos_finalizados)
     except Exception as e:
         print(f"Error al obtener datos: {e}")
-        return render_template('registro_monitoreo_insectos.html')
+        return render_template('registro_monitoreo_roedores.html')
 
-@registro_monitoreo_insectos.route('/generar_formato_monitoreo_insecto', methods=['POST'])
+@registro_monitoreo_roedores.route('/generar_formato_monitoreo_insecto', methods=['POST'])
 def generar_formato_monitoreo_insecto():
     try:
         fecha_actual = datetime.now()
@@ -54,7 +53,7 @@ def generar_formato_monitoreo_insecto():
         anio = str(fecha_actual.year)
 
         # Intentar ejecutar la consulta y ver si causa un error
-        execute_query('INSERT INTO registros_monitores_insectos_roedores(mes, anio, estado, fk_idtipoformatos) VALUES (%s,%s,%s,%s)', (mes, anio, 'CREADO', 9))
+        execute_query('INSERT INTO registros_monitores_insectos_roedores(mes, anio, estado, fk_idtipoformatos) VALUES (%s,%s,%s,%s)', (mes, anio, 'CREADO', 10))
 
         return jsonify({'status': 'success', 'message': 'Formato generado exitosamente.'}), 200
 
@@ -62,7 +61,7 @@ def generar_formato_monitoreo_insecto():
         print(f"Error al generar el formato: {e}")
         return jsonify({'status': 'error', 'message': f'Hubo un error al generar el formato: {e}'}), 500
 
-@registro_monitoreo_insectos.route('/ruta_para_guardar_monitoreo_insectos', methods=['POST'])
+@registro_monitoreo_roedores.route('/ruta_para_guardar_monitoreo_insectos', methods=['POST'])
 def ruta_para_guardar_monitoreo_insectos():
     try:
         data = request.json
@@ -89,7 +88,7 @@ def ruta_para_guardar_monitoreo_insectos():
 
         # Obtener el ID del registro de monitoreo de insectos en estado "CREADO"
         id_registro_monitoreo_resultado = execute_query(
-            "SELECT id_registro_monitoreo_insecto_roedor FROM registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 9"
+            "SELECT id_registro_monitoreo_insecto_roedor FROM registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 10"
         )
 
         if not id_registro_monitoreo_resultado:
@@ -123,7 +122,7 @@ def ruta_para_guardar_monitoreo_insectos():
 
 
     
-@registro_monitoreo_insectos.route('/estadoAC/<int:id_ca>', methods=['POST'])
+@registro_monitoreo_roedores.route('/estadoAC/<int:id_ca>', methods=['POST'])
 def estadoAC(id_ca):
     try:
         execute_query("UPDATE acciones_correctivas SET estado = %s WHERE idaccion_correctiva = %s", ('SOLUCIONADO', id_ca))
@@ -133,17 +132,17 @@ def estadoAC(id_ca):
         print(f"Error al modificar el estado de la acción correctiva: {e}")
         return jsonify({'status': 'error', 'message': 'No hay acción correctiva para validar.'}), 500
     
-@registro_monitoreo_insectos.route('/finalizar_monitoreo_insectos', methods=['POST'])
+@registro_monitoreo_roedores.route('/finalizar_monitoreo_insectos', methods=['POST'])
 def finalizar_monitoreo_insectos():
     try:
-        execute_query("UPDATE registros_monitores_insectos_roedores SET estado = %s WHERE estado = %s AND fk_idtipoformatos = 9", ('CERRADO', 'CREADO'))
+        execute_query("UPDATE registros_monitores_insectos_roedores SET estado = %s WHERE estado = %s AND fk_idtipoformatos = 10", ('CERRADO', 'CREADO'))
         return jsonify({'status': 'success', 'message': 'Se cambió el estado de esta acción correctiva.'}), 200
     
     except Exception as e:
         print(f"Error al finalizar el registro de control de higiene personal: {e}")
         return jsonify({'status': 'error', 'message': 'Error al finalizar el registro de control de higiene personal.'}), 500
     
-@registro_monitoreo_insectos.route('/obtener_detalle_monitoreo_insectos/<int:id_formatos>', methods=['GET'])
+@registro_monitoreo_roedores.route('/obtener_detalle_monitoreo_insectos/<int:id_formatos>', methods=['GET'])
 def obtener_detalle_monitoreo_insectos(id_formatos):
     try:
         # Consulta de detalles de monitoreo de insectos

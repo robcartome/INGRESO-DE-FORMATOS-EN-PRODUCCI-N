@@ -11,6 +11,7 @@ from routes.higiene_personal import higienePersona
 from routes.limpieza_areas import limpieza_areas
 from routes.limpieza_equipos_medicion import limpieza_equipos_medicion
 from routes.registro_monitoreo_insectos import registro_monitoreo_insectos
+from routes.registro_monitoreo_roedores import registro_monitoreo_roedores
 
 app = Flask(__name__)
 
@@ -25,6 +26,7 @@ app.register_blueprint(higienePersona, url_prefix='/higiene_personal')
 app.register_blueprint(limpieza_areas, url_prefix='/limpieza_areas')
 app.register_blueprint(limpieza_equipos_medicion, url_prefix='/limpieza_equipos_medicion')
 app.register_blueprint(registro_monitoreo_insectos, url_prefix = '/registro_monitoreo_insectos')
+app.register_blueprint(registro_monitoreo_roedores, url_prefix = '/registro_monitoreo_roedores')
 
 # Definiendo la ruta por defecto
 @app.route('/')
