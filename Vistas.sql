@@ -273,11 +273,10 @@ SELECT
 	TO_CHAR(TO_DATE(em.mes || ' ' || em.anio, 'MM YYYY'), 'TMMonth') AS mes,
 	em.anio,
 	em.estado,
-	em.fk_id_tipo_formato
+	em.fk_idtipoformatos
 FROM
 	verificaciones_equipos_medicion em;  
 
-SELECT * FROM detalles_verificaciones_equipos_medicion
 
 CREATE OR REPLACE VIEW v_detalles_verificaciones_equipos_medicion AS
 SELECT
@@ -291,7 +290,7 @@ SELECT
     v.mes,
     v.anio,
     v.estado,
-    v.fk_id_tipo_formato
+    v.fk_idtipoformatos
 FROM
     detalles_verificaciones_equipos_medicion d
 JOIN
@@ -299,7 +298,7 @@ JOIN
 JOIN
     verificaciones_equipos_medicion v ON v.id_verificacion_equipo_medicion = d.fk_id_verificacion_equipo_medicion;
 
-select * from v_detalles_verificaciones_equipos_medicion
+DROP VIEW v_verificaciones_equipos_medicion
 
 CREATE OR REPLACE VIEW v_observaciones_acc_correctivas AS
 SELECT
@@ -315,11 +314,53 @@ FROM
 JOIN
 	public.acciones_correctivas ac ON ac.idaccion_correctiva = ob.fk_id_accion_correctiva;
 
-SELECT * FROM v_observaciones_acc_correctivas
 
-SELECT * FROM v_detalles_verificaciones_equipos_medicion
-	
-SELECT id_detalle_verificacion_equipos_medicion, fecha, id_verificacion_equipo_medicion, estado_verificacion
-            FROM v_detalles_verificaciones_equipos_medicion
+-- PARA EL FORMATO DE CONTROL DE INSECTOS
 
-SELECT * FROM v_verificaciones_equipos_medicion WHERE estado = 'CERRADO' ORDER BY id_verificacion_equipo_medicion DESC
+SELECT * FROM public.registros_monitores_insectos_roedores
+
+SELECT * FROM tiposformatos
+
+CREATE OR REPLACE VIEW v_registros_monitores_insectos_roedores AS
+SELECT
+	ri.id_registro_monitoreo_insecto_roedor,
+	TO_CHAR(TO_DATE(ri.mes || ' ' || ri.anio, 'MM YYYY'), 'TMMonth') AS mes,
+	ri.anio,
+	ri.estado,
+	ri.fk_idtipoformatos
+FROM
+	registros_monitores_insectos_roedores ri;
+
+SELECT * FROM v_detalles_registros_monitoreos_insectos_roedores
+
+CREATE OR REPLACE VIEW v_detalles_registros_monitoreos_insectos_roedores AS
+SELECT
+	d.id_detalle_registro_monitoreo_insecto_roedor,
+	d.fecha,
+	d.hora,
+	d.observacion,
+	ac.idaccion_correctiva,
+	ac.detalle_accion_correctiva,
+	ac.estado AS estado_accion_correctiva,
+	r.id_registro_monitoreo_insecto_roedor,
+	r.mes,
+	r.anio,
+	r.estado,
+	r.fk_idtipoformatos
+FROM
+	detalles_registros_monitoreos_insectos_roedores d
+LEFT JOIN
+	acciones_correctivas ac ON ac.idaccion_correctiva = d.fk_id_accion_correctiva
+JOIN
+	registros_monitores_insectos_roedores r ON r.id_registro_monitoreo_insecto_roedor = d.fk_id_registro_monitoreo_insecto_roedor
+ORDER BY
+	d.id_detalle_registro_monitoreo_insecto_roedor
+DESC;
+
+SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 9 ORDER BY id_registro_monitoreo_insecto_roedor DESC
+
+DROP VIEW v_detalles_registros_monitoreos_insectos_roedores
+
+SELECT * FROM acciones_correctivas
+
+SELECT * FROM public.tiposformatos
