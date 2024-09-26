@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Registro y monitoreo de insectos{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Registro y monitoreo de insectos</h1>
+    
+    <!-- Botón de Generar Formato -->
+    {% if not formatos_creado %}
+        <div class="form-row mb-4 text-center">
+            <!-- Botón de Generar Formato -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FF7043; color: white; border-radius: 10px;" 
+                    onclick="generarFormatoMonitoreoInsecto()">
+                    <i class="fas fa-file-alt fa-lg mr-2"></i> GENERAR FORMATO
+                </button>
+            </div>
+        
+            <!-- Botón de Historial -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FFDAB9; color: #FF8C00; border: 2px solid #FF8C00; border-radius: 10px;" 
+                    data-toggle="modal" data-target="#historialLavadoManos">
+                    <i class="fas fa-history fa-lg mr-2"></i> HISTORIAL
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if formatos_creado %}
+        <!-- Formulario de Registro -->
+        <form enctype="multipart/form-data" id="formRegistroMonitoreo">
+            <div class="form-row mb-3">
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="fecha_monitoreo_insectos" class="font-weight-bold" style="color: #FF8C00;">Fecha:</label>
+                    <input type="date" id="fecha_monitoreo_insectos" class="form-control" name="fecha_monitoreo_insectos" required>
+                </div>
+                <div class="form-group col-lg-6 col-md-12">
+                    <label for="hora_monitoreo_insectos" class="font-weight-bold" style="color: #FF8C00;">Hora:</label>
+                    <input type="time" id="hora_monitoreo_insectos" class="form-control" name="hora_monitoreo_insectos" required>
+                </div>
+            </div>
+
+            <label class="font-weight-bold" style="color: #FF8C00;">Áreas a verificar:</label>
+
+            <div class="form-row mb-3">
+                {% for a in areas %}
+                    <div class="form-group col-md-4">
+                        <div class="form-check text-center">
+                            <input type="checkbox" id="area_{{ a.id_area_produccion }}" name="areas" value="{{ a.id_area_produccion }}" class="form-check-input">
+                            <label class="form-check-label" for="area_{{ a.id_area_produccion }}">{{ a.detalle_area_produccion }}</label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-row mb-3">
+                <div class="form-group col-md-6">
+                    <label for="observaciones" style="color: #FF8C00;">Observaciones:</label>
+                    <input type="text" id="observaciones" class="form-control" name="observaciones" placeholder="Ingrese una Observación" autocomplete="off">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="accionCorrectiva" style="color: #FF8C00;">Acción Correctiva:</label>
+                    <input type="text" id="accionCorrectiva" class="form-control" name="accionCorrectiva" placeholder="Ingrese la acción correctiva" autocomplete="off">
+                </div>
+            </div>
+            
+            <button type="button" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;" onclick="registrarDetalleMonitoreoInsectos()">
+                <i class="fas fa-plus-circle"></i> AGREGAR REGISTRO
+            </button>
+        </form>
+
+        
+        <!-- Botones de Historial y Finalizar Registro -->
+        <div class="form-row mb-4">
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;" data-toggle="modal" data-target="#historialLavadoManos">
+                    <i class="fas fa-history"></i> HISTORIAL
+                </button>
+            </div>
+            <div class="form-group col-lg-6 col-md-6">
+                <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalizar_monitoreo_insectos()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
+            </div>
+        </div>
+    
+        <!-- Registro de los monitoreos de insectos -->
+        <div class="container-fluid mt-4">
+            <!-- Título centrado -->
+            <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Detalle de los registros y monitoreos de insectos</h3>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" id="filtroTrabajadorDetalle" class="form-control" placeholder="Filtrar por trabajador...">
+                </div>
+                <div class="col-md-6">
+                    <input type="date" id="filtroFechaDetalle" class="form-control" placeholder="Filtrar por fecha...">
+                </div>
+            </div>
+            <!-- Tabla resizable -->
+            <div class="table-responsive mt-2">
+                <table class="table table-bordered" id="detalle_table_HP">
+                    <thead style="background-color: #FF8C00; color: white;">
+                        <tr>
+                            <th class="text-center">FECHA</th>
+                            <th class="text-center">HORA</th>
+                            <th class="text-center">AREA DE M. PRIMA</th>
+                            <th class="text-center">ALM. DE P. TERMINADO</th>
+                            <th class="text-center">A. DE PROCESO</th>
+                            <th class="text-center">VESTUARIOS</th>
+                            <th class="text-center">LAV. DE MANOS</th>
+                            <th class="text-center">SS.HH.</th>
+                            <th class="text-center">OFICIONAS</th>
+                            <th class="text-center">PASADIZO</th>
+                            <th class="text-center">A. DE EMPAQUE</th>
+                            <th class="text-center">A. DE LAVADO</th>
+                            <th class="text-center">OBSERVACIONES/AC</th>
+                            <th class="text-center">VALIDAR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hp in resgistros_control_insecto %}
+                        <tr>
+                            <td class="text-center">{{ hp.fecha.strftime('%d/%m/%Y') }}</td>
+                            <td class="text-center">{{ hp.hora }}</td>
+                            <!-- Comprobación de cada verificación con el id de detalle correspondiente -->
+                            {% set verificaciones = verificacion_araes_insectos | selectattr("fk_id_detalle_registro_monitoreo_insecto_roedor", "equalto", hp.id_detalle_registro_monitoreo_insecto_roedor) | list %}
+                            {% for area_id in areas %}
+                            <!-- Verificación de las areas -->
+                            <td class="text-center">
+                                {% set mprima = verificaciones | selectattr("fk_id_area_produccion", "equalto", area_id.id_area_produccion) | list %}
+                                {% if mprima and mprima|length > 0 %}
+                                    ✅
+                                {% else %}
+                                    ❌
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+
+                            <td class="text-center font-weight-bold" 
+                                style="{% if hp.estado_accion_correctiva == 'PENDIENTE' %} color: red; 
+                                    {% elif hp.estado_accion_correctiva == 'SOLUCIONADO' %} color: green; 
+                                    {% endif %}">
+                                {{ hp.observacion }}<br>
+                                <small>{{ hp.detalle_accion_correctiva }}</small>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC({{ hp.idaccion_correctiva }})">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    
+
+    <!-- Modal para mostrar el historial de los registros de los formatos de lavado de manos -->
+    <div class="modal fade" id="historialLavadoManos" tabindex="-1" role="dialog" aria-labelledby="historialLavadoManosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg resizable-modal" role="document">
+            <div class="modal-content">
+                <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="labelHistorialLavadoMano">Historial del lavado de manos</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead style="background-color: #FFC107; color: black;">
+                                <tr>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Ver</th>
+                                    <th class="text-center">Descargar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if formatos_finalizados %}
+                                    {% for hl in formatos_finalizados %}
+                                        <tr>   
+                                            <td class="text-center">{{ hl.mes }} del {{ hl.anio }} </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial('{{ hl.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm" onclick="descargarFormato('{{ hl.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
+                                                    <i class="fas fa-download"></i> Descagar Formato
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay registros disponibles.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar los detalles del registro de lavado de manos -->
+    <div class="modal fade" id="detalleLavadoManos" tabindex="-1" role="dialog" aria-labelledby="detalleLavadoManosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="detalleLavadoManosLabel">Detalle del Lavado de Manos</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleContenido">
+                        <!-- Aquí se mostrarán los detalles obtenidos de la consulta -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS para hacer el modal resizable -->
+<style>
+    .resizable-modal {
+        resize: both; 
+        overflow: auto; 
+        max-width: 90%; 
+        max-height: 90vh; 
+        min-width: 300px;
+        min-height: 200px;
+    }
+</style>
+
+<script src="{{ url_for('static', filename='js/registro_monitoreo_insectos.js') }}"></script>
+{% endblock %}

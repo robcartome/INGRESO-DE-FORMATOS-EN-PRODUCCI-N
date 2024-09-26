@@ -1,5 +1,3 @@
-// Llamar a la función cargarObservacionesLimpiezaAreas cuando se abra el modal
-
 
 function generarFormatoEquiposMedicion() {
     fetch('/limpieza_equipos_medicion/generar_formato_equipos_medicion', {
