@@ -19,7 +19,7 @@ limpieza_areas = Blueprint('limpieza_areas', __name__)
 def limpiezaAreas():
     try:
         # Obtener todas las áreas
-        query_areas = "SELECT * FROM areas_produccion"
+        query_areas = "SELECT * FROM areas_produccion WHERE id_area_produccion BETWEEN 2 AND 9"
         areas = execute_query(query_areas)
 
         # Obtener los registros de verificación de limpieza y desinfección creados
