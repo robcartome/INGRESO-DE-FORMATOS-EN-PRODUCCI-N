@@ -45,7 +45,7 @@ def generar_formato_equipos_medicion():
 
         # Eliminar el registro relacionado en controles_generales_personal
         query_generar_formato = """
-            INSERT INTO verificaciones_equipos_medicion(mes,anio,estado,fk_id_tipo_formatos) VALUES  (%s,%s,%s,%s);
+            INSERT INTO verificaciones_equipos_medicion(mes,anio,estado,fk_idtipoformatos) VALUES  (%s,%s,%s,%s);
         """
         execute_query(query_generar_formato, (mes_actual,anio_actual,'CREADO',8))
 

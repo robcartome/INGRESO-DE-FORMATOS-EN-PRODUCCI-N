@@ -54,7 +54,7 @@ def generar_formato_monitoreo_insecto():
         anio = str(fecha_actual.year)
 
         # Intentar ejecutar la consulta y ver si causa un error
-        execute_query('INSERT INTO registros_monitores_insectos_roedores(mes, anio, estado, fk_id_tipo_formatos) VALUES (%s,%s,%s,%s)', (mes, anio, 'CREADO', 9))
+        execute_query('INSERT INTO registros_monitores_insectos_roedores(mes, anio, estado, fk_idtipoformatos) VALUES (%s,%s,%s,%s)', (mes, anio, 'CREADO', 9))
 
         return jsonify({'status': 'success', 'message': 'Formato generado exitosamente.'}), 200
 
