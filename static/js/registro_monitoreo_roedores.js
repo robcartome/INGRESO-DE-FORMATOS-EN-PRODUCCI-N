@@ -1,5 +1,5 @@
 function generarFormatoMonitoreoInsecto() {
-    fetch('/registro_monitoreo_insectos/generar_formato_monitoreo_insecto', {
+    fetch('/registro_monitoreo_roedores/generar_formato_monitoreo_insecto', {
         method: 'POST'
     })
     .then(response => response.json())
@@ -63,7 +63,7 @@ function registrarDetalleMonitoreoInsectos() {
     };
 
     // Enviar la solicitud al backend
-    fetch('/registro_monitoreo_insectos/ruta_para_guardar_monitoreo_insectos', {
+    fetch('/registro_monitoreo_roedores/ruta_para_guardar_monitoreo_insectos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -99,7 +99,7 @@ function registrarDetalleMonitoreoInsectos() {
 }
 
 function modificarEstadoAC(idAC) {
-    fetch(`/registro_monitoreo_insectos/estadoAC/${idAC}`, {
+    fetch(`/registro_monitoreo_roedores/estadoAC/${idAC}`, {
         method: 'POST'
     })
     .then(response => response.json())
@@ -145,7 +145,7 @@ function finalizar_monitoreo_insectos() {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('/registro_monitoreo_insectos/finalizar_monitoreo_insectos', {
+            fetch('/registro_monitoreo_roedores/finalizar_monitoreo_insectos', {
                 method: 'POST'
             })
             .then(response => response.json())
@@ -180,7 +180,7 @@ function finalizar_monitoreo_insectos() {
 
 
 function verDetalleHistorial(idFormatos) {
-    fetch(`/registro_monitoreo_insectos/obtener_detalle_monitoreo_insectos/${idFormatos}`)
+    fetch(`/registro_monitoreo_roedores/obtener_detalle_monitoreo_insectos/${idFormatos}`)
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
@@ -205,6 +205,7 @@ function verDetalleHistorial(idFormatos) {
                             <th class="text-center">A. de Empaque</th>
                             <th class="text-center">A. de Lavado</th>
                             <th class="text-center">Observaciones / AC</th>
+                            <th class="text-center">Validar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -231,6 +232,13 @@ function verDetalleHistorial(idFormatos) {
                     <td class="text-center font-weight-bold" style="${detalle.estado_accion_correctiva === 'PENDIENTE' ? 'color: red;' : 'color: green;'}">
                         ${detalle.observacion} <br>
                         <small>${detalle.detalle_accion_correctiva}</small>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm rounded-pill shadow-sm" 
+                                style="background-color: #FF8C00; color: white;" 
+                                onclick="modificarEstadoAC(${detalle.idaccion_correctiva})">
+                            <i class="fas fa-check-circle"></i>
+                        </button>
                     </td>
                 </tr>`;
             });

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Registro y monitoreo de insectos{% endblock %}
+{% block title %}Registro y monitoreo de roedores{% endblock %}
 
 {% block content %}
 
 <div class="container-fluid">
-    <h1 class="mb-4 text-center" style="color: #FF8C00;">Registro y monitoreo de insectos</h1>
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Registro y monitoreo de roedores</h1>
     
     <!-- Botón de Generar Formato -->
     {% if not formatos_creado %}
@@ -86,10 +86,10 @@
             </div>
         </div>
     
-        <!-- Registro de los monitoreos de insectos -->
+        <!-- Registro de los monitoreos de roedores -->
         <div class="container-fluid mt-4">
             <!-- Título centrado -->
-            <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Detalle de los registros y monitoreos de insectos</h3>
+            <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Detalle de los registros y monitoreos de roedores</h3>
             <div class="row mb-3">
                 <div class="col-md-6">
                     <input type="text" id="filtroTrabajadorDetalle" class="form-control" placeholder="Filtrar por trabajador...">
@@ -146,7 +146,7 @@
                                 <small>{{ hp.detalle_accion_correctiva }}</small>
                             </td>
                             <td class="text-center">
-                                <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC('{{ hp.idaccion_correctiva }}')">
+                                <button type="button" class="btn d-block w-100 mb-1" style="background-color: #FF8C00; color: white;" onclick="modificarEstadoAC({{ hp.idaccion_correctiva }})">
                                     <i class="fas fa-check-circle"></i>
                                 </button>
                             </td>
@@ -211,7 +211,7 @@
         </div>
     </div>
 
-    <!-- Modal para mostrar los detalles de los casos cerrados del monitoreo de insectos -->
+    <!-- Modal para mostrar los detalles de los casos cerrados del monitoreo de roedores -->
     <div class="modal fade" id="detalleHistorialMonitoreoInsecto" tabindex="-1" role="dialog" aria-labelledby="detalleHistorialControlHigienePersonalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -243,5 +243,5 @@
     }
 </style>
 
-<script src="{{ url_for('static', filename='js/registro_monitoreo_insectos.js') }}"></script>
+<script src="{{ url_for('static', filename='js/registro_monitoreo_roedores.js') }}"></script>
 {% endblock %}
