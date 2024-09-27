@@ -367,7 +367,7 @@ SELECT * FROM registros_monitores_insectos_roedores
 
 SELECT * FROM public.tiposformatos
 
- public.areas_produccion
+
 SELECT * FROM public.detalles_registros_monitoreos_insectos_roedores
 
 SELECT * FROM public.acciones_correctivas
