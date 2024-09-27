@@ -68,7 +68,7 @@ def agregar_registro_limpieza_areas(selectArea):
         consult_eviromental_condition_month =  "SELECT * FROM verificacion_limpieza_desinfeccion_areas WHERE mes = %s AND anio = %s AND fk_idarea_produccion = %s AND estado = 'CREADO'" 
         verificar_limpieza_area = execute_query(consult_eviromental_condition_month, (mes_consultar, anio_consultar,selectArea))
         if not verificar_limpieza_area:
-            execute_query("INSERT INTO verificacion_limpieza_desinfeccion_areas(mes, anio, estado, fk_idarea_produccion, fk_idtipoformato) VALUES (%s,%s,%s,%s,%s)", (mes, anio, 'CREADO', selectArea, 7))
+            execute_query("INSERT INTO verificacion_limpieza_desinfeccion_areas(mes, anio, estado, fk_idarea_produccion, fk_idtipoformatos) VALUES (%s,%s,%s,%s,%s)", (mes, anio, 'CREADO', selectArea, 7))
             return jsonify({'status': 'success', 'message': 'Se registro una verificación de limpieza y desinfección para esta área.'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'El formato para esta área ya existe para este mes.'}), 500
