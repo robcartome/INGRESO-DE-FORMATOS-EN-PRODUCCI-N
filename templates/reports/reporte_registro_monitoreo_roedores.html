@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="12">
+                    <table class="header-table">
+                        <tr class="s2">
+                            <td colspan="1" class="border-none">Fecha</td>
+                            <td colspan="4" class="border-none w-15">Mes: {{ mes }}</td>
+                            <td colspan="7" class="border-none">Año: {{ anio }}</td>
+                            <td class="border-none text-right">Frecuencia de Registro
+                                <span class="border" style="font-weight: 600; padding: 4pt 12pt;">{{ frecuencia_registro }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="1"><b>Colocar:</b></td>
+                <td colspan="4"><b>&#x2713;</b> CONFORME&nbsp;&nbsp;&nbsp;&nbsp;<b>X</b> NO CONFORME</td>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="body-content text-center">
+            {% set areas = {
+                'area_m_prima': 'AREA DE M. PRIMA',
+                'alm_p_terminado': 'ALM. DE P. TERMINADO',
+                'alm_proceso': 'A. DE PROCESO',
+                'vesturarios': 'VESTUARIOS / LAV. DE MANOS',
+                'sshh': 'SS.HH.',
+                'oficinas': 'OFICINAS',
+                'pasadizos': 'PASADIZO',
+                'a_empaque': 'A. DE EMPAQUE',
+                'a_lavado': 'A. DE LAVADO'
+            } %}
+            <!-- Cabecera del cuerpo del reporte -->
+            <tr>
+                <th>FECHA</th>
+                <th>HORA</th>
+                {% for _,name in areas.items() %}
+                    <th>{{ name }}</th>
+                {% endfor %}
+                <th>OBSERVACIONES / ACCIONES CORRECTIVAS</th>
+            </tr>
+            <!-- Cuerpo del reporte -->
+            {% for record in info %}
+            <tr>
+                <td>{{ record['fecha'] }}</td>
+                <td>{{ record['hora'] }}</td>
+                {% for key, name in areas.items() %}
+                    <td>
+                        {% if record[key] %}
+                            &#x2713;
+                        {% else %}
+                            X
+                        {% endif %}
+                    </td>
+                {% endfor %}
+                <td>{{ record['acciones_correctivas'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>

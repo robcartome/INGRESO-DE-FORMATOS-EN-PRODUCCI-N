@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+
+{% include "reports/head_report.html" %}
+<body>
+    <table class="main-table">
+        <!-- Encabezado del reporte -->
+        <thead>
+            <tr>
+                <td colspan="12">
+                    {% include "reports/header_component.html" %}
+                </td>
+            </tr>
+            <!-- Información subtitulo -->
+            <tr>
+                <td colspan="12">
+                    <table class="header-table">
+                        <tr class="s2">
+                            <td colspan="1" class="border-none">Fecha</td>
+                            <td colspan="4" class="border-none w-15">Mes: {{ mes }}</td>
+                            <td colspan="7" class="border-none">Año: {{ anio }}</td>
+                            <td class="border-none text-right">Frecuencia de Registro
+                                <span class="border" style="font-weight: 600; padding: 4pt 12pt;">{{ frecuencia_registro }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td><b>Criterios:</b></td>
+                <td>Limpieza, Desinfección y estado del equipo</td>
+            </tr>
+            <tr>
+                <td><b>Colocar:</b></td>
+                <td><b>&#x2713;</b> CONFORME&nbsp;&nbsp;&nbsp;&nbsp;<b>X</b> NO CONFORME</td>
+            </tr>
+        </thead>
+
+        <!-- Cuerpo del reporte -->
+        <tbody class="text-center">
+            <tr>
+                <td colspan="12">
+                    <table class="body-table">
+                        <tr>
+                            <th>EQUIPOS DE MEDICIÓN</th>
+                            <!-- Generar números de día -->
+                            {% for i in range(1, 32) %}
+                                <th>{% if i < 10 %}0{{ i }}{% else %}{{ i }}{% endif %}</th>
+                            {% endfor %}
+                            <th>Frecuencia</th>
+                        </tr>
+
+                        <!-- Generar filas dinámicas para cada item del ambiente -->
+                        {% for area, items in info.items() %}
+                            <tr>
+                                <td>{{ area }}</td>
+                                {% for i in range(1, 32) %}
+                                    <td>
+                                        {% if i in items["dias"] %}
+                                            &#x2713;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                <td>{{ items["frecuencia"].capitalize() }}</td>
+                            </tr>
+                        {% endfor %}
+
+                    </table>
+                </td>
+            </tr>
+            <!-- Observación / Acción Correctiva -->
+            <tr class="body-content">
+                <th colspan="4">Observación N°</th>
+                <th colspan="2">Fecha</th>
+                <th colspan="6">Acción Correctiva</th>
+            </tr>
+
+            {% for record in info_observaciones %}
+            <tr class="body-content">
+                <td colspan="4">{{ record['detalledemedidacorrectiva'] }}</td>
+                <td colspan="2">{{ record['fecha'] }}</td>
+                <td colspan="6">{{ record['detalle_accion_correctiva'] }} / {{ record['estado'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        <!-- Pie del reporte -->
+        <tfoot>
+            <tr>
+                <td colspan="12" style="padding-top: 25pt;">
+                    {% include "reports/footer_component.html" %}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>

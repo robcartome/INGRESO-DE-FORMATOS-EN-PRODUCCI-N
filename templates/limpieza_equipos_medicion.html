@@ -113,13 +113,12 @@
                         </div>
                         <div>
                             <!-- Botón para descargar formato del área -->
-                            <button class="btn btn-outline-info btn-sm mr-2 rounded-pill shadow-sm" onclick="descargarFormatoArea()">
-                                <i class="fas fa-file-download"></i> Descargar Formato Áreas
-                            </button>
-                            <!-- Botón para descargar observaciones -->
-                            <button class="btn btn-outline-success btn-sm rounded-pill shadow-sm" onclick="descargarObservaciones()">
-                                <i class="fas fa-file-alt"></i> Descargar Observaciones
-                            </button>
+                            <a
+                                href="{{ url_for('limpieza_equipos_medicion.download_formato', mes=grupo.mes, id_formato=grupo.id_verificacion_equipo_medicion) }}"
+                                class="btn btn-info btn-sm mr-2">
+                                    <i class="fas fa-file-download"></i> Descargar Formato Áreas
+                            </a>
+
                         </div>
                     </div>
 
