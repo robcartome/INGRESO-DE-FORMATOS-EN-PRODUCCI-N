@@ -21,7 +21,8 @@ def get_cabecera_formato(tabla: str, id_formato: str) -> list:
         'registros_controles_envasados': 'id_registro_control_envasados',
         'controles_higiene_personal': 'id_control_higiene_personal',
         'verificacion_limpieza_desinfeccion_areas': 'id_verificacion_limpieza_desinfeccion_area',
-        'verificaciones_equipos_medicion': 'id_verificacion_equipo_medicion'
+        'verificaciones_equipos_medicion': 'id_verificacion_equipo_medicion',
+        'registros_monitores_insectos_roedores': 'id_registro_monitoreo_insecto_roedor'
         # Agrega más mapeos según sea necesario para otros formatos
     }
 

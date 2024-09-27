@@ -241,7 +241,7 @@ def download_formato():
     id_formato=1 # request.args.get('formato_id') # Por el momento cumple para todos los reportes
     nombre_mes=request.args.get('mes').lower()
     mes=MESES.get(nombre_mes, 0) # 9
-    print('mes', mes)
+
     cabecera = get_cabecera_formato("verificaciones_equipos_medicion", id_formato)
 
     # Realizar una consulta para obtener los detalles específicos de cada área
@@ -257,11 +257,11 @@ def download_formato():
                                     mes,
                                     anio,
                                     estado,
-                                    fk_id_tipo_formato
+                                    fk_idtipoformatos
                                 FROM public.v_detalles_verificaciones_equipos_medicion
                                 WHERE mes = '{mes}';
                                 """)
-    pprint.pprint(detalles_equipos_medicion)
+    # pprint.pprint(detalles_equipos_medicion)
 
     # Consulta para obtener Observaciones
     observaciones = execute_query(f"""
@@ -276,6 +276,8 @@ def download_formato():
 
     # Crear el subdiccionario para esta área
     info = defaultdict(lambda: {"dias": [], "frecuencia": ""})
+    anio=detalles_equipos_medicion[0]['anio']
+
     # Procesar cada registro en 'detalles' para llenar 'info'
     for detalle in detalles_equipos_medicion:
         categoria = detalle['detalles_categorias_limpieza_desinfeccion']
@@ -324,7 +326,7 @@ def download_formato():
         frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
         mes=nombre_mes,
-        anio='2025',
+        anio=anio,
         info=info,
         info_observaciones=observaciones
     )
