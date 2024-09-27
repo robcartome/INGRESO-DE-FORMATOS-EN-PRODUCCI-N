@@ -340,7 +340,7 @@ SELECT
 	d.hora,
 	d.observacion,
 	ac.idaccion_correctiva,
-	ac.detalle_accion_correctiva,
+	COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
 	ac.estado AS estado_accion_correctiva,
 	r.id_registro_monitoreo_insecto_roedor,
 	r.mes,
@@ -357,10 +357,17 @@ ORDER BY
 	d.id_detalle_registro_monitoreo_insecto_roedor
 DESC;
 
-SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 9 ORDER BY id_registro_monitoreo_insecto_roedor DESC
-
 DROP VIEW v_detalles_registros_monitoreos_insectos_roedores
 
-SELECT * FROM acciones_correctivas
+SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 9 ORDER BY id_registro_monitoreo_insecto_roedor DESC
+
+
+
+SELECT * FROM registros_monitores_insectos_roedores
 
 SELECT * FROM public.tiposformatos
+
+ public.areas_produccion
+SELECT * FROM public.detalles_registros_monitoreos_insectos_roedores
+
+SELECT * FROM public.acciones_correctivas
