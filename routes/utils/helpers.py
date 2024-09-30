@@ -1,8 +1,10 @@
 import base64
 import pdfkit
+import calendar
 
 from flask import make_response
 from connection.database import execute_query
+from datetime import datetime, timedelta
 
 
 def get_cabecera_formato(tabla: str, id_formato: str) -> list:
@@ -93,3 +95,25 @@ def generar_reporte(template, filename_report='Reporte sin nombre', orientation=
     except Exception as e:
         print(f"Error al generar el reporte: {e}")
         return make_response("Error al generar el reporte.", 500)
+
+
+def get_ultimo_dia_laboral_del_mes(mes=None, año=None):
+    ''' return 30/07/2024 '''
+    # Si no se proporciona mes ni año, se toma el mes y año actual
+    hoy = datetime.today()
+    if mes is None:
+        mes = hoy.month
+    if año is None:
+        año = hoy.year
+
+    # Obtener el último día del mes
+    ultimo_dia_mes = calendar.monthrange(año, mes)[1]
+    fecha_ultimo_dia = datetime(año, mes, ultimo_dia_mes)
+
+    # Verificar si es domingo
+    while fecha_ultimo_dia.weekday() == 6:  # 6 significa domingo
+        fecha_ultimo_dia -= timedelta(days=1)
+
+    # Formatear la fecha como dd/mm/yyyy
+    return fecha_ultimo_dia.strftime("%d/%m/%Y")
+

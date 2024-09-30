@@ -11,6 +11,7 @@ from .utils.constans import MESES
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
+from .utils.helpers import get_ultimo_dia_laboral_del_mes
 
 
 limpieza_equipos_medicion = Blueprint('limpieza_equipos_medicion', __name__)
@@ -328,7 +329,8 @@ def download_formato():
         mes=nombre_mes,
         anio=anio,
         info=info,
-        info_observaciones=observaciones
+        info_observaciones=observaciones,
+        fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
     file_name = f"{title_report} - {nombre_mes}"
