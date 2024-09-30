@@ -9,6 +9,7 @@ from .utils.constans import MESES_BY_NUM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
+from .utils.helpers import get_ultimo_dia_laboral_del_mes
 
 
 ########## PARA LAVADO_MANOS.HTML ###################################################################################
@@ -256,7 +257,8 @@ def download_formato():
         info=agrupado_por_fecha,
         medidas_correctivas = medidas_correctivas_agrupadas,
         mes=mes,
-        anio=anio
+        anio=anio,
+        fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
     filename=f"REPORTE DE LAVADO DE MANOS - {mes} - {anio}"

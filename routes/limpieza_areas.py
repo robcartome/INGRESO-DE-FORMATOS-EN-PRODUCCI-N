@@ -11,6 +11,7 @@ from .utils.constans import MESES
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
+from .utils.helpers import get_ultimo_dia_laboral_del_mes
 
 
 limpieza_areas = Blueprint('limpieza_areas', __name__)
@@ -382,6 +383,7 @@ def download_formato_obs():
         frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
         info=registros,
+        fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
     file_name = f"{title_report} - {mes}"

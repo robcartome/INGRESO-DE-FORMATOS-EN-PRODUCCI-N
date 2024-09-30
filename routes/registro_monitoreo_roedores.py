@@ -8,6 +8,8 @@ from .utils.constans import MESES_BY_NUM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
+from .utils.helpers import get_ultimo_dia_laboral_del_mes
+
 
 registro_monitoreo_roedores = Blueprint('registro_monitoreo_roedores', __name__)
 
@@ -280,7 +282,8 @@ def download_formato():
         logo_base64=logo_base64,
         mes=mes,
         anio=anio,
-        info=info
+        info=info,
+        fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
     file_name = f"{title_report} - {mes}"
