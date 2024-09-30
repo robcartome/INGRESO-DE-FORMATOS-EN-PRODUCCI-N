@@ -166,7 +166,7 @@
             <div class="modal-content">
                 <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
                 <div class="modal-header" style="background-color: #FF8C00; color: white;">
-                    <h5 class="modal-title" id="labelHistorialLavadoMano">Historial de los registros y monitoreos de insectos</h5>
+                    <h5 class="modal-title" id="labelHistorialLavadoMano">Historial de los registros y monitoreos de roedores</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -192,9 +192,11 @@
                                                 </button>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="descargarFormato('{{ hl.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
-                                                    <i class="fas fa-download"></i> Descagar Formato
-                                                </button>
+                                                <a
+                                                    href="{{ url_for('registro_monitoreo_roedores.download_formato', mes=hl.mes, id_formato=hl.id_registro_monitoreo_insecto_roedor) }}"
+                                                    class="btn btn-info btn-sm mr-2">
+                                                        <i class="fas fa-download"></i> Descargar Formatos
+                                                </a>
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -216,7 +218,7 @@
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header" style="background-color: #FF8C00; color: white;">
-                    <h5 class="modal-title" id="detalleHistorialControlHigienePersonalLabel">Detalle del registro y monitoreo de insectos</h5>
+                    <h5 class="modal-title" id="detalleHistorialControlHigienePersonalLabel">Detalle del registro y monitoreo de roedores</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
