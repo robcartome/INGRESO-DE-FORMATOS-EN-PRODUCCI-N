@@ -4,7 +4,8 @@ from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from datetime import datetime
 from datetime import time
-from .utils.constans import BPM
+from .utils.constans import POES
+from .utils.constans import MESES_BY_NUM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
@@ -187,3 +188,101 @@ def obtener_detalle_monitoreo_insectos(id_formatos):
     except Exception as e:
         print(f"Error al obtener los detalles: {e}")
         return jsonify({'status': 'error', 'message': 'Hubo un error al obtener los detalles.'}), 500
+
+
+@registro_monitoreo_roedores.route('/download_formato', methods=['GET'])
+def download_formato():
+
+    # Obtener el id del trabajador de los argumentos de la URL
+    id_formato=request.args.get('id_formato')
+    mes=request.args.get('mes')
+    print(id_formato, mes)
+    cabecera=get_cabecera_formato("registros_monitores_insectos_roedores", id_formato)
+    print(cabecera)
+    # Realizar la consulta para todos los registros y controles de envasados finalizados
+    registros = execute_query(f"""SELECT
+                id_detalle_registro_monitoreo_insecto_roedor,
+                to_char(fecha::timestamp with time zone, 'DD/MM/YYYY'::text) AS fecha,
+                hora,
+                observacion,
+                detalle_accion_correctiva,
+                estado_accion_correctiva,
+                idaccion_correctiva
+            FROM v_detalles_registros_monitoreos_insectos_roedores
+            WHERE id_registro_monitoreo_insecto_roedor = {id_formato}
+            ORDER BY fecha, hora""")
+
+    info=[]
+    for registro in registros:
+        # Obtener las verificaciones de áreas por detalle
+        verificaciones = execute_query("""
+            SELECT
+                fk_id_area_produccion,
+                fk_id_detalle_registro_monitoreo_insecto_roedor
+            FROM verificaciones_areas_produccion_insectos_roedores
+            WHERE fk_id_detalle_registro_monitoreo_insecto_roedor = %s
+        """, (registro['id_detalle_registro_monitoreo_insecto_roedor'],))
+
+        ids_areas = [verificacion['fk_id_area_produccion'] for verificacion in verificaciones]
+        dict_registro = {
+            "fecha": registro['fecha'],
+            "hora": registro['hora'],
+            "area_m_prima": 2 in ids_areas,
+            "alm_p_terminado": 4 in ids_areas,
+            "alm_proceso": 10 in ids_areas,
+            "vestuarios": 11 in ids_areas,
+            "lav_de_manos": 12 in ids_areas,
+            "sshh": 7 in ids_areas,
+            "oficinas": 8 in ids_areas,
+            "pasadizos": 13 in ids_areas,
+            "a_empaque": 14 in ids_areas,
+            "a_lavado": 15 in ids_areas,
+            "acciones_correctivas": registro['detalle_accion_correctiva']
+        }
+        info.append(dict_registro)
+
+   ### REGISTRO Y MONITOREO DE ROEDORES
+    """ Exampl info
+    info [
+            {
+                "fecha": registros['fecha'],
+                "hora": "09:05",
+                "area_m_prima": True,
+                "alm_p_terminado": False,
+                "alm_proceso": "",
+                "vestuarios": True,
+                "sshh": True,
+                "oficinas": True,
+                "pasadizos": False,
+                "a_empaque": True,
+                "a_lavado": True,
+                "acciones_correctivas": "Se volverá a revisar el almacen de productos terminados y pasadizos"
+            },
+        ]
+    """
+
+    # Generar Template
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report = f"{cabecera[0]['nombreformato']}"
+
+    # Establecer mes y año
+    num_mes=datetime.strptime(registros[0]['fecha'], '%d/%m/%Y').month
+    mes=MESES_BY_NUM[num_mes].upper()
+    anio=datetime.strptime(registros[0]['fecha'], '%d/%m/%Y').year
+
+    # Renderiza la plantilla
+    template = render_template(
+        "reports/reporte_registro_monitoreo_roedores.html",
+        title_manual=POES,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
+        mes=mes,
+        anio=anio,
+        info=info
+    )
+
+    file_name = f"{title_report} - {mes}"
+    return generar_reporte(template, file_name, orientation='landscape')
