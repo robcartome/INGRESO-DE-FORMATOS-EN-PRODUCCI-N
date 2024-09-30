@@ -404,3 +404,5 @@ SELECT * FROM trabajadores
 
 SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC
 SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC
+
+SELECT * FROM public.registros_monitores_insectos_roedores
