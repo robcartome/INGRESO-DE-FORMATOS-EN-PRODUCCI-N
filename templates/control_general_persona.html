@@ -11,8 +11,8 @@
         <div class="form-row mb-3">
             <div class="form-group col-md-6">
                 <label for="dniTrabajador" style="color: #FF8C00;">DNI:</label>
-                <input type="number" id="dniTrabajador" class="form-control" name="dniTrabajador" placeholder="DNI" required>
-            </div>
+                <input type="number" id="dniTrabajador" class="form-control" name="dniTrabajador" placeholder="DNI" oninput="this.value = this.value.slice(0, 8);" required>
+            </div>            
             <div class="form-group col-md-6">
                 <label for="nombresTrabajador" style="color: #FF8C00;">Nombres:</label>
                 <input type="text" id="nombresTrabajador" class="form-control" name="nombresTrabajador" placeholder="Nombres del Trabajador" required>
@@ -35,13 +35,13 @@
             </div>
             <div class="form-group col-md-6">
                 <label for="celularTrabajador" style="color: #FF8C00;">Celular:</label>
-                <input type="number" id="celularTrabajador" class="form-control" name="celularTrabajador" placeholder="Celular del Trabajador">
+                <input type="number" id="celularTrabajador" class="form-control" name="celularTrabajador" placeholder="Celular del Trabajador" oninput="this.value = this.value.slice(0, 9);">
             </div>
         </div>
         <div class="form-row mb-3">
             <div class="form-group col-md-6">
                 <label for="celularEmergenciaTrabajador" style="color: #FF8C00;">Celular de emergencia:</label>
-                <input type="number" id="celularEmergenciaTrabajador" class="form-control" name="celularEmergenciaTrabajador" placeholder="Celular de emergencia del Trabajador">
+                <input type="number" id="celularEmergenciaTrabajador" class="form-control" name="celularEmergenciaTrabajador" placeholder="Celular de emergencia del Trabajador" oninput="this.value = this.value.slice(0, 9);">
             </div>
             <div class="form-group col-md-6">
                 <label for="fechaIngreso" style="color: #FF8C00;">Fecha de ingreso:</label>
@@ -51,11 +51,11 @@
         <div class="form-row mb-3">
             <div class="form-group col-md-6">
                 <label for="areaTrabajador" style="color: #FF8C00;">Área:</label>
-                <input type="text" id="areaTrabajador" class="form-control" name="areaTrabajador" placeholder="Área del Trabajador" value="Producción">
-            </div>
+                <input type="text" id="areaTrabajador" class="form-control" name="areaTrabajador" placeholder="Área del Trabajador" value="Producción" readonly>
+            </div>            
             <div class="form-group col-md-6">
                 <label for="cargoTrabajador" style="color: #FF8C00;">Cargo:</label>
-                <input type="text" id="cargoTrabajador" class="form-control" name="cargoTrabajador" placeholder="Cargo del Trabajador">
+                <input type="text" id="cargoTrabajador" class="form-control" name="cargoTrabajador" placeholder="Cargo del Trabajador" autocomplete="off">
             </div>
         </div>
         <div class="form-row mb-3">

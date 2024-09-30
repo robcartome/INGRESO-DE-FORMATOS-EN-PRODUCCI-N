@@ -18,16 +18,30 @@ def control_general():
         try:
             # Obtener a los trabajadores
             query_trabajador = """SELECT 
-                                    c.idcontrolgeneral,t.idtrabajador, t.dni, t.nombres, t.apellidos, 
-                                    t.fecha_nacimiento, t.direccion, t.celular, 
-                                    t.celular_emergencia, t.fecha_ingreso, 
-                                    t.area, t.cargo, t.fk_idsexo, cn.carnet_salud
+                                    c.idcontrolgeneral,
+                                    t.idtrabajador, 
+                                    t.dni, 
+                                    t.nombres, 
+                                    t.apellidos, 
+                                    TO_CHAR(t.fecha_nacimiento, 'DD/MM/YYYY') AS fecha_nacimiento, 
+                                    t.direccion, 
+                                    t.celular, 
+                                    t.celular_emergencia, 
+                                    TO_CHAR(t.fecha_ingreso, 'DD/MM/YYYY') AS fecha_ingreso, 
+                                    t.area, 
+                                    t.cargo, 
+                                    t.fk_idsexo, 
+                                    cn.carnet_salud,
+                                    t.estado_trabajador
                                 FROM 
                                     trabajadores t 
                                 JOIN 
                                     controles_generales_personal c ON t.idtrabajador = c.fk_idtrabajador
                                 JOIN
-                                    carnetsalud cn ON c.fk_idcarnetsalud = cn.idcarnetsalud"""
+                                    carnetsalud cn ON c.fk_idcarnetsalud = cn.idcarnetsalud
+                                WHERE
+                                    t.estado_trabajador = 'ACTIVO'
+                                    """
             trabajadores = execute_query(query_trabajador)
 
             query_genero = "SELECT * FROM sexos"
@@ -69,14 +83,14 @@ def control_general():
             # Insertar trabajador en la base de datos
             query_insertar_trabajador = """ 
                 INSERT INTO trabajadores (dni, nombres, apellidos, fecha_nacimiento, direccion, celular, 
-                celular_emergencia, fecha_ingreso, area, cargo, fk_idsexo) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                celular_emergencia, fecha_ingreso, area, cargo, fk_idsexo, estado_trabajador) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING idtrabajador;
             """
             result = execute_query(query_insertar_trabajador, (
                 dniTrabajador, nombresTrabajador, apellidosTrabajador, fechaNacimiento,
                 direccionTrabajador, celularTrabajador, celularEmergenciaTrabajador, fechaIngreso,
-                areaTrabajador, cargoTrabajador, genero_seleccionar
+                areaTrabajador, cargoTrabajador, genero_seleccionar,'ACTIVO'
             ))
 
             if result and len(result) > 0:
@@ -184,9 +198,9 @@ def delete_trabajador():
 
         # Eliminar el registro relacionado en controles_generales_personal
         query_eliminar_control = """
-            DELETE FROM controles_generales_personal WHERE fk_idtrabajador = %s;
+            UPDATE trabajadores SET estado_trabajador = %s WHERE idtrabajador = %s;
         """
-        execute_query(query_eliminar_control, (idTrabajador,))
+        execute_query(query_eliminar_control, ('INACTIVO',idTrabajador,))
         
         return jsonify({'status': 'success', 'message': 'Registro eliminado.'}), 200
 

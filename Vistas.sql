@@ -357,17 +357,22 @@ ORDER BY
 	d.id_detalle_registro_monitoreo_insecto_roedor
 DESC;
 
-DROP VIEW v_detalles_registros_monitoreos_insectos_roedores
-
-SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 9 ORDER BY id_registro_monitoreo_insecto_roedor DESC
 
 
+SELECT * FROM public.trabajadores
+SELECT 
+	c.idcontrolgeneral,t.idtrabajador, t.dni, t.nombres, t.apellidos, 
+	t.fecha_nacimiento, t.direccion, t.celular, 
+	t.celular_emergencia, t.fecha_ingreso, 
+	t.area, t.cargo, t.fk_idsexo, cn.carnet_salud,
+	t.estado_trabajador
+FROM 
+	trabajadores t 
+JOIN 
+	controles_generales_personal c ON t.idtrabajador = c.fk_idtrabajador
+JOIN
+	carnetsalud cn ON c.fk_idcarnetsalud = cn.idcarnetsalud
+WHERE
+	t.estado_trabajador = 'ACTIVO'
 
-SELECT * FROM registros_monitores_insectos_roedores
 
-SELECT * FROM public.tiposformatos
-
-
-SELECT * FROM public.detalles_registros_monitoreos_insectos_roedores
-
-SELECT * FROM public.acciones_correctivas

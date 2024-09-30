@@ -92,76 +92,73 @@
 
         <!-- Sección para mostrar la lista de todos los registros de limpieza finalizados -->
         <div class="card mb-4 shadow-sm">
-            <div class="card-header text-white" style="background-color: #ff0000;">
-                <h5 class="mb-0">Registros de Verificación de Limpieza y Desinfección de las Áreas Finalizados</h5>
+            <div class="card-header text-white bg-danger">
+                <h5 class="mb-0">Historial de Limpieza y Desinfección de Áreas Finalizados</h5>
             </div>
             <div class="card-body">
-                <!-- Filtro por área -->
-                <div class="form-group col-md-6">
-                    <label for="filtrarAraeLACLOSE" style="color: #FF8C00;">Filtrar por área:</label>
-                    <input type="text" id="filtrarAraeLACLOSE" class="form-control" name="filtrarAraeLACLOSE" placeholder="Filtrar por área" onkeyup="filterLACloseArea()" autocomplete="off">
+                <!-- Filtro por área, mes y año -->
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="filtrarMesLACLOSE" class="text-warning">Filtrar por mes:</label>
+                        <input type="month" id="filtrarMesLACLOSE" class="form-control" onchange="filterByDate()">
+                    </div>
                 </div>
 
+        
                 <!-- Listado agrupado por mes y año -->
                 <div id="accordionFinalizados">
                     {% for grupo in v_finalizados_LA %}
-                    <div class="card">
+                    <div class="card mb-3">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
                             <div>
-                                <button class="btn btn-link text-dark font-weight-bold p-0" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
+                                <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
                                     {{ grupo.mes }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)
                                 </button>
                             </div>
                             <div>
-                                <!-- Botón para descargar formato del área -->
-                                <a
-                                    href="{{ url_for('limpieza_areas.download_formato', mes=grupo.mes) }}"
-                                    class="btn btn-info btn-sm mr-2">
-                                        <i class="fas fa-file-download"></i> Descargar Formato Áreas
+                                <a href="{{ url_for('limpieza_areas.download_formato', mes=grupo.mes) }}" class="btn btn-info btn-sm mr-2">
+                                    <i class="fas fa-file-download"></i> Descargar Formato
                                 </a>
-                                <!-- Botón para descargar observaciones -->
-                                <a
-                                    href="{{ url_for('limpieza_areas.download_formato_obs', mes=grupo.mes) }}"
-                                    class="btn btn-success btn-sm">
-                                        <i class="fas fa-file-alt"></i> Descargar Observaciones
+                                <a href="{{ url_for('limpieza_areas.download_formato_obs', mes=grupo.mes) }}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-file-alt"></i> Descargar Observaciones
                                 </a>
                             </div>
                         </div>
-
-                            <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
-                                <div class="card-body">
-                                    <!-- Tabla de registros finalizados -->
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered mb-3">
-                                            <thead class="text-white" style="background-color: #ff0000;">
-                                                <tr class="text-center">
-                                                    <th>Área</th>
-                                                    <th>Estado</th>
-                                                    <th>Ver</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for reg in grupo.registros %}
-                                                <tr class="text-center">
-                                                    <td>{{ reg.detalle_area_produccion }}</td>
-                                                    <td>{{ reg.estado }}</td>
-                                                    <td>
-                                                        <button class="btn btn-warning btn-sm" onclick="verDetallesVerificacionLimpiezaAreas('{{ reg.id_verificacion_limpieza_desinfeccion_area }}', '{{ reg.id_area_produccion }}', '{{ reg.detalle_area_produccion }}', '{{ grupo.mes }}', '{{ grupo.anio }}', '{{ reg.estado }}')">
-                                                            <i class="fas fa-arrow-circle-right"></i> Ver
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                        <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
+                            <div class="card-body">
+                                <!-- Tabla de registros -->
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="bg-danger text-white text-center">
+                                            <tr>
+                                                <th>Área</th>
+                                                <th>Estado</th>
+                                                <th>Ver</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for reg in grupo.registros %}
+                                            <tr class="text-center">
+                                                <td>{{ reg.detalle_area_produccion }}</td>
+                                                <td>{{ reg.estado }}</td>
+                                                <td>
+                                                    <button class="btn btn-warning btn-sm" onclick="verDetallesVerificacionLimpiezaAreas('{{ reg.id_verificacion_limpieza_desinfeccion_area }}', '{{ reg.id_area_produccion }}', '{{ reg.detalle_area_produccion }}', '{{ grupo.mes }}', '{{ grupo.anio }}', '{{ reg.estado }}')">
+                                                        <i class="fas fa-arrow-circle-right"></i> Ver
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
+        
 
     </div>
 

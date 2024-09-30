@@ -24,7 +24,6 @@ def kardex_info():
             query_kardex_cerrado = "SELECT * FROM v_kardex WHERE estado = 'CERRADO'"
             v_kardex_cerrado = execute_query(query_kardex_cerrado)
 
-
             return render_template('kardex.html', productos=productos, v_kardex=v_kardex, v_kardex_cerrado=v_kardex_cerrado)
         except Exception as e:
             print(f"Error al obtener datos: {e}")
@@ -144,7 +143,7 @@ def registrar_lote_kardex():
         observaciones = data['observaciones']
 
         # Validación de datos
-        if not all([id_kardex, fecha, lote, saldo_inicial, ingreso, salida]):
+        if not all([id_kardex, fecha, lote, saldo_inicial, ingreso]):
             return jsonify({'status': 'error', 'message': 'Todos los campos son obligatorios.'}), 400
         
         # Convertir a números si es necesario

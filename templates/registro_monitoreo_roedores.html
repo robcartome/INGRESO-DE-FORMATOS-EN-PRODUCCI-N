@@ -183,16 +183,16 @@
                             </thead>
                             <tbody>
                                 {% if formatos_finalizados %}
-                                    {% for hl in formatos_finalizados %}
+                                    {% for ff in formatos_finalizados %}
                                         <tr>   
-                                            <td class="text-center">{{ hl.mes }} del {{ hl.anio }} </td>
+                                            <td class="text-center">{{ ff.mes }} del {{ ff.anio }} </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial('{{ hl.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial('{{ ff.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
                                                     <i class="fas fa-eye"></i> Ver
                                                 </button>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="descargarFormato('{{ hl.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
+                                                <button type="button" class="btn btn-sm" onclick="descargarFormato('{{ ff.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
                                                     <i class="fas fa-download"></i> Descagar Formato
                                                 </button>
                                             </td>

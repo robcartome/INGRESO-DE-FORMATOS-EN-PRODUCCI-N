@@ -150,22 +150,25 @@ def registrar_fecha_limpieza():
         fecha = data.get('fecha')
         categoria_id = data.get('categoria_id')
         id_verificacion = data.get('id_verificacion')
-        print(data)
-        print(fecha)
-        print(categoria_id)
-        print(id_verificacion)
+
+
 
         # Validar que todos los datos estén presentes
         if not fecha or not categoria_id or not id_verificacion:
             return jsonify({'status': 'error', 'message': 'Faltan datos para registrar la fecha de limpieza.'}), 400
+        
+        verificiacion_fecha = execute_query("SELECT id_detalle_verificacion_limpieza_desinfeccion_area FROM detalles_verificacion_limpieza_desinfeccion_areas WHERE fecha = %s AND fk_id_verificacion_limpieza_desinfeccion_area = %s AND fk_id_categorias_limpieza_desinfeccion = %s", (fecha, id_verificacion, categoria_id))
 
-        # Insertar el registro de limpieza en la tabla detalles_verificacion_limpieza_desinfeccion_areas
-        query = """
-            INSERT INTO detalles_verificacion_limpieza_desinfeccion_areas 
-            (fecha, fk_id_verificacion_limpieza_desinfeccion_area, fk_id_categorias_limpieza_desinfeccion) 
-            VALUES (%s, %s, %s)
-        """
-        execute_query(query, (fecha, id_verificacion, categoria_id))
+        if verificiacion_fecha:
+            return jsonify({'status': 'error', 'message': 'Esta fecha ya esta registrada.'}), 400
+        else:
+            # Insertar el registro de limpieza en la tabla detalles_verificacion_limpieza_desinfeccion_areas
+            query = """
+                INSERT INTO detalles_verificacion_limpieza_desinfeccion_areas 
+                (fecha, fk_id_verificacion_limpieza_desinfeccion_area, fk_id_categorias_limpieza_desinfeccion) 
+                VALUES (%s, %s, %s)
+            """
+            execute_query(query, (fecha, id_verificacion, categoria_id))
 
         # Responder con éxito
         return jsonify({'status': 'success', 'message': 'La fecha de limpieza ha sido registrada correctamente.'}), 200
