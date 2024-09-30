@@ -1,3 +1,6 @@
+$(document).ready(function() {
+    setDefaultFechalimpiezaAreas();
+});
 
 function generarFormatoEquiposMedicion() {
     fetch('/limpieza_equipos_medicion/generar_formato_equipos_medicion', {
@@ -207,41 +210,55 @@ function registrarFechaLimpiezaEquiposMedicion(categoriaId) {
 }
 
 function finalizarVerificacionLimpiezaEquiposMedicion(id_verificacion_equipo_medicion) {
-    // Enviar la solicitud para cambiar el estado a CERRADO
-    fetch('/limpieza_equipos_medicion/finalizar_estado_equipos_medicion', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_verificacion_equipo_medicion: id_verificacion_equipo_medicion })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Registrado',
-                text: data.message,
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                location.reload(); // Recargar la página después de finalizar
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message,
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Si el usuario confirma, se procede con el fetch
+            fetch('/limpieza_equipos_medicion/finalizar_estado_equipos_medicion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_verificacion_equipo_medicion: id_verificacion_equipo_medicion })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registrado',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload(); // Recargar la página después de finalizar
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al finalizar el registro:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al registrar',
+                    text: 'Ocurrió un error al finalizar el registro. Inténtalo de nuevo más tarde.',
+                });
             });
         }
-    })
-    .catch(error => {
-        console.error("Error al finalizar el registro:", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error al registrar',
-            text: 'Ocurrió un error al finalizar el registro. Inténtalo de nuevo más tarde.',
-        });
     });
 }
+
 
 
 function modificarEstadoAC(idAC) {
@@ -352,5 +369,49 @@ function cargarFechasLimpiezaEquiposMedicionFinalizados(categoriaId, id_verifica
             title: 'Error al cargar fechas',
             text: 'Ocurrió un error al cargar las fechas de limpieza. Inténtalo de nuevo más tarde.',
         });
+    });
+}
+
+
+function filterByDate() {
+    const mes = document.getElementById("filtrarMesLACLOSE").value;
+    
+    // Mapear meses en número a nombre
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"];
+
+    if (mes) {
+        const mesInput = mes.split("-")[1]; // Obtener el mes en formato numérico (MM)
+        const anoInput = mes.split("-")[0]; // Obtener el año (YYYY)
+        
+        // Convertir el mes numérico a nombre (Setiembre, Octubre, etc.)
+        const nombreMesInput = meses[parseInt(mesInput) - 1]; // Restar 1 porque el índice del array comienza en 0
+
+        // Obtener todas las tarjetas (grupos de meses/años)
+        const cards = document.querySelectorAll("#accordionFinalizados .card");
+
+        cards.forEach(function (card) {
+            // Extraer el texto del botón del acordeón (Ejemplo: "Setiembre del 2024")
+            const headerText = card.querySelector('.card-header button').textContent;
+            
+            // Verificar si el texto contiene el mes y el año seleccionados
+            const mesFiltrado = headerText.includes(`${nombreMesInput} del ${anoInput}`);
+
+            // Mostrar u ocultar la tarjeta basado en los filtros
+            if (mesFiltrado) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+}
+
+// Función para establecer la fecha actual en los campos de fecha
+function setDefaultFechalimpiezaAreas() {
+    const today = new Date().toISOString().split('T')[0];  // Obtiene la fecha actual en formato YYYY-MM-DD
+    
+    // Selecciona todos los inputs que tienen la clase 'fecha_actual'
+    document.querySelectorAll('.fecha_actual').forEach(campo => {
+        campo.value = today;  // Asigna la fecha actual a cada campo
     });
 }

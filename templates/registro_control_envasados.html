@@ -176,12 +176,12 @@
         <div class="modal-dialog modal-lg resizable-modal" role="document">
             <div class="modal-content">
                 <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
-                <div class="modal-header" style="background-color: #FF8C00; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                    <h5 class="modal-title" id="labelhistorialControlEnvasados" style="font-weight: bold; font-size: 1.5rem;">Historial de Registros de Control de Envasados</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem;">
+                <div class="modal-header" style="background-color: #FF8C00; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 10px;">
+                    <h5 class="modal-title" id="labelhistorialControlEnvasados" style="font-weight: bold; font-size: 1.25rem;">Historial de Registros de Control de Envasados</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="font-size: 1.25rem;">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                </div>
+                </div>                
                 <div class="modal-body">
                     <div class="table-responsive">
                         <div class="input-container mb-3">
@@ -189,7 +189,7 @@
                             <input type="date" id="filterFechaCE" class="form-control" name="filterFechaCE"
                             onchange="filterTableFechaControlEnvasados()" style="border-radius: 5px; border: 1px solid #FF8C00;"/>
                         </div>
-                        <table class="table table-bordered table-hover" id="tablaRegistroCE">
+                        <table class="table table-bordered" id="tablaRegistroCE">
                             <thead style="background-color: #FF8C00; color: white; font-weight: bold;">
                                 <tr>
                                     <th class="text-center">Fecha</th>
@@ -203,7 +203,7 @@
                                         <tr>   
                                             <td class="text-center">{{ he.fecha }}</td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial({{ he.id_registro_control_envasados }})" style="background-color: #FFC107; color: black;">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial('{{ he.id_registro_control_envasados }}')" style="background-color: #FFC107; color: black; padding: 8px 12px; font-size: 1rem;">
                                                     <i class="fas fa-eye"></i> Ver
                                                 </button>
                                             </td>

@@ -23,7 +23,7 @@ def lavado_Manos():
             query_lavado_manos = """SELECT * FROM v_lavados_manos WHERE estado = 'CREADO' ORDER BY idmano DESC"""
             lavado_manos = execute_query(query_lavado_manos)
 
-            query_trabajadores = "SELECT idtrabajador, CONCAT(nombres, ' ', apellidos) AS nombres FROM trabajadores"
+            query_trabajadores = "SELECT idtrabajador, CONCAT(nombres, ' ', apellidos) AS nombres FROM trabajadores WHERE estado_trabajador = 'ACTIVO'"
             trabajadores = execute_query(query_trabajadores)
 
             query_formatos = "SELECT estado FROM lavadosmanos WHERE fk_idtipoformatos = 2 AND estado = 'CREADO'"

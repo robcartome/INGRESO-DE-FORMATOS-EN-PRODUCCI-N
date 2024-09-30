@@ -1,3 +1,18 @@
+$(document).ready(function() {
+    setDefaultFecha();
+});
+
+// Función para establecer la fecha actual en los campos de fecha
+function setDefaultFecha() {
+    const today = new Date().toISOString().split('T')[0];  // Obtiene la fecha actual en formato YYYY-MM-DD
+    
+    // Selecciona todos los inputs que tienen la clase 'fecha_monitoreo_insectos'
+    $('.fecha_monitoreo_insectos').each(function() {
+        $(this).val(today);  // Asigna la fecha actual a cada campo
+    });
+}
+
+
 function generarFormatoMonitoreoInsecto() {
     fetch('/registro_monitoreo_insectos/generar_formato_monitoreo_insecto', {
         method: 'POST'

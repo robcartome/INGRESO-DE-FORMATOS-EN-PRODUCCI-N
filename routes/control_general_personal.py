@@ -23,11 +23,11 @@ def control_general():
                                     t.dni, 
                                     t.nombres, 
                                     t.apellidos, 
-                                    TO_CHAR(t.fecha_nacimiento, 'DD/MM/YYYY') AS fecha_nacimiento, 
+                                    t.fecha_nacimiento, 
                                     t.direccion, 
                                     t.celular, 
                                     t.celular_emergencia, 
-                                    TO_CHAR(t.fecha_ingreso, 'DD/MM/YYYY') AS fecha_ingreso, 
+                                    t.fecha_ingreso,
                                     t.area, 
                                     t.cargo, 
                                     t.fk_idsexo, 
@@ -80,43 +80,47 @@ def control_general():
             
             file_data = carnetSaludTrabajador.read()
 
-            # Insertar trabajador en la base de datos
-            query_insertar_trabajador = """ 
-                INSERT INTO trabajadores (dni, nombres, apellidos, fecha_nacimiento, direccion, celular, 
-                celular_emergencia, fecha_ingreso, area, cargo, fk_idsexo, estado_trabajador) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING idtrabajador;
-            """
-            result = execute_query(query_insertar_trabajador, (
-                dniTrabajador, nombresTrabajador, apellidosTrabajador, fechaNacimiento,
-                direccionTrabajador, celularTrabajador, celularEmergenciaTrabajador, fechaIngreso,
-                areaTrabajador, cargoTrabajador, genero_seleccionar,'ACTIVO'
-            ))
-
-            if result and len(result) > 0:
-                idTrabajador = result[0]['idtrabajador']
-
-                # Insertar el carnet de salud y devolver el id generado
-                query_carnet_salud = """
-                    INSERT INTO carnetsalud (carnet_salud) 
-                    VALUES (%s) 
-                    RETURNING idcarnetsalud;
-                """
-                
-                # Ejecutamos la consulta y obtenemos el id del nuevo carnet
-                idcarnet_result = execute_query(query_carnet_salud, (psycopg2.Binary(file_data),))
-                idcarnet = idcarnet_result[0]['idcarnetsalud']
-
-                # Insertar control general personal con el id del carnet y el id del trabajador
-                query_insertar_control = """ 
-                    INSERT INTO controles_generales_personal (fk_idcarnetsalud, fk_idtrabajador, fk_idtipoformatos) 
-                    VALUES (%s, %s, %s);
-                """
-                execute_query(query_insertar_control, (idcarnet, idTrabajador, 1))
-
-                return jsonify({'status': 'success', 'message': 'Trabajador registrado exitosamente.'}), 200
+            dni_creado = execute_query("SELECT dni FROM trabajadores WHERE dni = %s", (dniTrabajador,))
+            if dni_creado and len(dni_creado) > 0:
+                return jsonify({'status': 'error', 'message': 'El DNI ya existe.'}), 400
             else:
-                return jsonify({'status': 'error', 'message': 'Error al insertar el trabajador en la base de datos.'}), 500
+                # Insertar trabajador en la base de datos
+                query_insertar_trabajador = """ 
+                    INSERT INTO trabajadores (dni, nombres, apellidos, fecha_nacimiento, direccion, celular, 
+                    celular_emergencia, fecha_ingreso, area, cargo, fk_idsexo, estado_trabajador) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING idtrabajador;
+                """
+                result = execute_query(query_insertar_trabajador, (
+                    dniTrabajador, nombresTrabajador, apellidosTrabajador, fechaNacimiento,
+                    direccionTrabajador, celularTrabajador, celularEmergenciaTrabajador, fechaIngreso,
+                    areaTrabajador, cargoTrabajador, genero_seleccionar,'ACTIVO'
+                ))
+
+                if result and len(result) > 0:
+                    idTrabajador = result[0]['idtrabajador']
+
+                    # Insertar el carnet de salud y devolver el id generado
+                    query_carnet_salud = """
+                        INSERT INTO carnetsalud (carnet_salud) 
+                        VALUES (%s) 
+                        RETURNING idcarnetsalud;
+                    """
+                    
+                    # Ejecutamos la consulta y obtenemos el id del nuevo carnet
+                    idcarnet_result = execute_query(query_carnet_salud, (psycopg2.Binary(file_data),))
+                    idcarnet = idcarnet_result[0]['idcarnetsalud']
+
+                    # Insertar control general personal con el id del carnet y el id del trabajador
+                    query_insertar_control = """ 
+                        INSERT INTO controles_generales_personal (fk_idcarnetsalud, fk_idtrabajador, fk_idtipoformatos) 
+                        VALUES (%s, %s, %s);
+                    """
+                    execute_query(query_insertar_control, (idcarnet, idTrabajador, 1))
+
+                    return jsonify({'status': 'success', 'message': 'Trabajador registrado exitosamente.'}), 200
+                else:
+                    return jsonify({'status': 'error', 'message': 'Error al insertar el trabajador en la base de datos.'}), 500
 
         except Exception as e:
             print(f"Error al procesar la solicitud POST: {e}")

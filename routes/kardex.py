@@ -237,7 +237,6 @@ def finalizar_kardex():
 
         query_update_estado_kardex = "UPDATE kardex SET estado = %s WHERE idkardex = %s"
         execute_query(query_update_estado_kardex,('CERRADO', id_kardex))
-
         return jsonify({'status': 'success', 'message': 'Se finalizo correctamente el Kardex'}), 200
 
     except Exception as e:

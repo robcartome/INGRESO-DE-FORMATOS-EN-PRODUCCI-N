@@ -217,3 +217,40 @@ html, body {
   margin-bottom: 1rem;
 }
 
+@media (max-width: 576px) {
+  .modal-dialog {
+      max-width: 100%;
+      margin: 10px;
+  }
+
+  .modal-content {
+      border-radius: 10px;
+  }
+
+  .modal-header {
+      padding: 10px 15px;
+  }
+
+  .modal-title {
+      font-size: 1.25rem;
+  }
+
+  .modal-body {
+      padding: 15px;
+  }
+
+  .table-responsive {
+      font-size: 0.875rem; /* Ajustar el tamaño de la fuente de la tabla */
+  }
+
+  .btn {
+      font-size: 0.875rem;
+      padding: 5px 10px;
+  }
+}
+
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling en dispositivos móviles */
+}

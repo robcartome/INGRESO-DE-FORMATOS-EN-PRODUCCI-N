@@ -265,39 +265,54 @@ function verDetallesVerificacionLimpiezaAreas(id_verificacion, id_area, detalle_
 
 
 function finalizarVerificacionLimpiezaAreas(id_verificacion) {
-    fetch(`/limpieza_areas/finalizar_limpieza_areas/${id_verificacion}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Registrado',
-                text: data.message,
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => location.reload());
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message,
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Si el usuario confirma, se procede con el fetch
+            fetch(`/limpieza_areas/finalizar_limpieza_areas/${id_verificacion}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registrado',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al registrar la limpieza del área:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al registrar limpieza',
+                    text: 'Ocurrió un error al registrar la limpieza del área. Inténtalo de nuevo más tarde.',
+                });
             });
         }
-    })
-    .catch(error => {
-        console.error("Error al registrar la limpieza del área:", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error al registrar limpieza',
-            text: 'Ocurrió un error al registrar la limpieza del área. Inténtalo de nuevo más tarde.',
-        });
     });
 }
+
 
 // Función para establecer la fecha actual en los campos de fecha
 function setDefaultFechalimpiezaAreas() {

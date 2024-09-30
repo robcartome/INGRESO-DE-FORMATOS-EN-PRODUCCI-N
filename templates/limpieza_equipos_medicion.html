@@ -95,10 +95,12 @@
             <h5 class="mb-0">Historial de registros de Verificación de limpieza y desinfección de equipos de medición por meses</h5>
         </div>
         <div class="card-body">
-            <!-- Filtro por área -->
-            <div class="form-group col-md-6 mx-auto mb-4">
-                <label for="filtrarAraeLACLOSE" style="color: #FF8C00;">Filtrar por área:</label>
-                <input type="text" id="filtrarAraeLACLOSE" class="form-control rounded-pill shadow-sm" name="filtrarAraeLACLOSE" placeholder="Filtrar por área" onkeyup="filterLACloseArea()" autocomplete="off">
+            <!-- Filtro por área, mes y año -->
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label for="filtrarMesLACLOSE" class="text-warning">Filtrar por mes:</label>
+                    <input type="month" id="filtrarMesLACLOSE" class="form-control" onchange="filterByDate()">
+                </div>
             </div>
 
             <!-- Listado agrupado por mes y año -->

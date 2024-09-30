@@ -243,40 +243,58 @@ async function descargarFormatoKardex() {
 }
 
 function finalizarKardex(idKardex) {
-    fetch('/kardex/finalizar_kardex', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idKardex })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Se finalizó',
-                text: 'El estado del kardex fue modificado a Finalizado.',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message,
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Solo se ejecuta el fetch si el usuario confirma la acción
+            fetch('/kardex/finalizar_kardex', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    idKardex: idKardex
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Se finalizó',
+                        text: 'El estado del kardex fue modificado a Finalizado.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire(
+                    'Error',
+                    'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                    'error'
+                );
             });
         }
-    })
-    .catch(error => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error en la solicitud',
-            text: 'Ocurrió un error al enviar la solicitud.',
-        });
-        console.error('Error en la solicitud:', error);
     });
 }
+
 
 // Filtros
 function filterKardexOpenProduct() {
@@ -475,37 +493,6 @@ async function descargarFormatoKardex() {
     const endpoint = `/kardex/descargar_formato_kardex/${idkardex}`;
     fetchDownloadPDF(endpoint, 'kardex');
   }
-
-
-function finalizarKardex(idKardex) {
-    $.post('/kardex/finalizar_kardex', {
-        idKardex: idKardex
-    }, function(response) {
-        if (response.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Se finalizo',
-                text: 'el estado del kardex fue modificado a Finalizado.',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: response.message,
-            });
-        }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error en la solicitud',
-            text: 'Ocurrió un error al enviar la solicitud: ' + textStatus,
-        });
-    });
-}
 
 //Para filtrar kardex activos
 function filterKardexOpenProduct() {

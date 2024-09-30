@@ -225,43 +225,58 @@ function registrarDetalleCA() {
 }
 
 function finalizarDetallesCondicionesAmbientales(idcondicionambiental) {
-    fetch('/condiciones_ambientales/finalizarDetallesCA', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            idcondicionambiental: idcondicionambiental
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Se finalizo',
-                text: 'El estado de la condición ambiental fue modificado a Finalizado.',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message,
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Si el usuario confirma, se procede con el fetch
+            fetch('/condiciones_ambientales/finalizarDetallesCA', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    idcondicionambiental: idcondicionambiental
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Se finalizó',
+                        text: 'El estado de la condición ambiental fue modificado a Finalizado.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en la solicitud',
+                    text: 'Ocurrió un error al enviar la solicitud: ' + error,
+                });
             });
         }
-    })
-    .catch(error => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error en la solicitud',
-            text: 'Ocurrió un error al enviar la solicitud: ' + error,
-        });
     });
 }
+
 
 async function descargarFormatoCA() {
     const idCA = document.getElementById('idcondicionambiental_hidden').value;

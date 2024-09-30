@@ -375,4 +375,32 @@ JOIN
 WHERE
 	t.estado_trabajador = 'ACTIVO'
 
+SELECT 
+	c.idcontrolgeneral,
+	t.idtrabajador, 
+	t.dni, 
+	t.nombres, 
+	t.apellidos, 
+	DATE_FORMAT(t.fecha_nacimiento, '%d/%m/%Y') AS fecha_nacimiento, 
+	t.direccion, 
+	t.celular, 
+	t.celular_emergencia, 
+	DATE_FORMAT(t.fecha_ingreso, '%d/%m/%Y') AS fecha_ingreso, 
+	t.area, 
+	t.cargo, 
+	t.fk_idsexo, 
+	cn.carnet_salud,
+	t.estado_trabajador
+FROM 
+	trabajadores t 
+JOIN 
+	controles_generales_personal c ON t.idtrabajador = c.fk_idtrabajador
+JOIN
+	carnetsalud cn ON c.fk_idcarnetsalud = cn.idcarnetsalud
+WHERE
+	t.estado_trabajador = 'ACTIVO'
 
+SELECT * FROM trabajadores
+
+SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC
+SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC

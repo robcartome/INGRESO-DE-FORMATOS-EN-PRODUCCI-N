@@ -18,7 +18,7 @@ def higiene_personal():
         control_higiene_personal = execute_query(query_higiene_personal)
 
         #Obtener el responsable para seleccionar
-        trabajador = execute_query("SELECT * FROM trabajadores")
+        trabajador = execute_query("SELECT idtrabajador, nombres, apellidos FROM trabajadores WHERE estado_trabajador = 'ACTIVO'")
 
         #Obtener el producto para seleccionar
         detalle_higiene_personal = execute_query("SELECT * FROM v_detalle_higiene_personal WHERE estado = 'CREADO' ORDER BY id_detalle_control_higiene_personal DESC")

@@ -21,7 +21,7 @@ def control_envasados():
             control_envasados_creado = execute_query(query_registros_envasados)
 
             #Obtener el responsable para seleccionar
-            responsable_envasado = execute_query("SELECT * FROM trabajadores")
+            responsable_envasado = execute_query("SELECT * FROM trabajadores WHERE estado_trabajador = 'ACTIVO'")
 
             #Obtener el producto para seleccionar
             producto_envasado = execute_query("SELECT * FROM productos")
