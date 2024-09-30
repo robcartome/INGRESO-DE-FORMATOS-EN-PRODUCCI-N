@@ -1,13 +1,17 @@
 import os
+import pprint
 
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
+from collections import defaultdict
 from datetime import datetime
 from datetime import time
-from .utils.constans import BPM
+from .utils.constans import POES
+from .utils.constans import MESES
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
+from .utils.helpers import get_ultimo_dia_laboral_del_mes
 
 
 limpieza_equipos_medicion = Blueprint('limpieza_equipos_medicion', __name__)
@@ -231,3 +235,103 @@ def obtener_fechas_limpieza_finalizados(categoria_id, id_verificacion_equipo_med
         print(f"Error al obtener las fechas de limpieza: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al obtener las fechas de limpieza.'}), 500
 
+
+@limpieza_equipos_medicion.route('/download_formato', methods=['GET'])
+def download_formato():
+
+    id_formato=1 # request.args.get('formato_id') # Por el momento cumple para todos los reportes
+    nombre_mes=request.args.get('mes').lower()
+    mes=MESES.get(nombre_mes, 0) # 9
+
+    cabecera = get_cabecera_formato("verificaciones_equipos_medicion", id_formato)
+
+    # Realizar una consulta para obtener los detalles específicos de cada área
+    detalles_equipos_medicion = execute_query(f"""
+                                SELECT
+                                    id_detalle_verificacion_equipos_medicion,
+                                    fecha,
+                                    estado_verificacion,
+                                    id_categorias_limpieza_desinfeccion,
+                                    detalles_categorias_limpieza_desinfeccion,
+                                    frecuencia,
+                                    id_verificacion_equipo_medicion,
+                                    mes,
+                                    anio,
+                                    estado,
+                                    fk_idtipoformatos
+                                FROM public.v_detalles_verificaciones_equipos_medicion
+                                WHERE mes = '{mes}';
+                                """)
+    # pprint.pprint(detalles_equipos_medicion)
+
+    # Consulta para obtener Observaciones
+    observaciones = execute_query(f"""
+                                SELECT
+                                    detalledemedidacorrectiva,
+                                    fecha,
+                                    detalle_accion_correctiva,
+                                    estado
+	                            FROM public.v_observaciones_acc_correctivas
+                                WHERE fk_id_verificacion_equipo_medicion = {id_formato};
+                                """)
+
+    # Crear el subdiccionario para esta área
+    info = defaultdict(lambda: {"dias": [], "frecuencia": ""})
+    anio=detalles_equipos_medicion[0]['anio']
+
+    # Procesar cada registro en 'detalles' para llenar 'info'
+    for detalle in detalles_equipos_medicion:
+        categoria = detalle['detalles_categorias_limpieza_desinfeccion']
+        fecha = detalle['fecha']
+        dia = datetime.strptime(fecha, '%d/%m/%Y').day
+        frecuencia = detalle['frecuencia']
+        # Agregar el día a la lista de días de esta categoría
+        info[categoria]["dias"].append(dia)
+        # Establecer la frecuencia si aún no se ha asignado
+        if not info[categoria]["frecuencia"]:
+            info[categoria]["frecuencia"] = frecuencia.lower()
+    # pprint.pprint(info)
+
+    """ Example
+        info {
+                "Balanzas": {
+                    "dias": [15],
+                    "frecuencia": "mensual",
+                },
+                "Insectolocutores":  {
+                    "dias": [25],
+                    "frecuencia": "mensual",
+                }
+        }
+        info_observaciones [
+            {
+                "detalledemedidacorrectiva": "Observación 1",
+                "fecha": "01/09/2023",
+                "detalle_accion_correctiva": "detalle_accion_correctiva 2",
+                "estado": "SOLUCIONADO"
+            },
+        ]
+    """
+
+    # Generar Template para reporte equipos
+    logo_path = os.path.join('static', 'img', 'logo.png')
+    logo_base64 = image_to_base64(logo_path)
+    title_report = f"{cabecera[0]['nombreformato']}"
+
+    # Renderiza la plantilla
+    template = render_template(
+        "reports/reporte_limpieza_desinfeccion_equipos_medicion.html",
+        title_manual=POES,
+        title_report=title_report,
+        format_code_report=cabecera[0]['codigo'],
+        frecuencia_registro=cabecera[0]['frecuencia'],
+        logo_base64=logo_base64,
+        mes=nombre_mes,
+        anio=anio,
+        info=info,
+        info_observaciones=observaciones,
+        fecha_periodo=get_ultimo_dia_laboral_del_mes()
+    )
+
+    file_name = f"{title_report} - {nombre_mes}"
+    return generar_reporte(template, file_name, orientation='landscape')

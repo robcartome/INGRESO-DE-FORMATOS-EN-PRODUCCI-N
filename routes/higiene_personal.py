@@ -7,6 +7,8 @@ from .utils.constans import BPM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
+from .utils.helpers import get_ultimo_dia_laboral_del_mes
+
 
 higienePersona = Blueprint('higiene_personal', __name__)
 
@@ -229,6 +231,7 @@ def download_formato():
         frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
         info=info,
+        fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
     file_name=f"{title_report}"

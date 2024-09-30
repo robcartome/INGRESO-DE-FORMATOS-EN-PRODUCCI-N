@@ -7,6 +7,7 @@ from .utils.constans import BPM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
+from .utils.helpers import get_ultimo_dia_laboral_del_mes
 
 kardex = Blueprint('kardex', __name__)
 
@@ -221,7 +222,8 @@ def descargar_formato_kardex(id_kardex):
         frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
         info=detalles_formateados,
-        kardex=kardex[0]
+        kardex=kardex[0],
+        fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
     file_name=f"{title_report} - {kardex[0]['mes']} - {kardex[0]['descripcion_producto']}"
