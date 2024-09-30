@@ -192,9 +192,12 @@
                                                 </button>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="descargarFormato('{{ hl.id_registro_monitoreo_insecto_roedor }}')" style="background-color: #FFC107;">
-                                                    <i class="fas fa-download"></i> Descagar Formato
-                                                </button>
+                                                <!-- Botón para descargar formato del área -->
+                                                <a
+                                                    href="{{ url_for('registro_monitoreo_insectos.download_formato', mes=hl.mes, id_formato=hl.id_registro_monitoreo_insecto_roedor) }}"
+                                                    class="btn btn-warning btn-sm mr-2">
+                                                        <i class="fas fa-download"></i> Descargar Formato
+                                                </a>
                                             </td>
                                         </tr>
                                     {% endfor %}

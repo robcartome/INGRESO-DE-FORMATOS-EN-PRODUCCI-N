@@ -3,7 +3,6 @@ import os
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from datetime import datetime
-from datetime import time
 from .utils.constans import POES
 from .utils.constans import MESES_BY_NUM
 from .utils.helpers import image_to_base64
@@ -198,8 +197,8 @@ def download_formato():
     mes=request.args.get('mes')
     print(id_formato, mes)
     cabecera=get_cabecera_formato("registros_monitores_insectos_roedores", id_formato)
-    print(cabecera)
-    # Realizar la consulta para todos los registros y controles de envasados finalizados
+
+    # Realizar la consulta para todos los registros para el monitoreo de roedores
     registros = execute_query(f"""SELECT
                 id_detalle_registro_monitoreo_insecto_roedor,
                 to_char(fecha::timestamp with time zone, 'DD/MM/YYYY'::text) AS fecha,
