@@ -144,7 +144,7 @@ def registrar_lote_kardex():
         observaciones = data['observaciones']
 
         # Validación de datos
-        if not all([id_kardex, fecha, lote, saldo_inicial, ingreso]):
+        if not all([id_kardex, fecha, lote, saldo_inicial]):
             return jsonify({'status': 'error', 'message': 'Todos los campos son obligatorios.'}), 400
         
         # Convertir a números si es necesario
