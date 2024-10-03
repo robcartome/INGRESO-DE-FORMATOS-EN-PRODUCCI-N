@@ -251,3 +251,33 @@ document.addEventListener('DOMContentLoaded', function () {
         width: '100%'
     });
 });
+
+
+// Filtrar la tabla de detalle del kardex por la fecha seleccionada
+function filterTableDetalleLavadoMano() {
+    // Obtener el valor del input de fecha
+    let input = document.getElementById('filterFechaDetalleCA');
+    let filter = input.value;  // El valor del input de fecha es en formato yyyy-mm-dd
+
+    let table = document.getElementById('detalleLavadoManoTable');
+    let tr = table.getElementsByTagName('tr');
+
+    // Iterar sobre las filas de la tabla (excepto la cabecera)
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td')[2];  // Obtener la tercera celda (columna de fecha)
+
+        if (td) {
+            // Obtener el valor de la fecha de la celda
+            let txtValue = td.textContent || td.innerText;
+
+            // Si coinciden o no hay filtro, mostrar la fila
+            if (txtValue === filter || filter === "") {
+                tr[i].style.display = "";
+            } else {
+                // Si no coinciden, ocultar la fila
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+
