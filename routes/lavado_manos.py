@@ -180,7 +180,7 @@ def download_formato():
     cabecera = get_cabecera_formato("lavadosmanos", formato_lavado_id)
 
     # Realizar la consulta para obtener el formato de lavado de mano que corresponda
-    detalle_lavado_manos = execute_query(f"SELECT * FROM v_lavados_manos WHERE idlavadomano = {formato_lavado_id}")
+    detalle_lavado_manos = execute_query(f"SELECT * FROM v_lavados_manos WHERE idlavadomano = {formato_lavado_id} ORDER BY fecha ASC")
 
     #Realizar una consulta para mostrar las medidas correctivas según corresponda
     medidas_correctivas = execute_query(f"SELECT * FROM medidascorrectivasobservaciones WHERE fk_idlavadomano = {formato_lavado_id}")
