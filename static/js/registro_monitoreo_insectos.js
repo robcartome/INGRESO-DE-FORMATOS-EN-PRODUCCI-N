@@ -277,3 +277,54 @@ function verDetalleHistorial(idFormatos) {
         });
     });
 }
+
+
+// Filtrar la tabla de detalle del kardex por la fecha seleccionada
+function filterTableDetalleCA() {
+    // Obtener el valor del input de fecha
+    let input = document.getElementById('filterFechaDetalleCA');
+    let filter = input.value;  // El valor del input de fecha es en formato yyyy-mm-dd
+
+    let table = document.getElementById('detalle_table_HP');
+    let tr = table.getElementsByTagName('tr');
+
+    // Iterar sobre las filas de la tabla (excepto la cabecera)
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td')[0];  // Obtener la primera celda (columna de fecha)
+
+        if (td) {
+            // Obtener el valor de la fecha de la celda
+            let txtValue = td.textContent || td.innerText;
+
+            // Asegurarse de que ambas fechas estén en formato yyyy-mm-dd antes de compararlas
+            let formattedCellDate = formatDate(txtValue);  // Formateamos la fecha de la celda
+
+            if (formattedCellDate === filter || filter === "") {
+                // Si coinciden o no hay filtro, mostrar la fila
+                tr[i].style.display = "";
+            } else {
+                // Si no coinciden, ocultar la fila
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+
+// Función para convertir una fecha en formato dd/mm/yyyy o mm/dd/yyyy a yyyy-mm-dd
+function formatDate(dateString) {
+    // Suponiendo que la fecha de la celda está en formato dd/mm/yyyy
+    let parts = dateString.split('/');
+    
+    // Verificar si la fecha tiene el formato esperado dd/mm/yyyy
+    if (parts.length === 3) {
+        let day = parts[0];
+        let month = parts[1];
+        let year = parts[2];
+
+        // Retornar en formato yyyy-mm-dd
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    // Si el formato no es dd/mm/yyyy, devolver la fecha tal como está
+    return dateString;
+}

@@ -90,13 +90,11 @@
         <div class="container-fluid mt-4">
             <!-- Título centrado -->
             <h3 class="text-center text-uppercase font-weight-bold" style="color: #FF5722;">Detalle de los registros y monitoreos de roedores</h3>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <input type="text" id="filtroTrabajadorDetalle" class="form-control" placeholder="Filtrar por trabajador...">
-                </div>
-                <div class="col-md-6">
-                    <input type="date" id="filtroFechaDetalle" class="form-control" placeholder="Filtrar por fecha...">
-                </div>
+            <div class="input-container">
+                <label for="filterFechaDetalleCA" style="color: #FF8C00;">Filtrar por fecha:</label>
+                <input type="date" id="filterFechaDetalleCA" class="form-control" name="filterFechaDetalleCA"
+                onchange="filterTableDetalleCA()" 
+                />
             </div>
             <!-- Tabla resizable -->
             <div class="table-responsive mt-2">

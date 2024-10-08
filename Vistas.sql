@@ -219,6 +219,7 @@ SELECT
 	d.id_detalle_verificacion_limpieza_desinfeccion_area,
 	TO_CHAR(d.fecha, 'DD/MM/YYYY') AS fecha,
 	v.id_verificacion_limpieza_desinfeccion_area,
+	v.fk_idarea_produccion,
 	c.id_categorias_limpieza_desinfeccion,
 	c.detalles_categorias_limpieza_desinfeccion,
 	c.frecuencia
@@ -228,6 +229,8 @@ JOIN
 	verificacion_limpieza_desinfeccion_areas v ON v.id_verificacion_limpieza_desinfeccion_area = d.fk_id_verificacion_limpieza_desinfeccion_area
 JOIN
 	categorias_limpieza_desinfeccion c ON c.id_categorias_limpieza_desinfeccion = d.fk_id_categorias_limpieza_desinfeccion;
+
+DROP VIEW v_detalles_verificacion_limpieza_desinfeccion_areas
 
 SELECT * FROM v_detalles_verificacion_limpieza_desinfeccion_areas
 -- Creación de vista para mostrar las asignaciones de medidas correctivas para la limpieza de las áreas
@@ -400,9 +403,20 @@ JOIN
 WHERE
 	t.estado_trabajador = 'ACTIVO'
 
-SELECT * FROM trabajadores
 
-SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC
-SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC
+SELECT * FROM public.condiciones_ambientales
 
-SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 10 ORDER BY id_registro_monitoreo_insecto_roedor DESC
+SELECT * FROM public.detalle_condiciones_ambientales
+
+SELECT * FROM public.areas
+
+
+SELECT * FROM public.tiposformatos
+
+SELECT * FROM public.condiciones_ambientales
+
+SELECT * FROM public.asignacion_verificacion_previa_condicion_ambiental
+
+SELECT * FROM public.detalle_condiciones_ambientales
+
+SELECT * FROM detalle_condiciones_ambientales

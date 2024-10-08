@@ -187,8 +187,6 @@ function registrarFechaLimpiezaEquiposMedicion(categoriaId) {
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                // Limpiar el campo de fecha y recargar la tabla de fechas
-                fechaInput.value = '';
                 cargarFechasLimpiezaEquiposMedicion(categoriaId); // Recargar fechas
             });
         } else {

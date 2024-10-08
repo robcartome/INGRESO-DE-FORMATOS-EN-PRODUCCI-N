@@ -76,8 +76,8 @@ function verDetallesCondicionesAmbientales(idcondicionambiental, detalle_area, m
                             <td class="text-center">${verificacionPrevia[2] ? '✅' : '❌'}</td>
                             <td class="text-center">${verificacionPrevia[3] ? '✅' : '❌'}</td>
                             <td class="text-center">${verificacionPrevia[4] ? '✅' : '❌'}</td>
-                            <td class="text-center">${item.temperatura}</td>
-                            <td class="text-center">${item.humedad}</td>
+                            <td class="text-center">${item.temperatura} °C</td>
+                            <td class="text-center">${item.humedad} %</td>
                             <td class="text-center">${item.observaciones}</td>
                             <td class="text-center" style="${estadoColor}">${item.detalle_accion_correctiva}</td>
                             <td class="text-center">
@@ -471,8 +471,8 @@ function verDetallesCondicionesAmbientalesFinalizadas(idcondicionambiental, deta
                             <td class="text-center">${verificacionPrevia[2] ? '✅' : '❌'}</td>
                             <td class="text-center">${verificacionPrevia[3] ? '✅' : '❌'}</td>
                             <td class="text-center">${verificacionPrevia[4] ? '✅' : '❌'}</td>
-                            <td class="text-center">${item.temperatura}</td>
-                            <td class="text-center">${item.humedad}</td>
+                            <td class="text-center">${item.temperatura} °C</td>
+                            <td class="text-center">${item.humedad} %</td>
                             <td class="text-center">${item.observaciones}</td>
                             <td class="text-center" style="${estadoColor}">${item.detalle_accion_correctiva}</td>
                             <td class="text-center">
