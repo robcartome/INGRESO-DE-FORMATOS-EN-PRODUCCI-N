@@ -290,16 +290,16 @@ def download_formato():
     # Crear un diccionario para mapear cada 'id_area_produccion' con su 'detalle_area_produccion'
     areas = {registro['id_area_produccion']: registro['detalle_area_produccion'] for registro in registros}
 
-    # pprint.pprint(areas)
+    pprint.pprint(areas)
 
     # Crear un diccionario info para almacenar los datos
     info = defaultdict(lambda: defaultdict(lambda: {"dias": [], "frecuencia": ""}))
 
     for id_area, detalle_area in areas.items():
         # Realizar una consulta para obtener los detalles específicos de cada área
-        detalles_limpieza_area = execute_query(f"""SELECT id_detalle_verificacion_limpieza_desinfeccion_area, fecha, id_verificacion_limpieza_desinfeccion_area, id_categorias_limpieza_desinfeccion, detalles_categorias_limpieza_desinfeccion, frecuencia
+        detalles_limpieza_area = execute_query(f"""SELECT id_detalle_verificacion_limpieza_desinfeccion_area, fecha, id_verificacion_limpieza_desinfeccion_area, fk_idarea_produccion, id_categorias_limpieza_desinfeccion, detalles_categorias_limpieza_desinfeccion, frecuencia
         FROM public.v_detalles_verificacion_limpieza_desinfeccion_areas
-        WHERE id_verificacion_limpieza_desinfeccion_area={id_area}""")
+        WHERE fk_idarea_produccion={id_area}""")
 
         # Crear el subdiccionario para esta área
         sub_info = defaultdict(lambda: {"dias": [], "frecuencia": ""})

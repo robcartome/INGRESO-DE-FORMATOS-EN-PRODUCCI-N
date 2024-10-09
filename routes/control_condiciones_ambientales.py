@@ -5,6 +5,7 @@ from connection.database import execute_query
 from datetime import datetime
 from datetime import time
 from .utils.constans import BPM
+from .utils.constans import MESES_BY_NUM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
@@ -184,6 +185,11 @@ def descargar_formato_CA(idCA):
     query_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY fecha, hora ASC;"
     ConsultCADetails = execute_query(query_CA, (idCA,))
 
+    # Set fecha, mes y año
+    fecha = ConsultCADetails[0]['fecha'].strftime("%d/%m/%Y")
+    _fecha = datetime.strptime(fecha, '%d/%m/%Y')
+    mes=MESES_BY_NUM[_fecha.month].capitalize()
+    anio=_fecha.year
 
     # Formatear la fecha en los detalles
     detalles_formateados = []
@@ -218,6 +224,8 @@ def descargar_formato_CA(idCA):
         frecuencia_registro=cabecera[0]['frecuencia'],
         logo_base64=logo_base64,
         info=detalles_formateados,
+        mes=mes,
+        anio=anio,
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
