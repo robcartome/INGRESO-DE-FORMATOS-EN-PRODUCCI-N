@@ -127,7 +127,7 @@ function verDetalleHistorial(idFormatos) {
                     <tr>
                         <td>${detalle.responsable}</td>
                         <td>${detalle.descripcion_producto}</td>
-                        <td>${detalle.cantidad_producida}</td>
+                        <td class="text-center">${detalle.cantidad_producida}</td>
                         <td class="text-center">${detalle.nom_empresa}</td>
                         <td class="text-center">${detalle.lote_proveedor}</td>
                         <td class="text-center">${detalle.lote_asignado}</td>

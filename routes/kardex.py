@@ -117,7 +117,6 @@ def detalles_kardex(id_kardex):
                 'fecha': detalle['fecha'],
                 'lote': detalle['lote'],
                 'saldo_inicial': detalle['saldo_inicial'],
-                'ingreso': detalle['ingreso'],
                 'salida': detalle['salida'],
                 'saldo_final': detalle['saldo_final'],
                 'observaciones': detalle['observaciones']
@@ -139,7 +138,6 @@ def registrar_lote_kardex():
         fecha = data['fecha']
         lote = data['lote']
         saldo_inicial = data['saldo_inicial']
-        ingreso = data['ingreso']
         salida = data['salida']
         observaciones = data['observaciones']
 
@@ -149,16 +147,19 @@ def registrar_lote_kardex():
         
         # Convertir a números si es necesario
         saldo_inicial = float(saldo_inicial)
-        ingreso = float(ingreso)
         salida = float(salida)
 
-        saldo_final = saldo_inicial + ingreso - salida
+        saldo_final = saldo_inicial - salida
 
         if not observaciones:
             observaciones = "-"
 
         query_update_stock = "UPDATE productos SET stock = %s WHERE idproducto = (SELECT fk_idproducto FROM kardex WHERE idkardex = %s)"
         execute_query(query_update_stock, (saldo_final,id_kardex))
+
+        ingreso_crudo = execute_query("SELECT cantidad_producida FROM v_obtener_cantidad_producida_control_envasados WHERE fk_idproducto = (SELECT fk_idproducto FROM kardex WHERE idkardex = %s) AND fecha = %s", (id_kardex,fecha))
+
+        ingreso = ingreso_crudo[0]['cantidad_producida']
 
         # Suponiendo que tienes una función 'execute_query' definida para manejar la base de datos
         query_insert_detalle_kardex = """

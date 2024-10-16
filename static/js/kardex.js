@@ -162,7 +162,6 @@ function registrarDetalleKardex() {
     var fecha = document.getElementById('fecha_kardex').value;
     var lote = document.getElementById('loteKardex').value;
     var saldo_inicial = parseFloat(document.getElementById('saldoInicial').value);
-    var ingreso = parseFloat(document.getElementById('ingresoKardex').value);
     var salida = parseFloat(document.getElementById('salidaKardex').value);
     var observaciones = document.getElementById('observaciones').value;
 
@@ -170,7 +169,7 @@ function registrarDetalleKardex() {
     var mes = document.getElementById('mesKardex').value; 
     var anio = document.getElementById('anioKardex').value;
 
-    if (!fecha || isNaN(saldo_inicial) || isNaN(ingreso) || isNaN(salida)) {
+    if (!fecha || isNaN(saldo_inicial) || isNaN(salida)) {
         Swal.fire({
             icon: 'warning',
             title: 'Campos incompletos',
@@ -182,7 +181,7 @@ function registrarDetalleKardex() {
     fetch('/kardex/registrar_lote_kardex', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idkardex, fecha, lote, saldo_inicial, ingreso, salida, observaciones })
+        body: JSON.stringify({ idkardex, fecha, lote, saldo_inicial, salida, observaciones })
     })
     .then(response => response.json())
     .then(data => {

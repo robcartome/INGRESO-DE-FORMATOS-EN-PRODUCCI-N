@@ -68,7 +68,7 @@ def control_envasados():
                 observacionAsignada = observacionesEnvasados
 
             try:
-                # Insertar lavado de manos
+                # Insertar control de envasados
                 query_insertar_controles_envasados = """ 
                     INSERT INTO detalles_registros_controles_envasados (fk_idtrabajador, fk_idproducto, cantidad_producida, 
                                                                         fk_idproveedor, lote_proveedor, lote_asignado, fecha_vencimiento, 
