@@ -2,7 +2,6 @@ import os
 
 from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
-from datetime import datetime
 from .utils.constans import BPM
 from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
@@ -78,6 +77,15 @@ def control_envasados():
                 """
                 
                 execute_query(query_insertar_controles_envasados, (responsable, producto, cantidadProducida, Proveedor, loteProveedor, loteAsignado, fechaVencimiento, observacionAsignada, registroEnvasado[0]['id_registro_control_envasados']))
+                
+                stock_anterior_product = execute_query("SELECT stock FROM productos WHERE idproducto = %s", (producto,))
+                
+                stock = stock_anterior_product[0]['stock']
+
+                stock_actual = stock + int(cantidadProducida)
+
+                execute_query("UPDATE productos SET stock = %s WHERE idproducto = %s", (stock_actual, producto))
+            
             except Exception as e:
                 # Convertir el mensaje de error a string
                 return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -91,7 +99,8 @@ def control_envasados():
 @controlEnvasados.route('/generar_formato_envasados', methods=['POST'])
 def generar_formato_envasados():
     try:
-        fecha_actual = datetime.now()
+        data = request.json
+        fecha_actual = data.get('fechaCreacion')
 
         # Eliminar el registro relacionado en controles_generales_personal
         query_generar_formato = """

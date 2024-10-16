@@ -39,9 +39,26 @@ $(document).ready(function() {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    $('#selectProducto').select2({
+        theme: 'bootstrap4',
+        placeholder: "Seleccione el producto",
+        allowClear: true,
+        width: '100%'
+    });
+});
+
 function generarFormatoControlEnvasados() {
+    const fechaCreacion = document.getElementById('fechaCreacion').value;
+
     fetch('/control_envasados/generar_formato_envasados', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            fechaCreacion: fechaCreacion
+        })
     })
     .then(response => response.json())
     .then(data => {
@@ -51,7 +68,7 @@ function generarFormatoControlEnvasados() {
                 title: 'Registro generado',
                 text: 'Se generó un registro para el control de envasados.',
                 showConfirmButton: false,
-                timer: 500
+                timer: 1500
             }).then(() => {
                 location.reload();
             });
@@ -71,6 +88,7 @@ function generarFormatoControlEnvasados() {
         });
     });
 }
+
 
 function verDetalleHistorial(idFormatos) {
     fetch(`/control_envasados/obtener_detalle_envasados/${idFormatos}`)

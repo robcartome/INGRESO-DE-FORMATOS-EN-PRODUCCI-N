@@ -246,6 +246,7 @@ function registrarMedidasCorrectivas() {
 
 document.addEventListener('DOMContentLoaded', function () {
     $('#selectTrabajador').select2({
+        theme: 'bootstrap4',
         placeholder: "Seleccione el colaborador a registrar",
         allowClear: true,
         width: '100%'

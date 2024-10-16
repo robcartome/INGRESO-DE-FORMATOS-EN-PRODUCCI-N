@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+    $('#selectProducto').select2({
+        theme: 'bootstrap4',
+        placeholder: "Seleccione el producto",
+        allowClear: true,
+        width: '100%'
+    });
+
     setDefaultFechaKardex();
 
     // Manejar los registros de productos

@@ -19,3 +19,4 @@ def execute_query(query, params=None):
     cur.close()
     conn.close()
     return result
+

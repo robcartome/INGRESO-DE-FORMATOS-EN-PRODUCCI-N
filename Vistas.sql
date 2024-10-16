@@ -404,19 +404,24 @@ WHERE
 	t.estado_trabajador = 'ACTIVO'
 
 
-SELECT * FROM public.condiciones_ambientales
 
-SELECT * FROM public.detalle_condiciones_ambientales
+SELECT * FROM public.lavadosmanos
 
-SELECT * FROM public.areas
+SELECT * FROM verificacion_limpieza_desinfeccion_areas
 
+SELECT * FROM public.detalles_verificacion_limpieza_desinfeccion_areas WHERE  fk_id_verificacion_limpieza_desinfeccion_area = 8
+
+SELECT * FROM detalles_verificaciones_equipos_medicion
+
+SELECT * FROM verificaciones_equipos_medicion
+
+SELECT * FROM condiciones_ambientales
+
+SELECT * FROM detalle_condiciones_ambientales
+
+SELECT * FROM registros_monitores_insectos_roedores
+
+SELECT * FROM detalles_registros_monitoreos_insectos_roedores
 
 SELECT * FROM public.tiposformatos
 
-SELECT * FROM public.condiciones_ambientales
-
-SELECT * FROM public.asignacion_verificacion_previa_condicion_ambiental
-
-SELECT * FROM public.detalle_condiciones_ambientales
-
-SELECT * FROM detalle_condiciones_ambientales
