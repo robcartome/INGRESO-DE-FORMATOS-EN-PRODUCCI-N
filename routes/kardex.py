@@ -136,13 +136,12 @@ def registrar_lote_kardex():
         # Extracción de los datos del formulario
         id_kardex = data['idkardex']
         fecha = data['fecha']
-        lote = data['lote']
         saldo_inicial = data['saldo_inicial']
         salida = data['salida']
         observaciones = data['observaciones']
 
         # Validación de datos
-        if not all([id_kardex, fecha, lote, saldo_inicial]):
+        if not all([id_kardex, fecha, saldo_inicial]):
             return jsonify({'status': 'error', 'message': 'Todos los campos son obligatorios.'}), 400
         
         # Convertir a números si es necesario
@@ -157,9 +156,15 @@ def registrar_lote_kardex():
         query_update_stock = "UPDATE productos SET stock = %s WHERE idproducto = (SELECT fk_idproducto FROM kardex WHERE idkardex = %s)"
         execute_query(query_update_stock, (saldo_final,id_kardex))
 
-        ingreso_crudo = execute_query("SELECT cantidad_producida FROM v_obtener_cantidad_producida_control_envasados WHERE fk_idproducto = (SELECT fk_idproducto FROM kardex WHERE idkardex = %s) AND fecha = %s", (id_kardex,fecha))
+        ingreso_crudo_lote = execute_query("SELECT cantidad_producida, lote_asignado FROM v_obtener_cantidad_producida_control_envasados WHERE fk_idproducto = (SELECT fk_idproducto FROM kardex WHERE idkardex = %s) AND fecha = %s", (id_kardex,fecha))
 
-        ingreso = ingreso_crudo[0]['cantidad_producida']
+        
+        lote = ingreso_crudo_lote[0]['lote_asignado']
+
+        ingreso = ingreso_crudo_lote[0]['cantidad_producida']
+
+        if not ingreso:
+            ingreso = 0
 
         # Suponiendo que tienes una función 'execute_query' definida para manejar la base de datos
         query_insert_detalle_kardex = """
@@ -167,6 +172,7 @@ def registrar_lote_kardex():
             (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, fk_idkardex) 
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
         """
+        
         execute_query(query_insert_detalle_kardex, (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, id_kardex))
 
         return jsonify({'status': 'success', 'message': 'Se registró el producto correctamente.'}), 200

@@ -160,11 +160,9 @@ function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
 function registrarDetalleKardex() {
     var idkardex = document.getElementById('idkardex_hidden').value;
     var fecha = document.getElementById('fecha_kardex').value;
-    var lote = document.getElementById('loteKardex').value;
     var saldo_inicial = parseFloat(document.getElementById('saldoInicial').value);
     var salida = parseFloat(document.getElementById('salidaKardex').value);
     var observaciones = document.getElementById('observaciones').value;
-
     var descripcion_producto = document.getElementById('descripcion_hidden').value;
     var mes = document.getElementById('mesKardex').value; 
     var anio = document.getElementById('anioKardex').value;
@@ -181,7 +179,7 @@ function registrarDetalleKardex() {
     fetch('/kardex/registrar_lote_kardex', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idkardex, fecha, lote, saldo_inicial, salida, observaciones })
+        body: JSON.stringify({ idkardex, fecha, saldo_inicial, salida, observaciones })
     })
     .then(response => response.json())
     .then(data => {
