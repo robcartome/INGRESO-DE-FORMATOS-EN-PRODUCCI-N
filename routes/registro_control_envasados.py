@@ -7,6 +7,7 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
+from datetime import datetime
 
 ########## PARA REGISTRO Y CONTROL DE ENVASADOS ###################################################################################
 
@@ -85,7 +86,21 @@ def control_envasados():
                 stock_actual = stock + int(cantidadProducida)
 
                 execute_query("UPDATE productos SET stock = %s WHERE idproducto = %s", (stock_actual, producto))
-            
+
+
+                # Ingreso para el kardex
+                #Obtener el id kardex activo para el producto a ingresar
+                query_kardex = "SELECT idkardex FROM kardex WHERE fk_idproducto = %s AND estado = 'CREADO'"
+                kardex = execute_query(query_kardex, (producto, ))
+                id_kardex = kardex[0]['idkardex']
+
+                #Obtener la fecha actual
+                fecha_actual = datetime.now().date()
+
+                #Ingreso de kardex
+                query_insert_kardex = "INSERT INTO detalles_kardex (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, fk_idkardex) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                execute_query(query_insert_kardex, (fecha_actual, loteAsignado, stock, cantidadProducida, 0, stock_actual, observacionAsignada, id_kardex))
+
             except Exception as e:
                 # Convertir el mensaje de error a string
                 return jsonify({'status': 'error', 'message': str(e)}), 500

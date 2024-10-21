@@ -116,7 +116,25 @@ function verDetallesKardex(idKardex, descripcionProducto, mes, anio) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
+            // Asignar el saldo inicial
             document.getElementById('saldoInicial').value = data.stock;
+    
+            // Obtener el select de lotes
+            const selectLote = document.getElementById('selectLote');
+    
+            // Limpiar el select actual
+            selectLote.innerHTML = '';
+    
+            // Llenar el select con todos los lotes
+            data.lotes.forEach(lote => {
+                const option = document.createElement('option');
+                option.value = lote;
+                option.textContent = lote;
+                if (lote === data.lote) {
+                    option.selected = true;  // Seleccionar el lote más reciente
+                }
+                selectLote.appendChild(option);
+            });
         } else {
             console.error('Error al obtener el stock:', data.message);
         }
@@ -161,6 +179,8 @@ function registrarDetalleKardex() {
     var idkardex = document.getElementById('idkardex_hidden').value;
     var fecha = document.getElementById('fecha_kardex').value;
     var saldo_inicial = parseFloat(document.getElementById('saldoInicial').value);
+    var ingreso = parseFloat(document.getElementById('ingresoKardex').value);
+    var lote = document.getElementById('selectLote').value;
     var salida = parseFloat(document.getElementById('salidaKardex').value);
     var observaciones = document.getElementById('observaciones').value;
     var descripcion_producto = document.getElementById('descripcion_hidden').value;
@@ -179,7 +199,7 @@ function registrarDetalleKardex() {
     fetch('/kardex/registrar_lote_kardex', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idkardex, fecha, saldo_inicial, salida, observaciones })
+        body: JSON.stringify({ idkardex, fecha, ingreso, lote, saldo_inicial, salida, observaciones })
     })
     .then(response => response.json())
     .then(data => {

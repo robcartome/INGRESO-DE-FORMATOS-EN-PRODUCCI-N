@@ -4,6 +4,73 @@
 
 {% block content %}
 
+<div class="container-fluid py-4">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Inventario de Productos</h1>
+    <!-- Sección para mostrar la lista de todos los kardex activos -->
+    <div>
+        <div class="form-row align-items-end mb-4">
+            <div class="form-group col-md-10">
+                <label for="filtrarProducto" style="color: #FF8C00;">Filtrar productos:</label>
+                <input type="text" id="filtrarProducto" class="form-control" name="filtrarProducto" placeholder="Filtrar el producto por su nombre" onkeyup="filterOpenProduct()"  autocomplete="off">
+            </div>
+            <div class="form-group col-lg-2 col-md-4">
+                <button type="button" class="btn btn-outline-warning w-100" data-toggle="modal" data-target="#registrarProductos">
+                    <i class="fas fa-plus"></i> Agregar Producto
+                </button>
+            </div>
+        </div>
 
+        <div class="table-responsive">
+            <table class="table table-bordered" id="TableOpen">
+                <thead style="background-color: #FF8C00; color: white;">
+                    <tr class="text-center">
+                        <th>N°</th>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in productos %}
+                    <tr class="text-center">
+                        <td>{{ p.contador }}</td>
+                        <td>{{ p.descripcion_producto }}</td>
+                        <td>{{ p.stock }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
+<!-- Modal para registrar productos -->
+<div class="modal fade" id="registrarProductos" tabindex="-1" role="dialog" aria-labelledby="registrarProductosLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="formRegistrarProductos" method="POST" enctype="multipart/form-data">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="registrarProductosLabel">Agregar Producto</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="IdProducto" name="idproducto">
+                    <div class="form-group">
+                        <label for="descripcionProducto" class="font-weight-bold">Descripción del producto</label>
+                        <input type="text" id="descripcionProducto" class="form-control" name="descripcionProducto" placeholder="Ingresa la descripción del producto" autocomplete="off">
+                        <label for="stockProducto" class="font-weight-bold">Stock Actual</label>
+                        <input type="number" id="stockProducto" class="form-control" name="stockProducto" placeholder="Stock actual del producto" autocomplete="off">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning text-white">Agregar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

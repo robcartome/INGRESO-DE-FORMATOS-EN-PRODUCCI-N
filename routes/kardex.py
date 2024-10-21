@@ -82,8 +82,34 @@ def get_stock():
         result = execute_query(query_stock, (idkardex,))
         stock = result[0]['stock'] if result else 0
 
-        # Retornar el stock en formato JSON
-        return jsonify({'status': 'success', 'stock': stock}), 200
+        query_lote = """ 
+                    SELECT id_detalle_registro_controles_envasados, lote_asignado
+                    FROM public.detalles_registros_controles_envasados
+                    WHERE fk_idproducto = (
+                        SELECT fk_idproducto 
+                        FROM public.kardex 
+                        WHERE idkardex = %s
+                    )   
+                    ORDER BY id_detalle_registro_controles_envasados DESC
+                    LIMIT 4;
+                    """
+        lotes = execute_query(query_lote, (idkardex,))
+
+        # Si hay lotes, seleccionar el más reciente (el primer resultado)
+        if lotes:
+            lote_mas_reciente = lotes[0]['lote_asignado']
+            lista_lotes = [lote['lote_asignado'] for lote in lotes]
+        else:
+            lote_mas_reciente = None
+            lista_lotes = []
+
+        # Retornar el stock y los lotes en formato JSON
+        return jsonify({
+            'status': 'success',
+            'stock': stock,
+            'lote': lote_mas_reciente,  # El lote más reciente
+            'lotes': lista_lotes  # Todos los lotes
+        }), 200
 
     except Exception as e:
         print(f"Error al obtener el stock: {e}")
@@ -136,6 +162,8 @@ def registrar_lote_kardex():
         # Extracción de los datos del formulario
         id_kardex = data['idkardex']
         fecha = data['fecha']
+        ingreso = data['ingreso']
+        lote = data['lote']
         saldo_inicial = data['saldo_inicial']
         salida = data['salida']
         observaciones = data['observaciones']
@@ -148,7 +176,7 @@ def registrar_lote_kardex():
         saldo_inicial = float(saldo_inicial)
         salida = float(salida)
 
-        saldo_final = saldo_inicial - salida
+        saldo_final = saldo_inicial + ingreso - salida
 
         if not observaciones:
             observaciones = "-"
@@ -156,17 +184,9 @@ def registrar_lote_kardex():
         query_update_stock = "UPDATE productos SET stock = %s WHERE idproducto = (SELECT fk_idproducto FROM kardex WHERE idkardex = %s)"
         execute_query(query_update_stock, (saldo_final,id_kardex))
 
-        ingreso_crudo_lote = execute_query("SELECT cantidad_producida, lote_asignado FROM v_obtener_cantidad_producida_control_envasados WHERE fk_idproducto = (SELECT fk_idproducto FROM kardex WHERE idkardex = %s) AND fecha = %s", (id_kardex,fecha))
-
-        
-        lote = ingreso_crudo_lote[0]['lote_asignado']
-
-        ingreso = ingreso_crudo_lote[0]['cantidad_producida']
-
         if not ingreso:
             ingreso = 0
 
-        # Suponiendo que tienes una función 'execute_query' definida para manejar la base de datos
         query_insert_detalle_kardex = """
             INSERT INTO detalles_kardex 
             (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, fk_idkardex) 
