@@ -9,7 +9,7 @@
     <!-- Sección para mostrar la lista de todos los kardex activos -->
     <div>
         <div class="form-row align-items-end mb-4">
-            <div class="form-group col-md-10">
+            <div class="form-group col-md-8">
                 <label for="filtrarProducto" style="color: #FF8C00;">Filtrar productos:</label>
                 <input type="text" id="filtrarProducto" class="form-control" name="filtrarProducto" placeholder="Filtrar el producto por su nombre" onkeyup="filterOpenProduct()"  autocomplete="off">
             </div>
@@ -17,6 +17,11 @@
                 <button type="button" class="btn btn-outline-warning w-100" data-toggle="modal" data-target="#registrarProductos">
                     <i class="fas fa-plus"></i> Agregar Producto
                 </button>
+            </div>
+            <div class="form-group col-lg-2 col-md-4">
+                <a href="{{ url_for('home.descargar_inventario') }}" class="btn btn-outline-success w-100">
+                    <i class="fas fa-download"></i> Descargar Inventario
+                </a>
             </div>
         </div>
 
@@ -27,6 +32,7 @@
                         <th>N°</th>
                         <th>Producto</th>
                         <th>Stock</th>
+                        <th>Editar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,6 +41,13 @@
                         <td>{{ p.contador }}</td>
                         <td>{{ p.descripcion_producto }}</td>
                         <td>{{ p.stock }}</td>
+                        <td>
+                            <button type="button" class="btn btn-outline-warning btn-sm btn-block mb-2" data-toggle="modal" data-target="#editProdutoModal"
+                            data-id="{{ p.idproducto }}" data-descripcion_producto="{{ p.descripcion_producto }}"
+                            data-stock="{{ p.stock }}" style="background-color: #fffb02; color: rgb(0, 0, 0);"> 
+                            <i class="fas fa-edit"></i> Editar
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -71,6 +84,38 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para Editar Información del Producto -->
+<div class="modal fade" id="editProdutoModal" tabindex="-1" role="dialog" aria-labelledby="editProdutoModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="formEditProduct" method="POST" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProdutoModal">Editar Información del Producto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editIdProducto" name="idProducto">
+                    <div class="form-group">
+                        <label for="editNombresProducto">Nombre del producto:</label>
+                        <input type="text" id="editNombresProducto" class="form-control" name="descripcion_producto"> 
+                    </div>
+                    <div class="form-group">
+                        <label for="editStock">Stock:</label>
+                        <input type="text" id="editStock" class="form-control" name="stock"> 
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

@@ -56,6 +56,8 @@ def control_envasados():
             fechaVencimiento = request.form.get('fechaVencimiento')
             observacionesEnvasados = request.form.get('observacionesEnvasados')
 
+            print(responsable, producto, cantidadProducida, Proveedor, loteProveedor, loteAsignado, fechaVencimiento, observacionesEnvasados)
+
             # Verificar si hay un formato 'CREADO' para el tipo de formato 2
             query_formatos = "SELECT id_registro_control_envasados FROM registros_controles_envasados WHERE fk_idtipoformatos = 5 AND estado = 'CREADO'"
             registroEnvasado = execute_query(query_formatos)
@@ -69,38 +71,41 @@ def control_envasados():
                 observacionAsignada = observacionesEnvasados
 
             try:
-                # Insertar control de envasados
-                query_insertar_controles_envasados = """ 
-                    INSERT INTO detalles_registros_controles_envasados (fk_idtrabajador, fk_idproducto, cantidad_producida, 
-                                                                        fk_idproveedor, lote_proveedor, lote_asignado, fecha_vencimiento, 
-                                                                        observacion, fk_id_registro_control_envasado) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
-                """
-                
-                execute_query(query_insertar_controles_envasados, (responsable, producto, cantidadProducida, Proveedor, loteProveedor, loteAsignado, fechaVencimiento, observacionAsignada, registroEnvasado[0]['id_registro_control_envasados']))
-                
-                stock_anterior_product = execute_query("SELECT stock FROM productos WHERE idproducto = %s", (producto,))
-                
-                stock = stock_anterior_product[0]['stock']
+                verify_creation_kardex = execute_query("SELECT idkardex FROM kardex WHERE fk_idproducto = %s AND estado = 'CREADO'", (producto,))
+                if verify_creation_kardex:
+                    # Insertar control de envasados
+                    query_insertar_controles_envasados = """ 
+                        INSERT INTO detalles_registros_controles_envasados (fk_idtrabajador, fk_idproducto, cantidad_producida, 
+                                                                            fk_idproveedor, lote_proveedor, lote_asignado, fecha_vencimiento, 
+                                                                            observacion, fk_id_registro_control_envasado) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+                    """
+                    
+                    execute_query(query_insertar_controles_envasados, (responsable, producto, cantidadProducida, Proveedor, loteProveedor, loteAsignado, fechaVencimiento, observacionAsignada, registroEnvasado[0]['id_registro_control_envasados']))
+                    
+                    stock_anterior_product = execute_query("SELECT stock FROM productos WHERE idproducto = %s", (producto,))
+                    
+                    stock = stock_anterior_product[0]['stock']
 
-                stock_actual = stock + int(cantidadProducida)
+                    stock_actual = stock + int(cantidadProducida)
 
-                execute_query("UPDATE productos SET stock = %s WHERE idproducto = %s", (stock_actual, producto))
+                    execute_query("UPDATE productos SET stock = %s WHERE idproducto = %s", (stock_actual, producto))
 
+                    # Ingreso para el kardex
+                    #Obtener el id kardex activo para el producto a ingresar
+                    query_kardex = "SELECT idkardex FROM kardex WHERE fk_idproducto = %s AND estado = 'CREADO'"
+                    kardex = execute_query(query_kardex, (producto, ))
+                    id_kardex = kardex[0]['idkardex']
 
-                # Ingreso para el kardex
-                #Obtener el id kardex activo para el producto a ingresar
-                query_kardex = "SELECT idkardex FROM kardex WHERE fk_idproducto = %s AND estado = 'CREADO'"
-                kardex = execute_query(query_kardex, (producto, ))
-                id_kardex = kardex[0]['idkardex']
+                    #Obtener la fecha actual
+                    fecha_ingreso = execute_query("SELECT fecha FROM registros_controles_envasados WHERE estado = 'CREADO'")
+                    fecha_kardex = fecha_ingreso[0]['fecha']
 
-                #Obtener la fecha actual
-                fecha_actual = datetime.now().date()
-
-                #Ingreso de kardex
-                query_insert_kardex = "INSERT INTO detalles_kardex (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, fk_idkardex) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                execute_query(query_insert_kardex, (fecha_actual, loteAsignado, stock, cantidadProducida, 0, stock_actual, observacionAsignada, id_kardex))
-
+                    #Ingreso de kardex
+                    query_insert_kardex = "INSERT INTO detalles_kardex (fecha, lote, saldo_inicial, ingreso, salida, saldo_final, observaciones, fk_idkardex) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                    execute_query(query_insert_kardex, (fecha_kardex, loteAsignado, stock, cantidadProducida, 0, stock_actual, observacionAsignada, id_kardex))
+                else:
+                    return jsonify({'status': 'error', 'message': 'Cree el kardex de este producto antes de realizar el ingreso de control de envasados.'}), 400
             except Exception as e:
                 # Convertir el mensaje de error a string
                 return jsonify({'status': 'error', 'message': str(e)}), 500
