@@ -21,6 +21,8 @@ def control_envasados():
             query_registros_envasados = "SELECT * FROM registros_controles_envasados WHERE estado = 'CREADO'"
             control_envasados_creado = execute_query(query_registros_envasados)
 
+            print(control_envasados_creado)
+
             #Obtener el responsable para seleccionar
             responsable_envasado = execute_query("SELECT * FROM trabajadores WHERE estado_trabajador = 'ACTIVO'")
 

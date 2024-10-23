@@ -331,3 +331,16 @@ CREATE TABLE IF NOT EXISTS verificaciones_areas_produccion_insectos_roedores (
 
 ALTER TABLE public.medidascorrectivasobservaciones
 ADD COLUMN fk_id_verificacion_equipo_medicion INT REFERENCES public.verificaciones_equipos_medicion(id_verificacion_equipo_medicion) NULL;
+
+
+CREATE TABLE IF NOT EXISTS min_max (
+	id_min_max SERIAL PRIMARY KEY,
+	minimo_und VARCHAR(5) NULL,
+	maximo_und VARCHAR(5) NULL,
+	conversion_und VARCHAR(5) NULL,
+	unidades VARCHAR(15) NULL,
+	fk_id_productos INT REFERENCES public.productos(idproducto) NOT NULL
+);
+
+SELECT * FROM detalles_kardex
+

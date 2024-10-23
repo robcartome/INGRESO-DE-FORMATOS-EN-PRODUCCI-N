@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Mínimos y máximos{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Mínimos y máximos</h1>
+
+    <div class="form-row align-items-end mb-6">
+        <!-- Filtro del producto, ocupa 8 columnas en pantallas medianas y 10 en pantallas pequeñas -->
+        <div class="form-group col-lg-10 col-md-8 col-sm-12">
+            <label for="filtrarProducto" style="color: #FF8C00;">Filtrar productos:</label>
+            <input type="text" id="filtrarProducto" class="form-control" name="filtrarProducto" placeholder="Filtrar el producto por su nombre" onkeyup="filterOpenProduct()" autocomplete="off">
+        </div>
+        
+        <!-- Botón guardar cambios, ocupa 2 columnas en pantallas medianas y 12 en pantallas pequeñas -->
+        <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
+            <button type="button" class="btn btn-secondary px-5 w-100" style="background-color: #FFC107;" onclick="guardarCambios()">Guardar cambios</button>
+        </div>
+    </div>
+    
+
+    <div class="table-responsive">
+        <form id="formMinMax">
+            <table class="table table-bordered table-hover" id="TableOpen">
+                <thead style="background-color: #FF8C00; color: white;">
+                    <tr class="text-center">
+                        <th>Producto</th>
+                        <th>Mínimo</th>
+                        <th>Conversión Mínimo</th>
+                        <th>Máximo</th>
+                        <th>Conversión Máximo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in min_max %}
+                    <tr class="text-center" data-id="{{ p.id_min_max }}">
+                        <td>{{ p.descripcion_producto }}</td>
+                        <td>
+                            <input type="text" name="minimo_und" class="form-control form-control-sm text-center" value="{{ p.minimo_und }}" />
+                        </td>
+                        <td>{{ p.transformed_min }}</td>
+                        <td>
+                            <input type="text" name="maximo_und" class="form-control form-control-sm text-center" value="{{ p.maximo_und }}" />
+                        </td>
+                        <td>{{ p.transformed_max }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/min_max.js') }}"></script>
+
+{% endblock %}
+

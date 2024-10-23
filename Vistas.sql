@@ -156,6 +156,9 @@ JOIN
 ORDER BY
 	ce.id_detalle_registro_controles_envasados DESC;
 
+SELECT * FROM v_registros_controles_envasados
+
+DROP VIEW v_registros_controles_envasados
 
 -- CONTROL DE ASEO E HIGIENE PERSONAL --
 
@@ -230,6 +233,7 @@ JOIN
 JOIN
 	categorias_limpieza_desinfeccion c ON c.id_categorias_limpieza_desinfeccion = d.fk_id_categorias_limpieza_desinfeccion;
 
+-- Este
 DROP VIEW v_detalles_verificacion_limpieza_desinfeccion_areas
 
 SELECT * FROM v_detalles_verificacion_limpieza_desinfeccion_areas
@@ -405,23 +409,41 @@ WHERE
 
 
 
-SELECT * FROM public.lavadosmanos
+CREATE OR REPLACE VIEW v_min_max AS
+SELECT
+    m.id_min_max,
+    m.minimo_und,
+    m.maximo_und,
+    m.conversion_und,
+    m.unidades,
+    -- Redondeo condicional para transformed_min
+    CASE 
+        WHEN m.unidades = 'KG' THEN 
+            ROUND(CAST(m.minimo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC), 2) -- Redondea a 2 decimales si es KG
+        ELSE 
+            CEIL(CAST(m.minimo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC)) -- Redondea a entero si no es KG
+    END::TEXT || ' ' || m.unidades AS transformed_min,
+    
+    -- Redondeo condicional para transformed_max
+    CASE 
+        WHEN m.unidades = 'KG' THEN 
+            ROUND(CAST(m.maximo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC), 2) -- Redondea a 2 decimales si es KG
+        ELSE 
+            CEIL(CAST(m.maximo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC)) -- Redondea a entero si no es KG
+    END::TEXT || ' ' || m.unidades AS transformed_max,
+    
+    p.idproducto,
+    p.descripcion_producto
+FROM
+    min_max m
+JOIN
+    productos p ON p.idproducto = m.fk_id_productos;
 
-SELECT * FROM verificacion_limpieza_desinfeccion_areas
+v_detalles_registros_controles_envasados
 
-SELECT * FROM public.detalles_verificacion_limpieza_desinfeccion_areas WHERE  fk_id_verificacion_limpieza_desinfeccion_area = 8
+DROP VIEW v_min_max
 
-SELECT * FROM detalles_verificaciones_equipos_medicion
 
-SELECT * FROM verificaciones_equipos_medicion
+SELECT * FROM v_min_max ORDER BY id_min_max
 
-SELECT * FROM condiciones_ambientales
-
-SELECT * FROM detalle_condiciones_ambientales
-
-SELECT * FROM registros_monitores_insectos_roedores
-
-SELECT * FROM detalles_registros_monitoreos_insectos_roedores
-
-SELECT * FROM public.tiposformatos
-
+SELECT * FROM public.min_max

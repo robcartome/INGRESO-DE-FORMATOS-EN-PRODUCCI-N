@@ -37,22 +37,31 @@
                 </thead>
                 <tbody>
                     {% for p in productos %}
-                    <tr class="text-center">
-                        <td>{{ p.contador }}</td>
-                        <td>{{ p.descripcion_producto }}</td>
-                        <td>{{ p.stock }}</td>
-                        <td>
-                            <button type="button" class="btn btn-outline-warning btn-sm btn-block mb-2" data-toggle="modal" data-target="#editProdutoModal"
-                            data-id="{{ p.idproducto }}" data-descripcion_producto="{{ p.descripcion_producto }}"
-                            data-stock="{{ p.stock }}" style="background-color: #fffb02; color: rgb(0, 0, 0);"> 
-                            <i class="fas fa-edit"></i> Editar
-                            </button>
-                        </td>
-                    </tr>
+                        {% for m in min_product %}
+                            {% if p.idproducto == m.fk_id_productos %}
+                            <tr class="text-center">
+                                <td>{{ p.contador }}</td>
+                                <td>{{ p.descripcion_producto }}</td>
+                                <td>
+                                    <!-- Convertir ambos valores a enteros para la comparación -->
+                                    <span class="{% if p.stock|int < m.minimo_und %}text-danger{% endif %}">
+                                        {{ p.stock }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-warning btn-sm btn-block mb-2" data-toggle="modal" data-target="#editProdutoModal"
+                                    data-id="{{ p.idproducto }}" data-descripcion_producto="{{ p.descripcion_producto }}"
+                                    data-stock="{{ p.stock }}" style="background-color: #fffb02; color: rgb(0, 0, 0);"> 
+                                    <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
+        </div>              
     </div>
 </div>
 

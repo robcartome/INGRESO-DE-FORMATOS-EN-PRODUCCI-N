@@ -13,7 +13,10 @@ def principal():
                                 FROM productos
                                 ORDER BY idproducto;""")
     
-    return render_template('home.html', productos=productos)
+    # Asegurarse de que minimo_und sea numérico usando CAST
+    min_product = execute_query("SELECT CAST(minimo_und AS INTEGER) AS minimo_und, fk_id_productos FROM public.min_max;")
+    
+    return render_template('home.html', productos=productos, min_product=min_product)
 
 
 @home.route('/descargar_inventario', methods=['GET'])

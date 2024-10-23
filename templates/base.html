@@ -86,6 +86,21 @@
                         </a>
                     </div>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="proyectDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #FF4500;">
+                        PROYECCIÓN
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="proyectDropdown">
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('min_max.min_max') }}">
+                            <img src="{{ url_for('static', filename='img/minmax.png') }}" alt="Mínimos máximos" width="20" height="20" class="mr-2">
+                            Mínimos y máximos
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('control_general.control_general') }}">
+                            <img src="{{ url_for('static', filename='img/proyeccion.png') }}" alt="Control personal" width="20" height="20" class="mr-2">
+                            Proyección semanal
+                        </a>
+                    </div>
+                </li>
             </ul>
             
             <form class="form-inline my-2 my-lg-0 ml-auto">
