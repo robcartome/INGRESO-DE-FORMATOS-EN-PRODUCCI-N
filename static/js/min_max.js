@@ -28,12 +28,14 @@ function guardarCambios() {
         let id = row.getAttribute('data-id');  // Obtener el id_min_max de la fila
         let minimo = row.querySelector('input[name="minimo_und"]').value;  // Obtener valor de mínimo
         let maximo = row.querySelector('input[name="maximo_und"]').value;  // Obtener valor de máximo
+        let conversion = row.querySelector('input[name="conversion_und"]').value;
 
         // Añadir los cambios al array
         cambios.push({
             id_min_max: id,
             minimo_und: minimo,
-            maximo_und: maximo
+            maximo_und: maximo,
+            conversion_und: conversion
         });
     }
 

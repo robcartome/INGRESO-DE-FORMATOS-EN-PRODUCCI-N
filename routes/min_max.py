@@ -18,10 +18,10 @@ def guardar_cambios():
         for cambio in cambios:
             query = """
                 UPDATE min_max
-                SET minimo_und = %s, maximo_und = %s
+                SET minimo_und = %s, maximo_und = %s, conversion_und = %s
                 WHERE id_min_max = %s
             """
-            params = (cambio['minimo_und'], cambio['maximo_und'], cambio['id_min_max'])
+            params = (cambio['minimo_und'], cambio['maximo_und'], cambio['conversion_und'], cambio['id_min_max'])
             execute_query(query, params)
 
         return jsonify({'status': 'success', 'message': 'Cambios guardados correctamente'}), 200
