@@ -20,24 +20,22 @@ def registroMonitoreoRoedores():
         query_control_insectos = "SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 10 ORDER BY id_registro_monitoreo_insecto_roedor DESC"
         formatos_creado = execute_query(query_control_insectos)
 
-        print(formatos_creado)
- 
         # Obtener las verificaciones en estado CERRADO
         query_control_insectos_finalizados = "SELECT * FROM v_registros_monitores_insectos_roedores WHERE estado = 'CERRADO' AND fk_idtipoformatos = 10 ORDER BY id_registro_monitoreo_insecto_roedor DESC"
         formatos_finalizados = execute_query(query_control_insectos_finalizados)
-        print(formatos_finalizados)
+
         areas = execute_query("SELECT * FROM areas_produccion WHERE id_area_produccion IN (2, 4, 10, 11, 12, 7, 8, 13, 14, 15)")
  
         query_categorias_limpieza_desinfeccion = "SELECT * FROM public.categorias_limpieza_desinfeccion WHERE id_categorias_limpieza_desinfeccion IN (22, 23, 24, 25)"
         categorias_limpieza_desinfeccion = execute_query(query_categorias_limpieza_desinfeccion)
-        print(categorias_limpieza_desinfeccion)
+
         # Obtener los registros
         query_registros = "SELECT * FROM v_detalles_registros_monitoreos_insectos_roedores WHERE estado = 'CREADO' AND fk_idtipoformatos = 10 ORDER BY id_detalle_registro_monitoreo_insecto_roedor DESC"
         resgistros_control_insecto = execute_query(query_registros)
-        print(resgistros_control_insecto)
+
         #obtener las asignaciones de las áreas que estan conforme o no conforme
         verificacion_araes_insectos = execute_query('SELECT fk_id_area_produccion, fk_id_detalle_registro_monitoreo_insecto_roedor FROM verificaciones_areas_produccion_insectos_roedores')
-        print(verificacion_araes_insectos)
+
         return render_template('registro_monitoreo_roedores.html',
                                formatos_creado=formatos_creado,
                                areas=areas,

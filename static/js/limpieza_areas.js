@@ -208,9 +208,9 @@ function verDetallesVerificacionLimpiezaAreas(id_verificacion, id_area, detalle_
                             </div>
 
                             <div id="collapse${categoria.id_categorias_limpieza_desinfeccion}" class="collapse" aria-labelledby="heading${categoria.id_categorias_limpieza_desinfeccion}" data-parent="#contenedorCategorias">
-                                <div class="card-body">
+                                <div class="card-body text-center">
                                     ${!isClosed ? `
-                                    <div class="form-inline d-flex justify-content-between">
+                                    <div class="form-inline d-flex justify-content-center">
                                         <input type="date" id="fecha_${categoria.id_categorias_limpieza_desinfeccion}" class="fecha_actual form-control mb-3 mr-2" style="flex: 2;">
                                         <button class="btn btn-success btn-sm mb-3" style="flex: 1;" onclick="registrarFechaLimpieza(${categoria.id_categorias_limpieza_desinfeccion})">
                                             <i class="fas fa-calendar-plus"></i> Registrar
@@ -219,15 +219,20 @@ function verDetallesVerificacionLimpiezaAreas(id_verificacion, id_area, detalle_
                                     ` : `
                                     <p class="text-muted">Historial de las fechas registradas:</p>
                                     `}
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center">Fechas Registradas</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tablaDetallesCA_${categoria.id_categorias_limpieza_desinfeccion}">
-                                        </tbody>
-                                    </table>
+                                    <div class="d-flex justify-content-center">
+                                        <div class="table-responsive">
+                                            <table class="table text-center" style="width: auto;">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center">Fechas Registradas</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tablaDetallesCA_${categoria.id_categorias_limpieza_desinfeccion}" class="d-flex flex-wrap">
+                                                    <!-- Las fechas se agregarán dinámicamente -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
