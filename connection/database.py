@@ -7,9 +7,8 @@ def get_db_connection():
             host = 'localhost',
             database = 'IngresoFormatosProduccion',
             user = 'postgres',
-            password = '1234'
+            password = 'cris123.'
         )
-        print(conn)
     except Exception as e:
         print('Exception', e)
     return conn

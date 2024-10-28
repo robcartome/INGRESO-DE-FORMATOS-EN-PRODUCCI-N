@@ -31,7 +31,10 @@
                         <th>Conversión Mínimo</th>
                         <th>Máximo</th>
                         <th>Conversión Máximo</th>
-                        <th>Conversión de unidades</th>
+                        <th>Conversión de unidades en KG</th>
+                        <th>Equivalencia por empaque</th>
+                        <th>Empaque</th>
+                        <th>Unidades por Empaque</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,13 +44,22 @@
                         <td>
                             <input type="text" name="minimo_und" class="form-control form-control-sm text-center" value="{{ p.minimo_und }}" />
                         </td>
-                        <td>{{ p.transformed_min }}</td>
+                        <td>{{ p.transformed_minimo }}</td>
                         <td>
                             <input type="text" name="maximo_und" class="form-control form-control-sm text-center" value="{{ p.maximo_und }}" />
                         </td>
-                        <td>{{ p.transformed_max }}</td>
+                        <td>{{ p.transformed_maximo }}</td>
                         <td>
                             <input type="text" name="conversion_und" class="form-control form-control-sm text-center" value="{{ p.conversion_und }}" />
+                        </td>
+                        <td>
+                            <input type="text" name="equivalencia" class="form-control form-control-sm text-center" value="{{ p.equivalencia }}" />
+                        </td>
+                        <td>
+                            <input type="text" name="unidad_equivalencia" class="form-control form-control-sm text-center" value="{{ p.unidad_equivalencia }}" />
+                        </td>
+                        <td>
+                            <input type="text" name="unidades_por_equivalencia" class="form-control form-control-sm text-center" value="{{ p.unidades_por_equivalencia }}" />
                         </td>
                     </tr>
                     {% endfor %}

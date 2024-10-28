@@ -29,13 +29,19 @@ function guardarCambios() {
         let minimo = row.querySelector('input[name="minimo_und"]').value;  // Obtener valor de mínimo
         let maximo = row.querySelector('input[name="maximo_und"]').value;  // Obtener valor de máximo
         let conversion = row.querySelector('input[name="conversion_und"]').value;
+        let equivalencia = row.querySelector('input[name="equivalencia"]').value;
+        let unidad_equivalencia = row.querySelector('input[name="unidad_equivalencia"]').value;
+        let unidades_por_equivalencia = row.querySelector('input[name="unidades_por_equivalencia"]').value;
 
         // Añadir los cambios al array
         cambios.push({
             id_min_max: id,
             minimo_und: minimo,
             maximo_und: maximo,
-            conversion_und: conversion
+            conversion_und: conversion,
+            equivalencia: equivalencia,
+            unidad_equivalencia: unidad_equivalencia,
+            unidades_por_equivalencia: unidades_por_equivalencia
         });
     }
 
@@ -57,7 +63,7 @@ function guardarCambios() {
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                location.reload();  // Recargar la página para mostrar los cambios
+                location.reload();
             });
         } else {
             Swal.fire({

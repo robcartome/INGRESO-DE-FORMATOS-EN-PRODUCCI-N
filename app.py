@@ -13,6 +13,7 @@ from routes.limpieza_equipos_medicion import limpieza_equipos_medicion
 from routes.registro_monitoreo_insectos import registro_monitoreo_insectos
 from routes.registro_monitoreo_roedores import registro_monitoreo_roedores
 from routes.min_max import minmax
+from routes.proyeccion_semanal import proyeccionsemanal
 
 app = Flask(__name__)
 
@@ -29,6 +30,7 @@ app.register_blueprint(limpieza_equipos_medicion, url_prefix='/limpieza_equipos_
 app.register_blueprint(registro_monitoreo_insectos, url_prefix = '/registro_monitoreo_insectos')
 app.register_blueprint(registro_monitoreo_roedores, url_prefix = '/registro_monitoreo_roedores')
 app.register_blueprint(minmax, url_prefix = '/min_max')
+app.register_blueprint(proyeccionsemanal, url_prefix = '/proyeccion_semanal')
 
 # Definiendo la ruta por defecto
 @app.route('/')

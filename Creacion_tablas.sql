@@ -344,3 +344,18 @@ CREATE TABLE IF NOT EXISTS min_max (
 
 SELECT * FROM detalles_kardex
 
+CREATE TABLE IF NOT EXISTS proyeccion (
+	idprojection SERIAL PRIMARY KEY,
+	estado VARCHAR(15) NOT NULL,
+	semana VARCHAR(45) NULL
+);
+
+CREATE TABLE IF NOT EXISTS proyeccion_semanal (
+    idProyeccion SERIAL PRIMARY KEY,
+    proyeccion DOUBLE PRECISION NOT NULL,
+    producido DOUBLE PRECISION NULL,
+	dia VARCHAR(10) NULL,
+    fk_id_productos INT REFERENCES public.productos(idproducto) NOT NULL,
+	fk_proyeccion INT REFERENCES public.proyeccion(idprojection) NOT NULL
+);
+

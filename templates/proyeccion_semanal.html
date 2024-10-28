@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Proyección semanal{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Efecto de oscurecimiento */
+    .btn-hover-darken:hover {
+        filter: brightness(0.9); /* Oscurece el botón un poco */
+        transition: 0.2s ease-in-out; /* Efecto de transición suave */
+    }
+    .card-header-custom {
+        color: white;
+        font-weight: bold;
+    }
+
+    /* Colores para cada día */
+    .dia-lunes { background-color: #f8d7da; }      /* Rojo claro */
+    .dia-martes { background-color: #d1ecf1; }     /* Azul claro */
+    .dia-miercoles { background-color: #d4edda; }  /* Verde claro */
+    .dia-jueves { background-color: #fff3cd; }     /* Amarillo claro */
+    .dia-viernes { background-color: #d6d8d9; }    /* Gris claro */
+    .dia-sabado { background-color: #fce5cd; }     /* Naranja claro */
+
+    .pagination .page-link {
+        color: #FF8C00; /* Color de los enlaces */
+        transition: background-color 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #FFD700; /* Color al hacer hover */
+        color: white;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #FF4500; /* Color de la página activa */
+        border-color: #FF4500;
+        color: white;
+    }
+
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- Acciones de Proyección -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header card-header-custom" style="background-color: #FFC107">
+            <h5 class="mb-0">Acciones de Proyección</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end">
+                
+                <!-- Selección de Producto -->
+                <div class="form-group col-lg-6 col-md-8">
+                    <label for="selectProducto" class="font-weight-bold">Producto</label>
+                    <select id="selectProducto" class="form-control" name="selectProducto">
+                        <option value="">Seleccione el Producto</option>
+                        {% for p in productos %}
+                            <option value="{{ p.idproducto }}">{{ p.descripcion_producto }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Botón Agregar Producto -->
+                <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
+                    <button type="button" class="btn btn-secondary text-white w-100 btn-hover-darken" style="background-color: #FFC107;" onclick="AgregarProducto()">
+                        <i class="fas fa-plus-circle"></i> Agregar producto
+                    </button>
+                </div>
+                <!-- Botón Generar Proyección -->
+                <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
+                    <button type="button" class="btn btn-secondary w-100 btn-hover-darken" style="background-color: #FF8C00;" onclick="GenerarProyeccion()">
+                        <i class="fas fa-chart-line"></i> Generar Proyección
+                    </button>
+                </div>
+
+                <!-- Botón Finalizar Proyección -->
+                <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
+                    <button type="button" class="btn btn-danger w-100 btn-hover-darken" onclick="FinalizarProyeccion()">
+                        <i class="fas fa-check-circle"></i> Finalizar Proyección
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loaderGenerar" class="text-center" style="display: none;">
+        <div class="spinner-border text-warning" role="status">
+            <span class="sr-only">Generando...</span>
+        </div>
+        <p>Generando proyección semanal, por favor espera...</p>
+    </div>
+
+    <div id="loaderFinalizar" class="text-center" style="display: none;">
+        <div class="spinner-border text-warning" role="status">
+            <span class="sr-only">Finalizando...</span>
+        </div>
+        <p>Finalizando proyección semanal, por favor espera...</p>
+    </div>
+
+    <!-- Proyección Semanal -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header card-header-custom" style="background-color: #FF8C00;">
+            <h5 class="mb-0 text-center">
+                Proyección semanal
+                {% if proyeccion %}
+                    {{ proyeccion[0].semana }}
+                {% else %}
+                    (Sin proyección generada para esta semana)
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end">
+                <div class="form-group col-lg-10 col-md-10">
+                    <input type="text" id="filtrarProducto" class="form-control" name="filtrarProducto" placeholder="Filtrar producto por nombre" onkeyup="filterOpenProduct()" autocomplete="off">
+                </div>
+                <div class="form-group col-lg-2 col-md-4 col-sm-4 text-md-right">
+                    <button type="button" class="btn btn-danger w-100 btn-hover-darken" onclick="GuardarProyeccion()">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Proyecciones Actuales -->
+            {% if proyeccion %}
+            <!-- Loader (se mostrará al guardar la proyección) -->
+            <div id="loader" class="text-center" style="display: none;">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="sr-only">Actualizando...</span>
+                </div>
+                <p>Guardando cambios, por favor espera...</p>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="TableOpen">
+                    <thead style="background-color: #FF8C00; color: white;">
+                        <tr class="text-center">
+                            <th>Producto</th>
+                            <th>Stock</th>
+                            <th>Proyección</th>
+                            <th>Equivalencia</th>
+                            <th>Día</th>
+                            <th>Quitar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in proyeccion %}
+                        <!-- Aplicar clase de color de fondo dependiendo del valor de `p.dia` -->
+                        <tr class="text-center 
+                                {% if p.dia == 'Lunes' %} dia-lunes 
+                                {% elif p.dia == 'Martes' %} dia-martes 
+                                {% elif p.dia == 'Miércoles' %} dia-miercoles 
+                                {% elif p.dia == 'Jueves' %} dia-jueves 
+                                {% elif p.dia == 'Viernes' %} dia-viernes 
+                                {% elif p.dia == 'Sábado' %} dia-sabado 
+                                {% endif %}" data-id="{{ p.idproyeccion }}">
+                            
+                            <td>{{ p.descripcion_producto }}</td>
+                            <td>{{ p.stock }}</td>
+                            <td>
+                                <input type="text" name="proyeccion_register" class="form-control form-control-sm text-center" value="{{ p.proyeccion }}" />
+                            </td>
+                            <td>Produce {{ (p.unidades | float * p.equivalenciauni | float) | round | int }} und. utilizando {{ p.equivalencia_unidades }} de materia prima.<br> Equivalente a {{ (p.kgs | float * (p.unidades | float * p.equivalenciauni | float)) | round(2) }} KG.</td>
+                            <td>
+                                <select class="form-control" name="selectSemana" required>
+                                    <option value="" {% if not p.dia %}selected{% endif %}>Seleccione...</option>
+                                    <option value="Lunes" {% if p.dia == "Lunes" %}selected{% endif %}>Lunes</option>
+                                    <option value="Martes" {% if p.dia == "Martes" %}selected{% endif %}>Martes</option>
+                                    <option value="Miércoles" {% if p.dia == "Miércoles" %}selected{% endif %}>Miércoles</option>
+                                    <option value="Jueves" {% if p.dia == "Jueves" %}selected{% endif %}>Jueves</option>
+                                    <option value="Viernes" {% if p.dia == "Viernes" %}selected{% endif %}>Viernes</option>
+                                    <option value="Sábado" {% if p.dia == "Sábado" %}selected{% endif %}>Sábado</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger text-white w-100" onclick="QuitarProyeccion('{{ p.idproyeccion }}')">
+                                    <i class="fas fa-trash"></i> Quitar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-warning text-center">
+                <strong>No hay proyección generada para esta semana.</strong>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+
+
+
+    <!-- Historial de Proyecciones -->
+    <div class="card shadow-sm">
+        <div class="card-header text-white" style="background-color: #FF5722;">
+            <h5 class="mb-0">Historial de Proyecciones Semanales</h5>
+        </div>
+        <div class="card-body">
+            <!-- Filtro de Historial -->
+            <div class="form-group col-md-6 mb-4">
+                <label for="filter" class="font-weight-bold">Filtrar por fecha de producción</label>
+                <input type="date" class="form-control" id="filter" onchange="filterHistory()">
+            </div>
+
+            <!-- Acordeón para mostrar el historial de proyecciones finalizadas -->
+            <div id="acordionProyeccionesFinalizadas">
+                {% for pe in proyectEnd %}
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning d-flex justify-content-between align-items-center" id="heading{{ loop.index }}">
+                                <h6 class="mb-0 font-weight-bold text-white">
+                                    <button class="btn btn-link text-white p-0 font-weight-bold" data-toggle="collapse" data-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
+                                        Proyección de la Semana: {{ pe.semana }}
+                                    </button>
+                                </h6>
+                            </div>
+                            <div id="collapse{{ loop.index }}" class="collapse" aria-labelledby="heading{{ loop.index }}" data-parent="#acordionProyeccionesFinalizadas">
+                                <!-- Tabla de registros -->
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="text-white text-center" style="background-color: #FF8C00;">
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Proyección</th>
+                                                <th>Producido</th>
+                                                <th>Día</th>
+                                            </tr>
+                                        </thead>
+                                    <tbody>
+                                        {% for de in proyectEndDetalles %}
+                                            {% if pe.idprojection == de.idprojection %}
+                                                <tr class="text-center">
+                                                    <td>{{ de.descripcion_producto }}</td>
+                                                    <td>Se proyecto producir {{ (de.unidades | float * de.equivalenciauni | float) | round | int }} und. utilizando {{ de.equivalencia_unidades }} de materia prima. <br> Equivalente a {{ (de.kgs | float * (de.unidades | float * de.equivalenciauni | float)) | round(2) }} KG. </td>
+                                                    <td style="color: {% if de.producido < de.unidades %}red{% else %}green{% endif %};">
+                                                        {{ de.producido }}
+                                                    </td>
+                                                    <td>{{ de.dia }}</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Controles de Paginación -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center mt-3">
+                <!-- Botón "Anterior" -->
+                <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=current_page-1) }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Anterior</span>
+                    </a>
+                </li>
+            
+                <!-- Números de página -->
+                {% for page in range(1, total_pages + 1) %}
+                    <li class="page-item {% if page == current_page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=page) }}">{{ page }}</a>
+                    </li>
+                {% endfor %}
+            
+                <!-- Botón "Siguiente" -->
+                <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=current_page+1) }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Siguiente</span>
+                    </a>
+                </li>
+                </ul>
+            </nav>
+  
+        </div>
+    </div>
+
+</div>
+
+
+
+<script src="{{ url_for('static', filename='js/proyeccion_semanal.js') }}"></script>
+
+{% endblock %}

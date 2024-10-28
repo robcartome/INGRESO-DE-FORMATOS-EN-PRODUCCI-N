@@ -134,6 +134,7 @@ CREATE OR REPLACE VIEW v_registros_controles_envasados AS
 SELECT
 	ce.id_detalle_registro_controles_envasados,
 	t.nombres || ' ' || t.apellidos AS responsable,
+	p.idproducto,
 	p.descripcion_producto,
 	ce.cantidad_producida,
 	pr.nom_empresa,
@@ -142,6 +143,7 @@ SELECT
 	TO_CHAR(ce.fecha_vencimiento, 'DD/MM/YYYY') AS fecha_vencimiento,
 	ce.observacion,
 	rce.estado,
+	rce.fecha AS date_insertion,
 	rce.id_registro_control_envasados
 FROM
 	detalles_registros_controles_envasados ce
@@ -415,35 +417,61 @@ SELECT
     m.minimo_und,
     m.maximo_und,
     m.conversion_und,
-    m.unidades,
-    -- Redondeo condicional para transformed_min
-    CASE 
-        WHEN m.unidades = 'KG' THEN 
-            ROUND(CAST(m.minimo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC), 2) -- Redondea a 2 decimales si es KG
-        ELSE 
-            CEIL(CAST(m.minimo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC)) -- Redondea a entero si no es KG
-    END::TEXT || ' ' || m.unidades AS transformed_min,
-    
-    -- Redondeo condicional para transformed_max
-    CASE 
-        WHEN m.unidades = 'KG' THEN 
-            ROUND(CAST(m.maximo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC), 2) -- Redondea a 2 decimales si es KG
-        ELSE 
-            CEIL(CAST(m.maximo_und AS NUMERIC) / CAST(m.conversion_und AS NUMERIC)) -- Redondea a entero si no es KG
-    END::TEXT || ' ' || m.unidades AS transformed_max,
-    
+	ROUND(CAST(m.minimo_und AS NUMERIC) * CAST(m.conversion_und AS NUMERIC), 2)::TEXT || ' ' || 'KG' AS transformed_minimo, 
+	ROUND(CAST(m.maximo_und AS NUMERIC) * CAST(m.conversion_und AS NUMERIC), 2)::TEXT || ' ' || 'KG' AS transformed_maximo,
+	m.equivalencia,
+	m.unidad_equivalencia,
     p.idproducto,
-    p.descripcion_producto
+    p.descripcion_producto,
+	m.unidades_por_equivalencia
 FROM
     min_max m
 JOIN
     productos p ON p.idproducto = m.fk_id_productos;
 
-v_detalles_registros_controles_envasados
 
 DROP VIEW v_min_max
 
+SELECT * FROM v_min_max
+	
 
-SELECT * FROM v_min_max ORDER BY id_min_max
 
-SELECT * FROM public.min_max
+CREATE OR REPLACE VIEW v_proyeccion_semanal AS
+SELECT
+    p.idproyeccion,
+    p.proyeccion,
+    p.producido,
+    pro.idproducto,
+    pro.descripcion_producto,
+    pro.stock,
+    CEIL(CAST(m.equivalencia AS NUMERIC) * CAST(p.proyeccion AS NUMERIC))::TEXT || ' ' || m.unidad_equivalencia AS equivalencia_unidades,
+    CAST(m.conversion_und AS NUMERIC) AS kgs,
+    m.equivalencia,
+    CAST(m.unidades_por_equivalencia AS NUMERIC) AS unidades,
+	CEIL((CAST(m.equivalencia AS NUMERIC) * CAST(p.proyeccion AS NUMERIC))) AS equivalenciauni,
+    proyect.idprojection,
+    proyect.estado,
+    proyect.semana,
+	p.dia
+FROM
+    proyeccion_semanal p
+JOIN
+    productos pro ON pro.idproducto = p.fk_id_productos
+JOIN
+    min_max m ON pro.idproducto = m.fk_id_productos
+JOIN
+    proyeccion proyect ON proyect.idprojection = p.fk_proyeccion
+ORDER BY
+    p.idproyeccion;
+
+DROP VIEW v_proyeccion_semanal
+
+SELECT * FROM v_proyeccion_semanal
+
+SELECT * FROM public.proyeccion_semanal
+
+SELECT * FROM productos
+
+SELECT * FROM proyeccion
+
+SELECT * FROM v_proyeccion_semanal
