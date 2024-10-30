@@ -7,7 +7,21 @@ proyeccionsemanal = Blueprint('proyeccion_semanal', __name__)
 
 @proyeccionsemanal.route('/', methods=['GET'])
 def proyeccion_semanal():
-    proyeccion = execute_query("SELECT * FROM v_proyeccion_semanal WHERE estado = 'CREADO' ORDER BY idproyeccion") or []
+    proyeccion = execute_query("""SELECT * 
+                                    FROM v_proyeccion_semanal 
+                                    WHERE estado = 'CREADO' 
+                                    ORDER BY 
+                                        CASE 
+                                            WHEN dia = 'Lunes' THEN 1
+                                            WHEN dia = 'Martes' THEN 2
+                                            WHEN dia = 'Miércoles' THEN 3
+                                            WHEN dia = 'Jueves' THEN 4
+                                            WHEN dia = 'Viernes' THEN 5
+                                            WHEN dia = 'Sábado' THEN 6
+                                            WHEN dia = 'Domingo' THEN 7
+                                        END,
+                                        idproyeccion;""") or []
+    
     productos = execute_query("SELECT * FROM productos ORDER BY idproducto")
 
     # Paginación para el historial de proyecciones finalizadas

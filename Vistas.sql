@@ -474,4 +474,20 @@ SELECT * FROM productos
 
 SELECT * FROM proyeccion
 
+SELECT * FROM public.proyeccion_semanal
+
 SELECT * FROM v_proyeccion_semanal
+
+SELECT * FROM public.v_registros_controles_envasados WHERE idproducto = 19
+
+SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = 20 AND date_insertion BETWEEN '2024-10-21' AND '2024-10-26'
+
+SELECT * FROM proyeccion WHERE estado = 'CERRADO'
+        ORDER BY idprojection
+
+SELECT * FROM v_proyeccion_semanal
+            WHERE estado = 'CERRADO'
+SELECT * FROM proyeccion WHERE estado = 'CREADO'
+
+SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = %s AND date_insertion BETWEEN %s AND %s
+
