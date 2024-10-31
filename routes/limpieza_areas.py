@@ -1,11 +1,10 @@
 import os
 import pprint
 
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
 from collections import defaultdict
 from datetime import datetime
-from datetime import time
 from .utils.constans import POES
 from .utils.constans import MESES
 from .utils.helpers import image_to_base64
@@ -19,6 +18,12 @@ limpieza_areas = Blueprint('limpieza_areas', __name__)
 @limpieza_areas.route('/', methods=['GET'])
 def limpiezaAreas():
     try:
+        #Paginador
+        #Obtener número de página
+        page = request.args.get('page', 1, type=int)
+        per_page = 5 #Número de agrupaciones mes-año por páginas
+        offset = (page - 1) * per_page
+        
         # Obtener todas las áreas
         query_areas = "SELECT * FROM areas_produccion WHERE id_area_produccion BETWEEN 2 AND 9"
         areas = execute_query(query_areas)
@@ -28,28 +33,41 @@ def limpiezaAreas():
         v_limpieza_areas = execute_query(query_vista_limpieza_areas)
 
         # Obtener los registros finalizados, agrupados por mes y año
-        query_la_finalizados = """
+        query_la_finalizados = f"""
             SELECT 
                 mes, anio, 
-                json_agg(json_build_object('id_verificacion_limpieza_desinfeccion_area', id_verificacion_limpieza_desinfeccion_area, 
-                                           'detalle_area_produccion', detalle_area_produccion,
-                                           'estado', estado,
-                                           'id_area_produccion', id_area_produccion)) AS registros
+                json_agg(json_build_object(
+                    'id_verificacion_limpieza_desinfeccion_area', id_verificacion_limpieza_desinfeccion_area, 
+                    'detalle_area_produccion', detalle_area_produccion,
+                    'estado', estado,
+                    'id_area_produccion', id_area_produccion
+                )) AS registros
             FROM v_verificacion_limpieza_desinfeccion_areas 
             WHERE estado = 'CERRADO' 
             GROUP BY mes, anio
             ORDER BY anio DESC, mes DESC
+            LIMIT {per_page} OFFSET {offset}
         """
         v_finalizados_LA = execute_query(query_la_finalizados)
+        
+        query_count = """SELECT COUNT(*) AS total
+                        FROM (SELECT DISTINCT mes, anio 
+                            FROM v_verificacion_limpieza_desinfeccion_areas 
+                            WHERE estado = 'CERRADO') AS distinct_months_years;"""
+        
+        total_count = execute_query(query_count)[0]['total']
+        total_pages = (total_count + per_page - 1) // per_page # Calcular total de páginas
         
         # Obtener las observaciones y acciones correctivas
         asignacion_observaciones_limpieza_areas = execute_query("SELECT * FROM v_asingaciones_observaciones_acCorrec_limpieza_areas")
 
         return render_template('limpieza_areas.html', 
-                               areas=areas, 
-                               v_limpieza_areas=v_limpieza_areas, 
-                               v_finalizados_LA=v_finalizados_LA, 
-                               asignacion_observaciones_limpieza_areas=asignacion_observaciones_limpieza_areas)
+                                areas=areas, 
+                                v_limpieza_areas=v_limpieza_areas, 
+                                v_finalizados_LA=v_finalizados_LA, 
+                                asignacion_observaciones_limpieza_areas=asignacion_observaciones_limpieza_areas,
+                                page=page,
+                                total_pages=total_pages)
     except Exception as e:
         print(f"Error al obtener datos: {e}")
         return render_template('limpieza_areas.html')

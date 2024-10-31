@@ -19,6 +19,12 @@ limpieza_equipos_medicion = Blueprint('limpieza_equipos_medicion', __name__)
 @limpieza_equipos_medicion.route('/', methods=['GET'])
 def limpiezaEquiposMedicion():
     try:
+        #Paginador
+        #obtener el número de página
+        page = request.args.get('page', 1, type=int)
+        per_page = 5
+        offset = (page - 1) * per_page
+        
         # Obtener las verificaciones en estado creado
         query_equipo_medicion = "SELECT * FROM v_verificaciones_equipos_medicion WHERE estado = 'CREADO' ORDER BY id_verificacion_equipo_medicion DESC"
         formatos_creado = execute_query(query_equipo_medicion)
@@ -26,14 +32,37 @@ def limpiezaEquiposMedicion():
         # Obtener las verificaciones en estado cerrado
         query_historial_equipos_medicion = "SELECT * FROM v_verificaciones_equipos_medicion WHERE estado = 'CERRADO' ORDER BY id_verificacion_equipo_medicion DESC"
         historial_formatos_creado = execute_query(query_historial_equipos_medicion)
+        
+        query_historial_equipos_medicion = f"""
+                                            SELECT * FROM v_verificaciones_equipos_medicion
+                                            WHERE estado = 'CERRADO'
+                                            GROUP BY v_verificaciones_equipos_medicion.id_verificacion_equipo_medicion, 
+                                                v_verificaciones_equipos_medicion.estado, 
+                                                v_verificaciones_equipos_medicion.fk_idtipoformatos,
+                                                mes, anio
+                                            ORDER BY anio DESC, mes DESC
+                                            LIMIT {per_page} OFFSET {offset}
+                                            """
+        historial_formatos_creado = execute_query(query_historial_equipos_medicion)
+        
+        #Obtener el número de registros
+        query_count = """SELECT COUNT(*) AS total
+                        FROM (SELECT DISTINCT mes, anio 
+                            FROM v_verificaciones_equipos_medicion 
+                            WHERE estado = 'CERRADO') AS distinct_months_years;"""
+        
+        total_count = execute_query(query_count)[0]['total']
+        total_pages = (total_count + per_page - 1) // per_page # Calcular total de páginas
 
         query_categorias_limpieza_desinfeccion = "SELECT * FROM public.categorias_limpieza_desinfeccion WHERE id_categorias_limpieza_desinfeccion IN (22, 23, 24, 25)"
         categorias_limpieza_desinfeccion = execute_query(query_categorias_limpieza_desinfeccion)
 
         return render_template('limpieza_equipos_medicion.html',
-                               formatos_creado=formatos_creado,
-                               historial_formatos_creado=historial_formatos_creado,
-                               categorias_limpieza_desinfeccion=categorias_limpieza_desinfeccion)
+                                formatos_creado=formatos_creado,
+                                historial_formatos_creado=historial_formatos_creado,
+                                categorias_limpieza_desinfeccion=categorias_limpieza_desinfeccion,
+                                page=page,
+                                total_pages=total_pages)
     except Exception as e:
         print(f"Error al obtener datos: {e}")
         return render_template('limpieza_equipos_medicion.html')

@@ -4,6 +4,37 @@
 
 {% block content %}
 
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .pagination .page-item .page-link {
+        color: #ff0000; /* Color principal */
+        border-color: #ff0000;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #ff0000; /* Fondo de la página activa */
+        border-color: #ff0000;
+        color: #fff;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #ff6666; /* Color de hover */
+        color: white;
+    }
+    
+    .pagination .page-link {
+        margin: 0 5px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+</style>
+
 <div class="container-fluid mt-1">
     <h1 class="mb-4 text-center" style="color: #FF8C00;">Verificación de Limpieza y Desinfección de las Áreas</h1>
     
@@ -41,6 +72,7 @@
                 <h5 class="mb-0">Registros de Verificación de Limpieza y Desinfección de las Áreas</h5>
             </div>
             <div class="card-body">
+                {% if v_limpieza_areas %}
                 <div class="form-group col-md-6">
                     <label for="filtrarAraeLA" style="color: #FF8C00;">Filtrar por área:</label>
                     <input type="text" id="filtrarAraeLA" class="form-control" name="filtrarAraeLA" placeholder="Filtrar el registro de verificación de limpieza y desinfección de las áreas por área" onkeyup="filterLAOpenArea()"  autocomplete="off">
@@ -87,6 +119,9 @@
                         </tbody>
                     </table>
                 </div>
+                {% else %}
+                <h5 class="text-center" style="color: #ff0000;">No hay registros para este mes</h5>
+                {% endif %}
             </div>
         </div>
 
@@ -156,10 +191,32 @@
                     </div>
                     {% endfor %}
                 </div>
+                <!-- Paginador -->
+                <div class="pagination-container mt-4 d-flex justify-content-center">
+                    <ul class="pagination">
+                        {% if page > 1 %}
+                            <li class="page-item">
+                                <a href="{{ url_for('limpieza_areas.limpiezaAreas', page=page - 1) }}" class="page-link">Anterior</a>
+                            </li>
+                        {% endif %}
+                        
+                        <!-- Muestra los números de página -->
+                        {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="{{ url_for('limpieza_areas.limpiezaAreas', page=p) }}" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        {% if page < total_pages %}
+                            <li class="page-item">
+                                <a href="{{ url_for('limpieza_areas.limpiezaAreas', page=page + 1) }}" class="page-link">Siguiente</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
             </div>
         </div>
-        
-
     </div>
 
     <!-- Contenedor para mostrar los detalles de una área específica -->

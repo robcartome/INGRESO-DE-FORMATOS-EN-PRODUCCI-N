@@ -72,8 +72,8 @@ def generar_reporte(template, filename_report='Reporte_sin_nombre', orientation=
         # Configuración de pdfkit con la ruta del ejecutable wkhtmltopdf WINDOWS
         wkhtmltopdf_path = "tools/wkhtmltox/bin/wkhtmltopdf.exe"
 
-        # Detecta automáticamente la ruta de wkhtmltopdf en docker
-        wkhtmltopdf_path = shutil.which("wkhtmltopdf")
+        # # Detecta automáticamente la ruta de wkhtmltopdf en docker
+        # wkhtmltopdf_path = shutil.which("wkhtmltopdf")
 
         if wkhtmltopdf_path is None:
             raise FileNotFoundError("No se encontró wkhtmltopdf en el sistema.")

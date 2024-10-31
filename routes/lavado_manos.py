@@ -11,7 +11,6 @@ from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
 
-
 ########## PARA LAVADO_MANOS.HTML ###################################################################################
 
 lavadoMano = Blueprint('lavado_Manos', __name__)
@@ -58,7 +57,6 @@ def lavado_Manos():
                     INSERT INTO detalle_lavados_manos (fecha, hora, fk_idtrabajador, fk_idlavadomano) 
                     VALUES (%s, %s, %s, %s);
                 """
-                
                 execute_query(query_insertar_trabajador, (fechaLavado, horaLavado, selectTrabajador, formato[0]['idlavadomano']))
             except Exception as e:
                 # Convertir el mensaje de error a string
@@ -69,7 +67,6 @@ def lavado_Manos():
         except Exception as e:
             print(f"Error al procesar la solicitud POST: {e}")
             return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el lavado de manos.'}), 500
-
         
 @lavadoMano.route('/generar_formato_lavado', methods=['POST'])
 def generar_formato_lavado():
