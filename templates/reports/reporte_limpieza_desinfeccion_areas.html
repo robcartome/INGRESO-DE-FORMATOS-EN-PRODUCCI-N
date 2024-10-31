@@ -7,13 +7,13 @@
         <!-- Encabezado del reporte -->
         <thead>
             <tr>
-                <td colspan="12">
+                <td colspan="33">
                     {% include "reports/header_component.html" %}
                 </td>
             </tr>
             <!-- Información subtitulo -->
             <tr>
-                <td colspan="4">
+                <td colspan="33">
                     <table class="header-table">
                         <tr class="s2">
                             <td colspan="1" class="border-none">Fecha</td>
@@ -31,15 +31,15 @@
         <!-- Cuerpo del reporte -->
         <tbody>
             <tr>
-                <td colspan="12">
+                <td colspan="33" class="main-table border-none">
                     <!-- Bucle para cada ambiente en el diccionario 'info' -->
                     {% for ambiente, data in info.items() %}
-                    <table class="body-table">
+                    <!-- <table class="body-table"> -->
                         <!-- Cabecera con el nombre del ambiente -->
-                        <tr>
+                        <tr class="header-table">
                             <td colspan="33" class="text-center"><b>{{ ambiente }}</b></td>
                         </tr>
-                        <tr>
+                        <tr class="header-table">
                             <th>Día</th>
                             <!-- Generar números de día -->
                             {% for i in range(1, 32) %}
@@ -50,7 +50,7 @@
 
                         <!-- Generar filas dinámicas para cada item del ambiente -->
                         {% for area, items in data.items() %}
-                            <tr>
+                            <tr class="body-table">
                                 <td>{{ area }}</td>
                                 {% for i in range(1, 32) %}
                                     <td>
@@ -62,8 +62,8 @@
                                 <td>{{ items["frecuencia"].capitalize() }}</td>
                             </tr>
                         {% endfor %}
-
-                    </table>
+                    <!-- </table> -->
+                        <tr style="height: 35pt;"></tr>
                     {% endfor %}
                 </td>
             </tr>
@@ -72,7 +72,7 @@
         <!-- Pie del reporte -->
         <tfoot>
             <tr>
-                <td colspan="12" style="padding-top: 25pt;">
+                <td colspan="33" style="padding-top: 25pt;">
                     {% include "reports/footer_component.html" %}
                 </td>
             </tr>
