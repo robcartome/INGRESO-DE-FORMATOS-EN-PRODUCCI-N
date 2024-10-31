@@ -148,13 +148,13 @@ def finalizar_higiene_personal():
     except Exception as e:
         print(f"Error al finalizar el registro de control de higiene personal: {e}")
         return jsonify({'status': 'error', 'message': 'Error al finalizar el registro de control de higiene personal.'}), 500
-    
+
 @higienePersona.route('/obtener_detalle_HP/<int:id_formatos>', methods=['GET'])
 def obtener_detalle_HP(id_formatos):
     try:
         print('bandera')
         # Ejecutar la consulta SQL para obtener los detalles
-        query = "SELECT * FROM v_detalle_higiene_personal WHERE fk_idcontrol_higiene_personal = %s AND estado = 'CERRADO'"
+        query = "SELECT * FROM v_detalle_higiene_personal WHERE fk_idcontrol_higiene_personal = %s AND estado = 'CERRADO' ORDER BY fecha DESC"
         detalles = execute_query(query, (id_formatos,))
 
         query_verificacion_higiene_personal = "SELECT * FROM asignacion_verificacion_previa_higiene_personal"
@@ -185,7 +185,7 @@ def download_formato():
     cabecera = get_cabecera_formato("controles_higiene_personal", formato_lavado_id)
 
     # Realizar la consulta para el detalle de todos los registros y controles de envasados finalizados
-    detalle_controles_higiene_personal = execute_query(f"SELECT * FROM v_detalle_higiene_personal WHERE fk_idcontrol_higiene_personal = {formato_lavado_id}")
+    detalle_controles_higiene_personal = execute_query(f"SELECT * FROM v_detalle_higiene_personal WHERE fk_idcontrol_higiene_personal = {formato_lavado_id} ORDER BY fecha")
 
     # Obtener todas las verificaciones en una sola consulta
     query_verificacion_higiene_personal = "SELECT * FROM asignacion_verificacion_previa_higiene_personal"

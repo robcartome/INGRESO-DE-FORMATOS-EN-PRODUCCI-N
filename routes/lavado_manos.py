@@ -203,6 +203,11 @@ def download_formato():
 
         # Agregar los datos formateados al diccionario
         agrupado_por_fecha[fecha_formateada][nombre].append(hora_formateada)
+        
+    # Ordenar las horas para cada trabajador en cada fecha
+    for fecha, nombres in agrupado_por_fecha.items():
+        for nombre in nombres:
+            nombres[nombre].sort()  # Ordena la lista de horas en orden ascendente
 
     # Procesar las medidas correctivas
     medidas_correctivas_agrupadas = defaultdict(str)
