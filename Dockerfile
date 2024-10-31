@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Utiliza una imagen base de Python en Alpine
 FROM python:alpine3.18
 
@@ -27,3 +28,29 @@ EXPOSE 5000
 
 # Ejecuta Flask en modo de desarrollo
 CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]
+=======
+FROM python:3.11.9-slim
+
+WORKDIR /home/app
+
+COPY requirements.txt .
+
+# Instala dependencias de sistema y wkhtmltopdf
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    wkhtmltopdf \
+    libxrender1 \
+    libxext6 \
+    libfontconfig1 \
+    fontconfig && \
+    fc-cache -f -v && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install gunicorn && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+EXPOSE 5000
+
+CMD gunicorn --bind 0.0.0.0:5000 run:app
+>>>>>>> 36e7f79b2cc142cacd61821fed6ac27fe90aea9d

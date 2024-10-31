@@ -1,6 +1,7 @@
 import base64
 import pdfkit
 import calendar
+import shutil
 
 from flask import make_response
 from connection.database import execute_query
@@ -55,7 +56,7 @@ def image_to_base64(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-def generar_reporte(template, filename_report='Reporte sin nombre', orientation='portrait'):
+def generar_reporte(template, filename_report='Reporte_sin_nombre', orientation='portrait'):
     """
     Genera un reporte en formato PDF a partir de una plantilla HTML.
 
@@ -67,6 +68,16 @@ def generar_reporte(template, filename_report='Reporte sin nombre', orientation=
         Flask Response: Una respuesta HTTP con el contenido del PDF generado.
     """
     try:
+
+        # Configuración de pdfkit con la ruta del ejecutable wkhtmltopdf WINDOWS
+        wkhtmltopdf_path = "tools/wkhtmltox/bin/wkhtmltopdf.exe"
+
+        # Detecta automáticamente la ruta de wkhtmltopdf en docker
+        wkhtmltopdf_path = shutil.which("wkhtmltopdf")
+
+        if wkhtmltopdf_path is None:
+            raise FileNotFoundError("No se encontró wkhtmltopdf en el sistema.")
+
         # Definir opciones para la generación del PDF
         options = {
             'page-size': 'A4',
@@ -79,9 +90,8 @@ def generar_reporte(template, filename_report='Reporte sin nombre', orientation=
             'orientation': 'landscape' if orientation.lower() == 'landscape' else 'portrait'
         }
 
-        # Configuración de pdfkit con la ruta del ejecutable wkhtmltopdf
-        config = pdfkit.configuration(
-            wkhtmltopdf="tools/wkhtmltox/bin/wkhtmltopdf.exe")
+        # Configuración de pdfkit con la ruta detectada
+        config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
         # Generar el PDF en memoria desde la cadena HTML de la plantilla
         pdf_content = pdfkit.from_string(
