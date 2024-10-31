@@ -558,3 +558,133 @@ function filterKardexCloseProduct() {
         }
     }
 }
+
+
+// Función para agregar todos los productos al kardex
+function agregarTodosPorductosKardex() {
+    Swal.fire({
+        title: '¿Estás seguro de agregar todos los productos?',
+        text: "Se agregarán todos los productos que tengas agregados en tu inventario al kardex",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, agregar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/kardex/agregar_todos_productos_kardex', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Proceso completado!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // Crear tarjeta informativa para productos registrados correctamente
+                    if (data.productos_nuevos && data.productos_nuevos.length > 0) {
+                        let productosListRegister = data.productos_nuevos.map(p => `<li>${p}</li>`).join("");
+                        let infoCard = `
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <strong>Éxito:</strong> Los siguientes productos fueron registrados correctamente:
+                                <ul>${productosListRegister}</ul>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>`;
+                        
+                        document.getElementById('messagesContainer').innerHTML = infoCard;
+                    }
+
+                    // Crear tarjeta informativa para productos ya existentes
+                    if (data.productos_registrados && data.productos_registrados.length > 0) {
+                        let productosList = data.productos_registrados.map(p => `<li>${p}</li>`).join("");
+                        let infoCard = `
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <strong>Advertencia:</strong> Los siguientes productos ya tienen un kardex creado para este mes:
+                                <ul>${productosList}</ul>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>`;
+                        
+                        document.getElementById('messagesExito').innerHTML = infoCard;
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.'
+                });
+            });
+        }
+    });
+}
+
+function finalizarTodosPorductosKardex(){
+    Swal.fire({
+        title: '¿Estás seguro de finalizar todos los productos?',
+        text: "Todos los productos con estado 'CREADO' serán cerrados. Procede solo si estas seguro de esta acción.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            fetch('/kardex/finalizar_todos_productos_kardex', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Proceso completado!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.'
+                });
+            });
+        }
+    })
+};

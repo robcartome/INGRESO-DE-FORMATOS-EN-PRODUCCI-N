@@ -32,7 +32,8 @@ def control_general():
                                     t.cargo, 
                                     t.fk_idsexo, 
                                     cn.carnet_salud,
-                                    t.estado_trabajador
+                                    t.estado_trabajador,
+                                    t.status
                                 FROM 
                                     trabajadores t 
                                 JOIN 
@@ -126,6 +127,21 @@ def control_general():
             print(f"Error al procesar la solicitud POST: {e}")
             return jsonify({'status': 'error', 'message': 'Ocurrió un error al procesar la solicitud.'}), 500
 
+@controlGeneral.route('/toggle_status', methods=['POST'])
+def toggle_status():
+    data = request.get_json()
+    trabajador_id = data.get('id')
+    new_status = data.get('status')
+
+    try:
+        # Actualizar el estado del trabajador en la base de datos
+        query_update_status = "UPDATE trabajadores SET status = %s WHERE idtrabajador = %s"
+        execute_query(query_update_status, (new_status, trabajador_id))
+
+        return jsonify({'status': 'success', 'message': 'Estado actualizado correctamente'}), 200
+    except Exception as e:
+        print(f"Error al actualizar el estado: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al actualizar el estado.'}), 500
 
 
 @controlGeneral.route('/update', methods=['POST'])

@@ -156,3 +156,32 @@ function eliminarTrabajador(idTrabajador) {
     });
 }
 
+function toggleStatus(trabajadorId, newStatus) {
+    fetch('/control_general/toggle_status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: trabajadorId, status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log(data.message);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error al actualizar el estado:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al actualizar el estado. Inténtelo de nuevo más tarde.'
+        });
+    });
+}

@@ -36,10 +36,24 @@
         <!-- Sección para mostrar la lista de todos los kardex activos -->
         <div>
             <h3 class="text-center font-weight-bold" style="color: #FF8C00;">Registros de Kardex Activos</h3>
-            <div class="form-group col-md-6">
-                <label for="filtrarProductoKardex" style="color: #FF8C00;">Filtrar kardex:</label>
-                <input type="text" id="filtrarProductoKardex" class="form-control" name="filtrarProductoKardex" placeholder="Filtrar el kardex por el producto" onkeyup="filterKardexOpenProduct()"  autocomplete="off">
+            <div class="form-row align-items-end mb-4">
+                <div class="form-group col-lg-6 col-md-6">
+                    <label for="filtrarProductoKardex" style="color: #FF8C00;">Filtrar kardex:</label>
+                    <input type="text" id="filtrarProductoKardex" class="form-control" name="filtrarProductoKardex" placeholder="Filtrar el kardex por el producto" onkeyup="filterKardexOpenProduct()"  autocomplete="off">
+                </div>
+                <div class="form-group col-lg-3 col-md-4">
+                    <button type="submit" class="btn btn-warning text-white w-100" onclick="agregarTodosPorductosKardex()">
+                        <i class="fas fa-plus-circle"></i> Agregar todos los productos
+                    </button>
+                </div>
+                <div class="form-group col-lg-3 col-md-4">
+                    <button type="button" class="btn btn-warning text-white w-100" style="background-color: #ff0000;" onclick="finalizarTodosPorductosKardex()">
+                        <i class="fas fa-check-circle"></i> Finalizar todos los productos
+                    </button>
+                </div>
             </div>
+            <div id="messagesExito"></div>
+            <div id="messagesContainer"></div>
             <div class="table-responsive">
                 <table class="table table-bordered" id="kardexTableOpen">
                     <thead style="background-color: #FF8C00; color: white;">

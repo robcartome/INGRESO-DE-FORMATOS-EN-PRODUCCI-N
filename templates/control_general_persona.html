@@ -3,6 +3,57 @@
 {% block title %}Control general del personal{% endblock %}
 
 {% block content %}
+
+<style>
+    /* Switch styling */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 3em;
+        height: 1.5em;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* Background slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #f5aeae; /* Red for false */
+        border-radius: 1em;
+        transition: background-color 0.3s;
+    }
+
+    .slider-circle {
+        position: absolute;
+        height: 1.1em;
+        width: 1.1em;
+        background-color: white;
+        border-radius: 50%;
+        bottom: 0.2em;
+        left: 0.2em;
+        transition: transform 0.3s;
+    }
+
+    /* Checked state */
+    input:checked + .slider {
+        background-color: #9ed99c; /* Green for true */
+    }
+
+    input:checked + .slider .slider-circle {
+        transform: translateX(1.5em);
+    }
+
+</style>
+
 <div class="container-fluid">
     <h1 class="mb-4 text-center" style="color: #FF8C00;">Control general del personal</h1>
     
@@ -80,8 +131,17 @@
         {% for trabajador in trabajadores %}
         <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
             <div class="card shadow-sm h-100" style="border: 1px solid #FF8C00;">
+                
                 <div class="card-body d-flex flex-column" style="background-color: #ffffff;">
-                    <h5 class="card-title" style="color: #FF8C00;">{{ trabajador.apellidos }} {{ trabajador.nombres }}</h5>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="card-title mb-0" style="color: #FF8C00;">{{ trabajador.apellidos }} {{ trabajador.nombres }}</h5>
+                        <label class="switch ml-3">
+                            <input type="checkbox" {% if trabajador.status %}checked{% endif %} onclick="toggleStatus('{{ trabajador.idtrabajador }}', this.checked)">
+                            <div class="slider">
+                                <div class="slider-circle"></div>
+                            </div>
+                        </label>
+                    </div>                                                          
                     <p class="card-text mb-3">
                         <strong>DNI:</strong> {{ trabajador.dni }}<br>
                         <strong>Área:</strong> {{ trabajador.area }}<br>

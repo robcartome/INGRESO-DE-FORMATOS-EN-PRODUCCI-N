@@ -29,6 +29,7 @@ def kardex_info():
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('kardex.html')
+        
     elif request.method == 'POST':
         try:
             producto = request.form.get('selectProducto')
@@ -271,3 +272,65 @@ def finalizar_kardex():
     except Exception as e:
         print(f"Error al agregar detalle de kardex: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el producto.'}), 500
+    
+from datetime import datetime
+from flask import jsonify
+
+@kardex.route('/agregar_todos_productos_kardex', methods=['POST'])
+def agregar_todos_productos_kardex():
+    try:
+        productos = execute_query("SELECT idproducto, descripcion_producto FROM productos")
+        fecha_actual = datetime.now()
+
+        registrados_correctamente = []
+        list_productos_registrados = []
+
+        mes_actual = str(fecha_actual.month)
+        anio_actual = str(fecha_actual.year)
+
+        # Consulta para verificar si ya existen registros en el kardex para el mes actual
+        consult_product_kardex_month = """
+            SELECT fk_idproducto 
+            FROM kardex 
+            WHERE mes = %s AND anio = %s AND estado = 'CREADO'
+        """
+        productos_registrados = execute_query(consult_product_kardex_month, (mes_actual, anio_actual))
+        productos_registrados_ids = {p['fk_idproducto'] for p in productos_registrados}
+
+        # Insertar solo los productos que no están registrados
+        for p in productos:
+            product_id = p['idproducto']
+            descripcion_producto = p['descripcion_producto']
+
+            if product_id not in productos_registrados_ids:
+                query_crear_formato = """
+                    INSERT INTO kardex(mes, anio, estado, fk_idproducto, fk_idtipoformatos)
+                    VALUES (%s, %s, %s, %s, %s)
+                """
+                execute_query(query_crear_formato, (mes_actual, anio_actual, 'CREADO', product_id, 3))
+                registrados_correctamente.append(descripcion_producto)
+            else:
+                list_productos_registrados.append(descripcion_producto)
+
+        # Crear respuesta con productos registrados y ya existentes
+        return jsonify({
+            'status': 'success',
+            'message': 'Proceso completado.',
+            'productos_registrados': list_productos_registrados,
+            'productos_nuevos': registrados_correctamente
+        }), 200
+
+    except Exception as e:
+        print(f"Error al crear el kardex: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al crear el kardex.'}), 500
+
+@kardex.route('/finalizar_todos_productos_kardex', methods=['POST'])
+def finalizar_todos_productos_kardex():
+    try:
+        kardex_creados = execute_query("SELECT idkardex FROM kardex WHERE estado = 'CREADO'")
+        for k in kardex_creados:
+            execute_query("UPDATE kardex SET estado = 'CERRADO' WHERE idkardex = %s", (k['idkardex'], ))
+        return jsonify({'status': 'success', 'message': 'Se finalizaron todos los Kardex'}), 200
+    except Exception as e:
+        print(f"Error al finalizar el kardex: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al finalizar el kardex.'}), 500
