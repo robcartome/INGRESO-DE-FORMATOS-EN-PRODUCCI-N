@@ -19,43 +19,55 @@ limpieza_equipos_medicion = Blueprint('limpieza_equipos_medicion', __name__)
 @limpieza_equipos_medicion.route('/', methods=['GET'])
 def limpiezaEquiposMedicion():
     try:
+        # Obtener las verificaciones en estado creado
+        query_equipo_medicion = "SELECT * FROM v_verificaciones_equipos_medicion WHERE estado = 'CREADO' ORDER BY id_verificacion_equipo_medicion DESC"
+        formatos_creado = execute_query(query_equipo_medicion)
+        
+        query_categorias_limpieza_desinfeccion = "SELECT * FROM public.categorias_limpieza_desinfeccion WHERE id_categorias_limpieza_desinfeccion IN (22, 23, 24, 25)"
+        categorias_limpieza_desinfeccion = execute_query(query_categorias_limpieza_desinfeccion)
+        
         #Paginador
         #obtener el número de página
         page = request.args.get('page', 1, type=int)
         per_page = 5
         offset = (page - 1) * per_page
         
-        # Obtener las verificaciones en estado creado
-        query_equipo_medicion = "SELECT * FROM v_verificaciones_equipos_medicion WHERE estado = 'CREADO' ORDER BY id_verificacion_equipo_medicion DESC"
-        formatos_creado = execute_query(query_equipo_medicion)
-
+        #Obtener los parámetros de mes y año desde la URL
+        filter_mes = request.args.get('mes')
+        filter_anio = request.args.get('anio')
+        
+        #Construimos las condiciones del filtro
+        filter_conditions = "WHERE estado = 'CERRADO'"
+        
+        if filter_mes and filter_anio:
+            filter_conditions += f" AND mes = '{filter_mes}' AND anio = '{filter_anio}'"
+            limit_offset_clause = ""
+        else:
+            limit_offset_clause = f"LIMIT {per_page} OFFSET {offset}"
+        
         # Obtener las verificaciones en estado cerrado
         query_historial_equipos_medicion = "SELECT * FROM v_verificaciones_equipos_medicion WHERE estado = 'CERRADO' ORDER BY id_verificacion_equipo_medicion DESC"
         historial_formatos_creado = execute_query(query_historial_equipos_medicion)
-        
+
         query_historial_equipos_medicion = f"""
-                                            SELECT * FROM v_verificaciones_equipos_medicion
-                                            WHERE estado = 'CERRADO'
-                                            GROUP BY v_verificaciones_equipos_medicion.id_verificacion_equipo_medicion, 
-                                                v_verificaciones_equipos_medicion.estado, 
-                                                v_verificaciones_equipos_medicion.fk_idtipoformatos,
-                                                mes, anio
+                                            SELECT DISTINCT mes, anio, id_verificacion_equipo_medicion, estado
+                                            FROM v_verificaciones_equipos_medicion
+                                            {filter_conditions}
                                             ORDER BY anio DESC, mes DESC
-                                            LIMIT {per_page} OFFSET {offset}
+                                            {limit_offset_clause}
                                             """
         historial_formatos_creado = execute_query(query_historial_equipos_medicion)
         
-        #Obtener el número de registros
-        query_count = """SELECT COUNT(*) AS total
-                        FROM (SELECT DISTINCT mes, anio 
-                            FROM v_verificaciones_equipos_medicion 
-                            WHERE estado = 'CERRADO') AS distinct_months_years;"""
-        
-        total_count = execute_query(query_count)[0]['total']
-        total_pages = (total_count + per_page - 1) // per_page # Calcular total de páginas
-
-        query_categorias_limpieza_desinfeccion = "SELECT * FROM public.categorias_limpieza_desinfeccion WHERE id_categorias_limpieza_desinfeccion IN (22, 23, 24, 25)"
-        categorias_limpieza_desinfeccion = execute_query(query_categorias_limpieza_desinfeccion)
+        # Si no hay filtro de fecha, contar el total de páginas
+        if not filter_mes and not filter_anio:
+            query_count = """SELECT COUNT(*) AS total
+                            FROM (SELECT DISTINCT mes, anio 
+                                FROM v_verificaciones_equipos_medicion 
+                                WHERE estado = 'CERRADO') AS distinct_months_years;"""
+            total_count = execute_query(query_count)[0]['total']
+            total_pages = (total_count + per_page - 1) // per_page
+        else:
+            total_pages = 1
 
         return render_template('limpieza_equipos_medicion.html',
                                 formatos_creado=formatos_creado,
@@ -65,9 +77,14 @@ def limpiezaEquiposMedicion():
                                 total_pages=total_pages)
     except Exception as e:
         print(f"Error al obtener datos: {e}")
-        return render_template('limpieza_equipos_medicion.html')
+        # Pasar valores por defecto para page y total_pages
+        return render_template('limpieza_equipos_medicion.html', 
+                            formatos_creado=[], 
+                            historial_formatos_creado=[], 
+                            categorias_limpieza_desinfeccion=[], 
+                            page=1, 
+                            total_pages=1)
 
-    
 @limpieza_equipos_medicion.route('/generar_formato_equipos_medicion', methods=['POST'])
 def generar_formato_equipos_medicion():
     try:
@@ -138,7 +155,6 @@ def obtener_fechas_limpieza(categoria_id):
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al obtener las fechas de limpieza.'}), 500
 
 
-
 @limpieza_equipos_medicion.route('/registrar_no_conforme', methods=['POST'])
 def registrar_no_conforme():
     try:
@@ -198,7 +214,7 @@ def estadoAC(id_ca):
     except Exception as e:
         print(f"Error al modificar el estado de la acción correctiva: {e}")
         return jsonify({'status': 'error', 'message': 'No hay acción correctiva para validar.'}), 500
-    
+
 
 @limpieza_equipos_medicion.route('/obtener_observaciones', methods=['GET'])
 def obtener_observaciones():

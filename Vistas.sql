@@ -118,7 +118,9 @@ JOIN
 
 CREATE OR REPLACE VIEW v_historial_registros_controles_envasados AS
 SELECT
-    TO_CHAR(f.fecha, 'DD/MM/YYYY') AS fecha,
+    TO_CHAR(f.fecha, 'MM') AS mes,
+    TO_CHAR(f.fecha, 'YYYY') AS anio,
+    TO_CHAR(f.fecha, 'TMMonth') AS month_name,
     f.estado,
     f.id_registro_control_envasados
 FROM
@@ -127,6 +129,11 @@ WHERE
     f.fk_idtipoformatos = 5 AND f.estado = 'CERRADO'
 ORDER BY
     f.id_registro_control_envasados DESC;
+
+
+DROP VIEW v_historial_registros_controles_envasados
+
+SELECT * FROM registros_controles_envasados
 
 SELECT * FROM v_historial_registros_controles_envasados
 

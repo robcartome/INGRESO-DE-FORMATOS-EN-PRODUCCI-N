@@ -19,7 +19,7 @@ lavadoMano = Blueprint('lavado_Manos', __name__)
 def lavado_Manos():
     if request.method == 'GET':
         try:
-            # Obtener a los trabajadores
+            # Obtener los registros necesarios
             query_lavado_manos = """SELECT * FROM v_lavados_manos WHERE estado = 'CREADO' ORDER BY idmano DESC"""
             lavado_manos = execute_query(query_lavado_manos)
 
@@ -28,11 +28,29 @@ def lavado_Manos():
 
             query_formatos = "SELECT estado FROM lavadosmanos WHERE fk_idtipoformatos = 2 AND estado = 'CREADO'"
             formatos = execute_query(query_formatos)
-
-            query_historialLavadoMano = "SELECT * FROM v_historial_lavado_manos"
+            
+            # Paginación para el historial de lavado de manos
+            page = request.args.get('page', 1, type=int)
+            per_page = 5
+            offset = (page - 1) * per_page
+            query_count = "SELECT COUNT(*) AS total FROM public.lavadosmanos"
+            
+            total_count = execute_query(query_count)[0]['total']
+            total_pages = (total_count + per_page - 1) // per_page
+            
+            query_historialLavadoMano = f"SELECT * FROM v_historial_lavado_manos ORDER BY idlavadomano DESC LIMIT {per_page} OFFSET {offset}"
             historialLavadoMano = execute_query(query_historialLavadoMano)
+            
+            print(historialLavadoMano)
 
-            return render_template('lavado_manos.html', formatos=formatos, lavado_manos=lavado_manos, trabajadores=trabajadores, historialLavadoMano=historialLavadoMano)
+            return render_template('lavado_manos.html', 
+                                    formatos=formatos, 
+                                    lavado_manos=lavado_manos, 
+                                    trabajadores=trabajadores, 
+                                    historialLavadoMano=historialLavadoMano,
+                                    page=page,
+                                    total_pages=total_pages
+                                )
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('lavado_manos.html')
@@ -68,6 +86,29 @@ def lavado_Manos():
             print(f"Error al procesar la solicitud POST: {e}")
             return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el lavado de manos.'}), 500
         
+@lavadoMano.route('/historial', methods=['GET'])
+def historial_lavado_manos():
+    try:
+        # Paginación para el historial de lavado de manos
+        page = request.args.get('page', 1, type=int)
+        per_page = 5
+        offset = (page - 1) * per_page
+        query_count = "SELECT COUNT(*) AS total FROM public.lavadosmanos"
+        
+        total_count = execute_query(query_count)[0]['total']
+        total_pages = (total_count + per_page - 1) // per_page
+        
+        query_historialLavadoMano = f"SELECT * FROM v_historial_lavado_manos ORDER BY idlavadomano DESC LIMIT {per_page} OFFSET {offset}"
+        historialLavadoMano = execute_query(query_historialLavadoMano)
+
+        return render_template('partials/historial_lavado_manos.html', 
+                                historialLavadoMano=historialLavadoMano,
+                                page=page,
+                                total_pages=total_pages)
+    except Exception as e:
+        print(f"Error al obtener datos: {e}")
+        return jsonify({"error": "Error al obtener datos"}), 500
+
 @lavadoMano.route('/generar_formato_lavado', methods=['POST'])
 def generar_formato_lavado():
     try:

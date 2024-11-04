@@ -47,7 +47,17 @@ def proyeccion_semanal():
         proyectEndDetalles = execute_query(f"""
             SELECT * FROM v_proyeccion_semanal
             WHERE estado = 'CERRADO' AND idprojection IN ({format_ids})
-            ORDER BY idproyeccion
+            ORDER BY 
+            CASE 
+                WHEN dia = 'Lunes' THEN 1
+                WHEN dia = 'Martes' THEN 2
+                WHEN dia = 'Miércoles' THEN 3
+                WHEN dia = 'Jueves' THEN 4
+                WHEN dia = 'Viernes' THEN 5
+                WHEN dia = 'Sábado' THEN 6
+                WHEN dia = 'Domingo' THEN 7
+            END,
+            idproyeccion;
         """) or []
     else:
         proyectEndDetalles = []
@@ -226,11 +236,10 @@ def finalizar_proyeccion():
 
         inicio, fin = semana.split(' - ')
 
-        # lunes = datetime.strptime(inicio, "%d/%m/%Y").strftime("%Y-%m-%d")
-        lunes = '2024-10-21'
+        lunes = datetime.strptime(inicio, "%d/%m/%Y").strftime("%Y-%m-%d")
         print(lunes)
-        # sabado = datetime.strptime(fin, "%d/%m/%Y").strftime("%Y-%m-%d")
-        sabado = '2024-10-26'
+        
+        sabado = datetime.strptime(fin, "%d/%m/%Y").strftime("%Y-%m-%d")
         print(sabado)
 
         #Ingresar la cantidad producida a la proyección semanal para poder hacer las comparaciones
@@ -254,4 +263,3 @@ def obtener_producido(inicio, fin, producto):
     cantidad_producida = execute_query("SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = %s AND date_insertion BETWEEN %s AND %s", (producto, inicio, fin))
     
     return cantidad_producida[0]['sum'] or 0
-    

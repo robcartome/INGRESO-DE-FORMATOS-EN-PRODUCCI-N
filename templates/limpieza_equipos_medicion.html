@@ -137,13 +137,15 @@
             <!-- Listado agrupado por mes y año -->
             <div id="accordionFinalizados">
                 {% for grupo in historial_formatos_creado %}
-                <div class="card mb-2">
+                <div class="card mb-2 card-mes" data-mes="{{ grupo.mes }}" data-anio="{{ grupo.anio }}">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
-                        <div>
-                            <button class="btn btn-link text-dark font-weight-bold p-0" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
-                                {{ grupo.mes }} del {{ grupo.anio }}
-                            </button>
-                        </div>
+                        <button class="btn btn-link text-dark font-weight-bold p-0" 
+                                data-toggle="collapse" 
+                                data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" 
+                                aria-expanded="true" 
+                                aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
+                            {{ grupo.mes }} del {{ grupo.anio }}
+                        </button>
                         <div>
                             <!-- Botón para descargar formato del área -->
                             <a
@@ -154,7 +156,7 @@
 
                         </div>
                     </div>
-
+                    
                     <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
                         <div class="card-body bg-light">
                             {% for categoriaFina in categorias_limpieza_desinfeccion %}
@@ -162,7 +164,12 @@
                                 <div class="card border-0 shadow-sm">
                                     <div class="card-header bg-warning text-white" id="headingCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}">
                                         <h5 class="mb-0">
-                                            <button class="btn btn-link text-white" type="button" data-toggle="collapse" data-target="#collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" aria-expanded="true" aria-controls="collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" onclick="cargarFechasLimpiezaEquiposMedicionFinalizados('{{ categoriaFina.id_categorias_limpieza_desinfeccion }}', '{{ grupo.id_verificacion_equipo_medicion }}')">
+                                            <button class="btn btn-link text-white" type="button" 
+                                                data-toggle="collapse" 
+                                                data-target="#collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" 
+                                                aria-expanded="true" 
+                                                aria-controls="collapseCategoriaFina{{ grupo.anio }}{{ grupo.mes }}{{ categoriaFina.id_categorias_limpieza_desinfeccion }}" 
+                                                onclick="cargarFechasLimpiezaEquiposMedicionFinalizados('{{ categoriaFina.id_categorias_limpieza_desinfeccion }}', '{{ grupo.id_verificacion_equipo_medicion }}', '{{ grupo.anio }}', '{{ grupo.mes }}')">
                                                 {{ categoriaFina.detalles_categorias_limpieza_desinfeccion }} (Frecuencia: {{ categoriaFina.frecuencia }})
                                             </button>
                                         </h5>
@@ -176,7 +183,7 @@
                                                             <th class="text-center">Fechas Registradas</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody id="tablaDetallesCAFinalizados_{{ categoriaFina.id_categorias_limpieza_desinfeccion }}">
+                                                    <tbody id="tablaDetallesCAFinalizados_{{ grupo.anio }}_{{ grupo.mes }}_{{ categoriaFina.id_categorias_limpieza_desinfeccion }}_{{ grupo.id_verificacion_equipo_medicion }}">
                                                         <!-- Fechas se llenan aquí con JavaScript -->
                                                     </tbody>
                                                 </table>

@@ -39,7 +39,13 @@ def control_envasados():
             query_historial_envasados = "SELECT * FROM v_historial_registros_controles_envasados"
             historial_envasados  = execute_query(query_historial_envasados)
 
-            return render_template('registro_control_envasados.html', control_envasados_creado=control_envasados_creado, historial_envasados=historial_envasados, responsable_envasado=responsable_envasado, producto_envasado=producto_envasado, proveedores_envasado=proveedores_envasado, detalle_control_envasados=detalle_control_envasados)
+            return render_template('registro_control_envasados.html', 
+                                    control_envasados_creado=control_envasados_creado,
+                                    historial_envasados=historial_envasados,
+                                    responsable_envasado=responsable_envasado,
+                                    producto_envasado=producto_envasado,
+                                    proveedores_envasado=proveedores_envasado,
+                                    detalle_control_envasados=detalle_control_envasados)
         
         except Exception as e:
             print(f"Error al obtener datos: {e}")

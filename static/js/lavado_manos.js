@@ -282,3 +282,13 @@ function filterTableDetalleLavadoMano() {
     }
 }
 
+function loadHistorialPage(page) {
+    fetch(`/lavado_Manos/historial?page=` + page)
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector("#historialLavadoManos .modal-body").innerHTML = html;
+        })
+        .catch(error => {
+            console.error("Error al cargar el historial:", error);
+        });
+}

@@ -536,37 +536,13 @@ function cargarObservacionesLimpiezaAreas() {
 
 function filterByDate() {
     const mes = document.getElementById("filtrarMesLACLOSE").value;
-    
-    // Mapear meses en número a nombre
-    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"];
 
     if (mes) {
-        const mesInput = mes.split("-")[1]; // Obtener el mes en formato numérico (MM)
-        const anoInput = mes.split("-")[0]; // Obtener el año (YYYY)
-        
-        // Convertir el mes numérico a nombre (Setiembre, Octubre, etc.)
-        const nombreMesInput = meses[parseInt(mesInput) - 1]; // Restar 1 porque el índice del array comienza en 0
+        const [anio, mesNum] = mes.split("-");
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const nombreMes = meses[parseInt(mesNum) - 1];
 
-        // Obtener todas las tarjetas (grupos de meses/años)
-        const cards = document.querySelectorAll("#accordionFinalizados .card");
-
-        cards.forEach(function (card) {
-            // Extraer el texto del botón del acordeón (Ejemplo: "Setiembre del 2024")
-            const headerText = card.querySelector('.card-header button').textContent;
-            
-            // Verificar si el texto contiene el mes y el año seleccionados
-            const mesFiltrado = headerText.includes(`${nombreMesInput} del ${anoInput}`);
-
-            // Mostrar u ocultar la tarjeta basado en los filtros
-            if (mesFiltrado) {
-                card.style.display = "";
-            } else {
-                card.style.display = "none";
-            }
-        });
+        // Redirigir a la misma ruta con los parámetros de mes y año
+        window.location.href = `?mes=${nombreMes}&anio=${anio}`;
     }
 }
-
-
-
-

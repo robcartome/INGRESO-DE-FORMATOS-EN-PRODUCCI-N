@@ -237,7 +237,7 @@
                                                 <tr class="text-center">
                                                     <td>{{ de.descripcion_producto }}</td>
                                                     <td>Se proyecto producir {{ (de.unidades | float * de.equivalenciauni | float) | round | int }} und. utilizando {{ de.equivalencia_unidades }} de materia prima. <br> Equivalente a {{ (de.kgs | float * (de.unidades | float * de.equivalenciauni | float)) | round(2) }} KG. </td>
-                                                    <td style="color: {% if de.producido < de.unidades %}red{% else %}green{% endif %};">
+                                                    <td style="color: {% if de.producido < (de.unidades | float * de.equivalenciauni | float) %}red{% else %}green{% endif %};">
                                                         {{ de.producido }}
                                                     </td>
                                                     <td>{{ de.dia }}</td>
