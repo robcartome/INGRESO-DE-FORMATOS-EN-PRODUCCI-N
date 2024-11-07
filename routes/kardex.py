@@ -21,11 +21,78 @@ def kardex_info():
 
             query_kardex = "SELECT * FROM v_kardex WHERE estado = 'CREADO'"
             v_kardex = execute_query(query_kardex)
+            
+            #Paginación
+            page = request.args.get('page', 1, type=int)
+            per_page = 5
+            offset = (page - 1) * per_page
+            
+            # Obtener los parámetros de mes y año desde la URL
+            filter_mes = request.args.get('mes', None)
+            filter_anio = request.args.get('anio', None)
+            
+            # Construir condiciones de filtro
+            filter_conditions = "WHERE estado = 'CERRADO'"
+            if filter_mes and filter_anio:
+                # Si hay filtro de mes y año, solo obtenemos registros que coincidan
+                filter_conditions += f" AND mes = '{filter_mes}' AND anio = '{filter_anio}'"
+                limit_offset_clause = ""  # Sin paginación cuando hay un filtro
+            else:
+                # Usar paginación si no hay filtro de fecha
+                limit_offset_clause = f" LIMIT {per_page} OFFSET {offset}"
+            
+            # Construir la consulta para obtener registros finalizados
+            query_la_finalizados = f"""
+                SELECT
+                    mes,
+                    anio,
+                    json_agg(json_build_object(
+                        'idkardex', idkardex,
+                        'mes', mes,
+                        'anio', anio,
+                        'estado', estado,
+                        'descripcion_producto', descripcion_producto
+                    )) AS registros
+                FROM v_kardex
+                {filter_conditions}
+                GROUP BY mes, anio
+                ORDER BY 
+                    anio::INTEGER DESC,  
+                    CASE 
+                        WHEN mes = 'Enero' THEN 1
+                        WHEN mes = 'Febrero' THEN 2
+                        WHEN mes = 'Marzo' THEN 3
+                        WHEN mes = 'Abril' THEN 4
+                        WHEN mes = 'Mayo' THEN 5
+                        WHEN mes = 'Junio' THEN 6
+                        WHEN mes = 'Julio' THEN 7
+                        WHEN mes = 'Agosto' THEN 8
+                        WHEN mes = 'Septiembre' THEN 9
+                        WHEN mes = 'Octubre' THEN 10
+                        WHEN mes = 'Noviembre' THEN 11
+                        WHEN mes = 'Diciembre' THEN 12
+                    END DESC
+                {limit_offset_clause}
+            """
+            v_kardex_cerrado = execute_query(query_la_finalizados)
+            
+            # Si no hay filtro de fecha, contar el total de páginas
+            if not filter_mes and not filter_anio:
+                query_count = """SELECT COUNT(*) AS total
+                                FROM (SELECT DISTINCT mes, anio 
+                                    FROM v_kardex 
+                                    WHERE estado = 'CERRADO') AS distinct_months_years;"""
+                total_count = execute_query(query_count)[0]['total']
+                total_pages = (total_count + per_page - 1) // per_page
+            else:
+                total_pages = 1  # Solo una "página" si estamos en modo de filtro
 
-            query_kardex_cerrado = "SELECT * FROM v_kardex WHERE estado = 'CERRADO'"
-            v_kardex_cerrado = execute_query(query_kardex_cerrado)
-
-            return render_template('kardex.html', productos=productos, v_kardex=v_kardex, v_kardex_cerrado=v_kardex_cerrado)
+            return render_template('kardex.html', 
+                                    productos=productos, 
+                                    v_kardex=v_kardex, 
+                                    v_kardex_cerrado=v_kardex_cerrado,
+                                    page=page,
+                                    total_pages=total_pages)
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('kardex.html')

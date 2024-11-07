@@ -322,33 +322,53 @@ function finalizarKardex(idKardex) {
 
 
 // Filtros
-function filterKardexOpenProduct() {
-    let input = document.getElementById('filtrarProductoKardex');
+function filterKardexCloseProduct(anio, mes) {
+    // Generar el id esperado del campo de entrada
+    const inputId = `filtrarProductoKardexClose_${anio}_${mes}`;
+
+    // Obtener el campo de entrada y verificar si existe
+    let input = document.getElementById(inputId);
+    if (!input) {
+        console.error(`No se encontró el campo de entrada con id: ${inputId}`);
+        return;
+    }
+
+    // Obtener el valor de filtro y convertir a minúsculas
     let filter = input.value.toLowerCase();
-    let table = document.getElementById('kardexTableOpen');
+
+    // Generar el id esperado de la tabla
+    const tableId = `tableCloseKardex_${anio}_${mes}`;
+
+    // Obtener la tabla y verificar si existe
+    let table = document.getElementById(tableId);
+    if (!table) {
+        console.error(`No se encontró la tabla con id: ${tableId}`);
+        return;
+    }
+
+    // Obtener todas las filas de la tabla
     let tr = table.getElementsByTagName('tr');
 
+    // Recorrer las filas y aplicar el filtro
     for (let i = 1; i < tr.length; i++) {
         let td = tr[i].getElementsByTagName('td')[0];
         if (td) {
             let txtValue = td.textContent || td.innerText;
-            tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+            tr[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
         }
     }
 }
 
-function filterKardexCloseProduct() {
-    let input = document.getElementById('filtrarProductoKardexClose');
-    let filter = input.value.toLowerCase();
-    let table = document.getElementById('tableCloseKardex');
-    let tr = table.getElementsByTagName('tr');
+function filterByDate() {
+    const mes = document.getElementById("filtrarMesKardexCLOSE").value;
 
-    for (let i = 1; i < tr.length; i++) {
-        let td = tr[i].getElementsByTagName('td')[0];
-        if (td) {
-            let txtValue = td.textContent || td.innerText;
-            tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
-        }
+    if (mes) {
+        const [anio, mesNum] = mes.split("-");
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const nombreMes = meses[parseInt(mesNum) - 1];
+
+        // Redirigir a la misma ruta con los parámetros de mes y año
+        window.location.href = `?mes=${nombreMes}&anio=${anio}`;
     }
 }
 
@@ -517,7 +537,7 @@ async function descargarFormatoKardex() {
     var idkardex = document.getElementById('idkardex_hidden').value;
     const endpoint = `/kardex/descargar_formato_kardex/${idkardex}`;
     fetchDownloadPDF(endpoint, 'kardex');
-  }
+}
 
 //Para filtrar kardex activos
 function filterKardexOpenProduct() {
@@ -538,27 +558,6 @@ function filterKardexOpenProduct() {
         }
     }
 }
-
-//Para filtrar kardex finalizados
-function filterKardexCloseProduct() {
-    let input = document.getElementById('filtrarProductoKardexClose');
-    let filter = input.value.toLowerCase();
-    let table = document.getElementById('tableCloseKardex');
-    let tr = table.getElementsByTagName('tr');
-
-    for (let i = 1; i < tr.length; i++) {
-        let td = tr[i].getElementsByTagName('td')[0];
-        if (td) {
-            let txtValue = td.textContent || td.innerText;
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
-        }
-    }
-}
-
 
 // Función para agregar todos los productos al kardex
 function agregarTodosPorductosKardex() {

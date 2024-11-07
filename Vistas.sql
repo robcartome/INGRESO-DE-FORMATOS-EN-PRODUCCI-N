@@ -118,11 +118,12 @@ JOIN
 
 CREATE OR REPLACE VIEW v_historial_registros_controles_envasados AS
 SELECT
+	f.id_registro_control_envasados,
+	TO_CHAR(f.fecha, 'DD/MM/YYYY') AS fecha,
     TO_CHAR(f.fecha, 'MM') AS mes,
     TO_CHAR(f.fecha, 'YYYY') AS anio,
     TO_CHAR(f.fecha, 'TMMonth') AS month_name,
-    f.estado,
-    f.id_registro_control_envasados
+    f.estado
 FROM
     registros_controles_envasados f
 WHERE 
@@ -130,6 +131,29 @@ WHERE
 ORDER BY
     f.id_registro_control_envasados DESC;
 
+SELECT 
+    month_name, 
+    anio,
+    JSON_AGG(
+        JSON_BUILD_OBJECT(
+            'id_registro_control_envasados', id_registro_control_envasados,
+            'fecha', fecha
+        )
+    ) AS registros
+FROM 
+    v_historial_registros_controles_envasados
+GROUP BY 
+    month_name,mes, anio
+ORDER BY 
+    anio DESC, 
+    mes DESC;
+
+SELECT COUNT(*) AS total
+FROM (SELECT DISTINCT mes, anio 
+	FROM v_historial_registros_controles_envasados 
+	WHERE estado = 'CERRADO') AS distinct_months_years
+
+SELECT * FROM v_historial_registros_controles_envasados
 
 DROP VIEW v_historial_registros_controles_envasados
 
@@ -475,17 +499,6 @@ DROP VIEW v_proyeccion_semanal
 
 SELECT * FROM v_proyeccion_semanal
 
-SELECT * FROM public.proyeccion_semanal
-
-SELECT * FROM productos
-
-SELECT * FROM proyeccion
-
-SELECT * FROM public.proyeccion_semanal
-
-SELECT * FROM v_proyeccion_semanal
-
-SELECT * FROM public.v_registros_controles_envasados WHERE idproducto = 19
 
 SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = 20 AND date_insertion BETWEEN '2024-10-21' AND '2024-10-26'
 
@@ -498,3 +511,49 @@ SELECT * FROM proyeccion WHERE estado = 'CREADO'
 
 SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = %s AND date_insertion BETWEEN %s AND %s
 
+SELECT * FROM v_historial_registros_controles_envasados WHERE fecha = '2024-10-31'
+
+SELECT * FROM public.detalles_kardex WHERE fecha= '31/10/2024'
+
+SELECT * FROM public.kardex
+
+SELECT COUNT(*) AS total
+                        FROM (SELECT DISTINCT mes, anio 
+                            FROM v_historial_registros_controles_envasados 
+                            WHERE estado = 'CERRADO') AS distinct_months_years
+
+SELECT 
+	mes, 
+	anio, 
+	json_agg(json_build_object(
+		'id_verificacion_limpieza_desinfeccion_area', id_verificacion_limpieza_desinfeccion_area, 
+		'detalle_area_produccion', detalle_area_produccion,
+		'estado', estado,
+		'id_area_produccion', id_area_produccion
+	)) AS registros
+FROM v_verificacion_limpieza_desinfeccion_areas
+GROUP BY mes, anio
+
+SELECT * FROM v_kardex WHERE estado = 'CERRADO'
+
+SELECT
+	mes,
+	anio,
+	json_agg(json_build_object(
+		'idkardex', idkardex,
+		'mes', mes,
+		'anio', anio,
+		'estado', estado,
+		'descripcion_producto', descripcion_producto
+	)) AS registros
+FROM v_kardex
+WHERE estado = 'CERRADO'
+GROUP BY mes, anio
+
+SELECT COUNT(*) AS total
+FROM (SELECT DISTINCT mes, anio 
+	FROM v_kardex 
+	WHERE estado = 'CERRADO') AS distinct_months_years;
+	
+SELECT * FROM public.lavadosmanos
+SELECT * FROM public.detalle_lavados_manos ORDER BY idmano

@@ -4,6 +4,37 @@
 
 {% block content %}
 
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .pagination .page-item .page-link {
+        color: #ff0000; /* Color principal */
+        border-color: #ff0000;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #ff0000; /* Fondo de la página activa */
+        border-color: #ff0000;
+        color: #fff;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #ff6666; /* Color de hover */
+        color: white;
+    }
+    
+    .pagination .page-link {
+        margin: 0 5px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+</style>
+
 <div class="container-fluid py-4">
     <h1 class="mb-4 text-center" style="color: #FF8C00;">Kardex</h1>
     
@@ -91,39 +122,133 @@
         </div>
 
         <!-- Sección para mostrar la lista de todos los kardex finalizados -->
-        <div>
-            <h3 class="text-center font-weight-bold" style="color: #ff0000;">Registros de Kardex Finalizados</h3>
-            <div class="form-group col-md-6">
-                <label for="filtrarProductoKardex" style="color: #ff0000;">Filtrar kardex finalizados:</label>
-                <input type="text" id="filtrarProductoKardexClose" class="form-control" name="filtrarProductoKardex" placeholder="Filtrar el kardex por el producto" onkeyup="filterKardexCloseProduct()"  autocomplete="off">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header text-white" style="background-color: #ff0000;">
+                <h5 class="mb-0">Historial de registros de Kardex</h5>
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered" id="tableCloseKardex">
-                    <thead style="background-color: #ff0000; color: white;">
-                        <tr class="text-center">
-                            <th>Producto</th>
-                            <th>Mes</th>
-                            <th>Año</th>
-                            <th>Estado</th>
-                            <th>Ver</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for k in v_kardex_cerrado %}
-                        <tr class="text-center">
-                            <td>{{ k.descripcion_producto }}</td>
-                            <td>{{ k.mes }}</td>
-                            <td>{{ k.anio }}</td>
-                            <td>{{ k.estado }}</td>
-                            <td>
-                                <button class="btn btn-warning btn-sm" onclick="verDetallesKardexCerrado('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
-                                    <i class="fas fa-arrow-circle-right"></i> Ver
+            <div class="card-body">
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="filtrarMesKardexCLOSE" class="text-warning">Filtrar por mes:</label>
+                        <input type="month" id="filtrarMesKardexCLOSE" class="form-control" onchange="filterByDate()">
+                    </div>
+                </div>
+
+                <!-- Listado agrupado por mes y año -->
+                <div id="accordionFinalizados">
+                    {% for grupo in v_kardex_cerrado %}
+                    <div class="card mb-3">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
+                            <div>
+                                <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
+                                    {{ grupo.mes }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)
                                 </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+                        </div>
+                        <div id="collapse{{ grupo.anio }}{{ grupo.mes }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.mes }}" data-parent="#accordionFinalizados">
+                            <div class="card-body">
+                                <div class="form-group col-md-6">
+                                    <label for="filtrarProductoKardex" style="color: #ff0000;">Filtrar kardex finalizados:</label>
+                                    <input 
+                                    type="text" 
+                                    id="filtrarProductoKardexClose_{{ grupo.anio }}_{{ grupo.mes }}" 
+                                    class="form-control" 
+                                    name="filtrarProductoKardex" 
+                                    placeholder="Filtrar el kardex por el producto" 
+                                    onkeyup="filterKardexCloseProduct('{{ grupo.anio }}', '{{ grupo.mes }}')" 
+                                    autocomplete="off">
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="tableCloseKardex_{{ grupo.anio }}_{{ grupo.mes }}">
+                                        <thead style="background-color: #ff0000; color: white;">
+                                            <tr class="text-center">
+                                                <th>Producto</th>
+                                                <th>Mes</th>
+                                                <th>Año</th>
+                                                <th>Estado</th>
+                                                <th>Ver</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for k in grupo.registros %}
+                                            <tr class="text-center">
+                                                <td>{{ k.descripcion_producto }}</td>
+                                                <td>{{ k.mes }}</td>
+                                                <td>{{ k.anio }}</td>
+                                                <td>{{ k.estado }}</td>
+                                                <td>
+                                                    <button class="btn btn-warning btn-sm" onclick="verDetallesKardexCerrado('{{ k.idkardex }}', '{{ k.descripcion_producto }}', '{{ k.mes }}', '{{ k.anio }}')">
+                                                        <i class="fas fa-arrow-circle-right"></i> Ver
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <!-- Paginador -->
+                <div class="pagination-container mt-4 d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- Botón de página anterior -->
+                        {% if page > 1 %}
+                            <li class="page-item">
+                                <a href="{{ url_for('kardex.kardex_info', page=page - 1) }}" class="page-link">Anterior</a>
+                            </li>
+                        {% endif %}
+                
+                        <!-- Páginas iniciales -->
+                        {% if total_pages > 7 %}
+                            {% for p in range(1, min(4, total_pages + 1)) %}
+                                <li class="page-item {% if p == page %}active{% endif %}">
+                                    <a href="{{ url_for('kardex.kardex_info', page=p) }}" class="page-link">{{ p }}</a>
+                                </li>
+                            {% endfor %}
+                            
+                            {% if page > 4 %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                            
+                            <!-- Páginas alrededor de la página actual -->
+                            {% for p in range(max(1, page - 2), min(page + 3, total_pages + 1)) %}
+                                {% if p > 3 and p < total_pages - 2 %}
+                                    <li class="page-item {% if p == page %}active{% endif %}">
+                                        <a href="{{ url_for('kardex.kardex_info', page=p) }}" class="page-link">{{ p }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                
+                            {% if page < total_pages - 3 %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                            
+                            <!-- Páginas finales -->
+                            {% for p in range(max(total_pages - 2, 4), total_pages + 1) %}
+                                <li class="page-item {% if p == page %}active{% endif %}">
+                                    <a href="{{ url_for('kardex.kardex_info', page=p) }}" class="page-link">{{ p }}</a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Si hay menos de 7 páginas, mostrar todas las páginas -->
+                            {% for p in range(1, total_pages + 1) %}
+                                <li class="page-item {% if p == page %}active{% endif %}">
+                                    <a href="{{ url_for('kardex.kardex_info', page=p) }}" class="page-link">{{ p }}</a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                
+                        <!-- Botón de página siguiente -->
+                        {% if page < total_pages %}
+                            <li class="page-item">
+                                <a href="{{ url_for('kardex.kardex_info', page=page + 1) }}" class="page-link">Siguiente</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -185,12 +310,12 @@
                 <input type="number" id="ingresoKardex" class="form-control" name="ingresoKardex" placeholder="Ingreso" value="0" required>
             </div>
             <div class="form-group col-md-6">
-                <label for="Lote" style="color: #FF8C00;">Lote:</label>
+                <label style="color: #FF8C00;">Lote:</label>
                 <select id="selectLote" class="form-control" name="selectLote">
                     <!-- Las opciones se llenarán dinámicamente con JavaScript -->
                 </select> 
             </div>
-                       
+
         </div>
         <div class="form-row mb-3">
             <div class="form-group col-md-6">

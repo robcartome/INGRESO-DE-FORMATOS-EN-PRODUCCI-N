@@ -1,43 +1,50 @@
-$(document).ready(function() {
-    $('#formControlEnvasados').on('submit', function(event) {
-        event.preventDefault();
-        var formElement = document.getElementById('formControlEnvasados');
-        var formData = new FormData(formElement);
+function registerControlEnvasados() {
+    const formElement = document.getElementById('formControlEnvasados');
+    const formData = new FormData(formElement);
 
-        fetch('/control_envasados/', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Registrado!',
-                    text: 'Se registró control de envasados correctamente.',
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => {
-                    location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message || 'Hubo un error al registrar el control de envasados.',
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error en la solicitud:', error);
+    // Convertir FormData a JSON
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    fetch('/control_envasados/registro_control_envasados_reg', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Registrado!',
+                text: 'Se registró control de envasados correctamente.',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                location.reload();
+            });
+        } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                text: data.message || 'Hubo un error al registrar el control de envasados.',
             });
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
         });
     });
-});
+}
+
 
 document.addEventListener('DOMContentLoaded', function () {
     $('#selectProducto').select2({
@@ -271,34 +278,44 @@ function formatDate(dateString) {
     return dateString;
 }
 
+
 // Filtrar la tabla de registro y control de envasados por fecha
 function filterTableFechaControlEnvasados() {
-    // Obtener el valor del input de fecha
-    let input = document.getElementById('filterFechaCE');
-    let filter = input.value; // El valor del input de fecha es en formato yyyy-mm-dd
-
-    let table = document.getElementById('tablaRegistroCE');
-    let tr = table.getElementsByTagName('tr');
-
-    // Iterar sobre las filas de la tabla (excepto la cabecera)
-    for (let i = 1; i < tr.length; i++) {
-        let td = tr[i].getElementsByTagName('td')[0]; // Obtener la primera celda (columna de fecha)
-
-        if (td) {
-            // Obtener el valor de la fecha de la celda
-            let txtValue = td.textContent || td.innerText;
-
-            // Convertir la fecha del texto a formato yyyy-mm-dd
-            let formattedCellDate = formatDate(txtValue.trim());
-
-            // Mostrar u ocultar la fila basado en la comparación con el filtro
-            if (formattedCellDate === filter || filter === "") {
-                // Si coinciden o no hay filtro, mostrar la fila
-                tr[i].style.display = "";
-            } else {
-                // Si no coinciden, ocultar la fila
-                tr[i].style.display = "none";
-            }
-        }
+    const fecha_filtrar = document.getElementById("filterFechaCE").value;
+    
+    // Si la fecha está vacía, mostrar el acordeón y vaciar la tabla
+    if (!fecha_filtrar) {
+        document.getElementById("tablaHistorialEnvasados").innerHTML = "";
+        document.getElementById("accordionFinalizados").style.display = "block";
+        return;
     }
+
+    // Enviar la solicitud AJAX con fecha en el cuerpo
+    fetch(`/control_envasados/filtrar_por_fecha`, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({ fecha_filtrar: fecha_filtrar })
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Ocultar el acordeón y mostrar solo la tabla filtrada
+        document.getElementById("accordionFinalizados").style.display = "none";
+        document.getElementById("tablaHistorialEnvasados").innerHTML = html;
+    })
+    .catch(error => console.error('Error al filtrar por fecha:', error));
+}
+
+
+function loadHistorialPage(page) {
+    fetch(`/control_envasados/historial?page=` + page)
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector("#historialControlEnvasados .modal-body").innerHTML = html;
+        })
+        .catch(error => {
+            console.error("Error al cargar el historial:", error);
+        });
 }

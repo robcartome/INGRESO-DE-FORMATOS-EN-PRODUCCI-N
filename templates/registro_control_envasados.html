@@ -22,6 +22,89 @@
             border-radius: 0.5rem; /* Bordes redondeados para una mejor estética */
         }
     }
+
+    /* Estilos adicionales para mejorar el diseño del modal */
+    .modal-lg {
+        max-width: 90%;
+    }
+
+    /* Sombra y borde de las tarjetas */
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    /* Botones de acción en la tabla */
+    .btn {
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #FFC107;
+        color: #000;
+    }
+
+    /* Filas de la tabla con efecto hover */
+    .table-hover tbody tr:hover {
+        background-color: #ffe3d8;
+    }
+
+    /* Estilos del encabezado de la tabla */
+    .table thead th {
+        font-size: 1rem;
+        font-weight: bold;
+        border: none;
+    }
+
+    /* Ajustes del filtro de fecha */
+    .input-container input[type="date"] {
+        transition: border-color 0.3s;
+    }
+
+    .input-container input[type="date"]:focus {
+        border-color: #FF5722;
+        box-shadow: 0 0 5px rgba(255, 87, 34, 0.5);
+    }
+
+    /* Botón colapsable personalizado */
+    .btn-link {
+        font-weight: bold;
+        color: #FF8C00;
+    }
+
+    .btn-link:hover {
+        color: #FF5722;
+        text-decoration: none;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .pagination .page-item .page-link {
+        color: #ff0000; /* Color principal */
+        border-color: #ff0000;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #ff0000; /* Fondo de la página activa */
+        border-color: #ff0000;
+        color: #fff;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #ff6666; /* Color de hover */
+        color: white;
+    }
+    
+    .pagination .page-link {
+        margin: 0 5px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
 </style>
 
 <div class="container-fluid">
@@ -116,7 +199,9 @@
                     <input type="text" id="observacionesEnvasados" class="form-control" name="observacionesEnvasados" placeholder="Observaciones">
                 </div>
             </div>
-            <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;"><i class="fas fa-plus-circle"></i> AGREGAR REGISTRO</button>
+            <button type="button" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;" onclick="registerControlEnvasados()">
+                <i class="fas fa-plus-circle"></i> AGREGAR REGISTRO
+            </button>            
         </form>
         
         <!-- Botones de Historial y Finalizar Registro -->
@@ -184,58 +269,138 @@
     <div class="modal fade" id="historialControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="historialControlEnvasadosLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg resizable-modal" role="document">
             <div class="modal-content">
-                <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
-                <div class="modal-header" style="background-color: #FF8C00; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 10px;">
-                    <h5 class="modal-title" id="labelhistorialControlEnvasados" style="font-weight: bold; font-size: 1.25rem;">Historial de Registros de Control de Envasados</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="font-size: 1.25rem;">
+                <!-- Cabecera del modal -->
+                <div class="modal-header" style="background-color: #FF8C00; color: white; padding: 15px;">
+                    <h5 class="modal-title" id="labelhistorialControlEnvasados" style="font-weight: bold;">Historial de Registros de Control de Envasados</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                </div>                
-                <div class="modal-body">
+                </div>
+
+                <!-- Cuerpo del modal con scroll -->
+                <div class="modal-body" style="padding: 20px; max-height: 500px; overflow-y: auto;">
                     <div class="table-responsive">
+                        <!-- Campo de filtro de fecha -->
                         <div class="input-container mb-3">
                             <label for="filterFechaCE" style="color: #FF8C00; font-weight: bold;">Filtrar por fecha:</label>
-                            <input type="date" id="filterFechaCE" class="form-control" name="filterFechaCE"
-                            onchange="filterTableFechaControlEnvasados()" style="border-radius: 5px; border: 1px solid #FF8C00;"/>
+                            <input type="date" id="filterFechaCE" class="form-control" name="filterFechaCE" onchange="filterTableFechaControlEnvasados()" style="border-radius: 8px; border: 1px solid #FF8C00; padding: 8px;">
                         </div>
-                        <table class="table table-bordered" id="tablaRegistroCE">
-                            <thead style="background-color: #FF8C00; color: white; font-weight: bold;">
-                                <tr>
-                                    <th class="text-center">Fecha</th>
-                                    <th class="text-center">Ver</th>
-                                    <th class="text-center">Descargar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if historial_envasados %}
-                                    {% for he in historial_envasados %}
-                                        <tr>   
-                                            <td class="text-center">{{ he.fecha }}</td>
-                                            <td class="text-center">
-                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial('{{ he.id_registro_control_envasados }}')" style="background-color: #FFC107; color: black; padding: 8px 12px; font-size: 1rem;">
-                                                    <i class="fas fa-eye"></i> Ver
-                                                </button>
-                                            </td>
-                                            <td class="text-center">
-                                                <a href="{{ url_for('control_envasados.download_formato', formato_id=he.id_registro_control_envasados) }}"
-                                                    class="btn btn-warning btn-sm" style="background-color: #FF5722; color: white;">
-                                                    <i class="fas fa-download"></i> Descargar Formato
-                                                </a>
-                                            </td>
-                                        </tr>
+                        
+                        <!-- Contenedor de la tabla filtrada -->
+                        <div id="tablaHistorialEnvasados">
+                            <!-- Aquí se insertará la tabla filtrada cuando se seleccione una fecha -->
+                        </div>
+                        
+                        <!-- Mostrar el acordeón si no hay filtro -->
+                        {% if not filter_fecha %}
+                            <div id="accordionFinalizados">
+                                {% for grupo in finalizados_envasados %}
+                                    <div class="card mb-3" style="border: none; border-radius: 8px;">
+                                        <div class="card-header" id="heading{{grupo.anio}}{{grupo.month_name}}" style="background: #FFC107; border-radius: 8px;">
+                                            <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{grupo.anio}}{{grupo.month_name}}" aria-expanded="true">
+                                                {{ grupo.month_name }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)
+                                            </button>
+                                        </div>
+
+                                        <div id="collapse{{ grupo.anio }}{{ grupo.month_name }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.month_name }}" data-parent="#accordionFinalizados">
+                                            <div class="card-body">
+                                                <table class="table table-bordered table-hover">
+                                                    <thead class="text-white text-center" style="background-color: #FF5722;">
+                                                        <tr>
+                                                            <th class="text-center">Fecha</th>
+                                                            <th class="text-center">Ver</th>
+                                                            <th class="text-center">Descargar</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for he in grupo.registros %}
+                                                            <tr>
+                                                                <td class="text-center">{{ he.fecha }}</td>
+                                                                <td class="text-center">
+                                                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="verDetalleHistorial('{{ he.id_registro_control_envasados }}')">
+                                                                        <i class="fas fa-eye"></i> Ver
+                                                                    </button>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <a href="{{ url_for('control_envasados.download_formato', formato_id=he.id_registro_control_envasados) }}" class="btn btn-sm" style="background-color: #FF5722; color: white;">
+                                                                        <i class="fas fa-download"></i> Descargar Formato
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <!-- Paginador -->
+                        <div class="pagination-container mt-4 d-flex justify-content-center">
+                            <ul class="pagination">
+                                <!-- Botón de página anterior -->
+                                {% if page > 1 %}
+                                    <li class="page-item">
+                                        <a href="#" onclick="loadHistorialPage('{{ page - 1 }}')" class="page-link">Anterior</a>
+                                    </li>
+                                {% endif %}
+                        
+                                <!-- Páginas iniciales -->
+                                {% if total_pages > 7 %}
+                                    {% for p in range(1, min(4, total_pages + 1)) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    
+                                    {% if page > 4 %}
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                    
+                                    <!-- Páginas alrededor de la página actual -->
+                                    {% for p in range(max(1, page - 2), min(page + 3, total_pages + 1)) %}
+                                        {% if p > 3 and p < total_pages - 2 %}
+                                            <li class="page-item {% if p == page %}active{% endif %}">
+                                                <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                        
+                                    {% if page < total_pages - 3 %}
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                    
+                                    <!-- Páginas finales -->
+                                    {% for p in range(max(total_pages - 2, 4), total_pages + 1) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
                                     {% endfor %}
                                 {% else %}
-                                    <tr>
-                                        <td colspan="3" class="text-center">No hay registros disponibles.</td>
-                                    </tr>
+                                    <!-- Si hay menos de 7 páginas, mostrar todas las páginas -->
+                                    {% for p in range(1, total_pages + 1) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
                                 {% endif %}
-                            </tbody>
-                        </table>
+                        
+                                <!-- Botón de página siguiente -->
+                                {% if page < total_pages %}
+                                    <li class="page-item">
+                                        <a href="#" onclick="loadHistorialPage('{{ page + 1 }}')" class="page-link">Siguiente</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
 
     <!-- Modal para mostrar los detalles de los registros para el control de envasados -->
     <div class="modal fade" id="registroControlEnvasados" tabindex="-1" role="dialog" aria-labelledby="registroControlEnvasadosLabel" aria-hidden="true">
@@ -255,8 +420,6 @@
             </div>
         </div>
     </div>
-
-
 </div>
 
 

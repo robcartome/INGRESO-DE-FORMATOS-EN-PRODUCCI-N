@@ -1,0 +1,119 @@
+<!-- Cuerpo del modal con scroll -->
+<div class="modal-body" style="padding: 20px; max-height: 500px; overflow-y: auto;">
+    <div class="table-responsive">
+        <!-- Campo de filtro de fecha -->
+        <div class="input-container mb-3">
+            <label for="filterFechaCE" style="color: #FF8C00; font-weight: bold;">Filtrar por fecha:</label>
+            <input type="date" id="filterFechaCE" class="form-control" name="filterFechaCE" onchange="filterTableFechaControlEnvasados()" style="border-radius: 8px; border: 1px solid #FF8C00; padding: 8px;">
+        </div>
+        
+        <!-- Contenedor de la tabla filtrada -->
+        <div id="tablaHistorialEnvasados">
+            <!-- Aquí se insertará la tabla filtrada cuando se seleccione una fecha -->
+        </div>
+
+        <!-- Mostrar el acordeón si no hay filtro -->
+        {% if not filter_fecha %}
+            <div id="accordionFinalizados">
+                {% for grupo in finalizados_envasados %}
+                    <div class="card mb-3" style="border: none; border-radius: 8px;">
+                        <div class="card-header" id="heading{{grupo.anio}}{{grupo.month_name}}" style="background: #FFC107; border-radius: 8px;">
+                            <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{grupo.anio}}{{grupo.month_name}}" aria-expanded="true">
+                                {{ grupo.month_name }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)
+                            </button>
+                        </div>
+
+                        <div id="collapse{{ grupo.anio }}{{ grupo.month_name }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.month_name }}" data-parent="#accordionFinalizados">
+                            <div class="card-body">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="text-white text-center" style="background-color: #FF5722;">
+                                        <tr>
+                                            <th class="text-center">Fecha</th>
+                                            <th class="text-center">Ver</th>
+                                            <th class="text-center">Descargar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for he in grupo.registros %}
+                                            <tr>
+                                                <td class="text-center">{{ he.fecha }}</td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="verDetalleHistorial('{{ he.id_registro_control_envasados }}')">
+                                                        <i class="fas fa-eye"></i> Ver
+                                                    </button>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{{ url_for('control_envasados.download_formato', formato_id=he.id_registro_control_envasados) }}" class="btn btn-sm" style="background-color: #FF5722; color: white;">
+                                                        <i class="fas fa-download"></i> Descargar Formato
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <!-- Paginador -->
+        <div class="pagination-container mt-4 d-flex justify-content-center">
+            <ul class="pagination">
+                <!-- Botón de página anterior -->
+                {% if page > 1 %}
+                    <li class="page-item">
+                        <a href="#" onclick="loadHistorialPage('{{ page - 1 }}')" class="page-link">Anterior</a>
+                    </li>
+                {% endif %}
+        
+                <!-- Páginas iniciales -->
+                {% if total_pages > 7 %}
+                    {% for p in range(1, min(4, total_pages + 1)) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                    
+                    {% if page > 4 %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                    
+                    <!-- Páginas alrededor de la página actual -->
+                    {% for p in range(max(1, page - 2), min(page + 3, total_pages + 1)) %}
+                        {% if p > 3 and p < total_pages - 2 %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+        
+                    {% if page < total_pages - 3 %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                    
+                    <!-- Páginas finales -->
+                    {% for p in range(max(total_pages - 2, 4), total_pages + 1) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <!-- Si hay menos de 7 páginas, mostrar todas las páginas -->
+                    {% for p in range(1, total_pages + 1) %}
+                        <li class="page-item {% if p == page %}active{% endif %}">
+                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+        
+                <!-- Botón de página siguiente -->
+                {% if page < total_pages %}
+                    <li class="page-item">
+                        <a href="#" onclick="loadHistorialPage('{{ page + 1 }}')" class="page-link">Siguiente</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
