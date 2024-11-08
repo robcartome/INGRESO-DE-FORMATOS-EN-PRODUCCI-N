@@ -48,6 +48,18 @@ function setDefaultFechaKardex() {
 }
 
 function verDetallesCondicionesAmbientales(idcondicionambiental, detalle_area, mes, anio) {
+    console.log(detalle_area);
+
+    // Desactivar los checkboxes si el área es "Envases y Embalajes" o "Productos Químicos y de Limpieza"
+    if (detalle_area === "Envases y Embalajes" || detalle_area === "Productos Químicos y de Limpieza") {
+        document.getElementById('paletasLimpias').disabled = true;
+        document.getElementById('paletasBuenEstado').disabled = true;
+    } else {
+        // Asegurarse de habilitarlos nuevamente en caso de que se trate de un área diferente
+        document.getElementById('paletasLimpias').disabled = false;
+        document.getElementById('paletasBuenEstado').disabled = false;
+    }
+
     document.getElementById('listaCA').style.display = 'none';
     document.getElementById('llenarFormularioCA').style.display = 'block';
     document.getElementById('detallesCA').style.display = 'block';
@@ -68,14 +80,15 @@ function verDetallesCondicionesAmbientales(idcondicionambiental, detalle_area, m
                     var verificacionPrevia = item.verificacion_previa;
                     var estadoColor = item.estado === "PENDIENTE" ? 'color: red;' : 'color: green;';
 
+                    // Crear una fila HTML y dejar en blanco las celdas donde verificación previa sea None para áreas 2 o 3
                     var row = `
                         <tr>
                             <td class="text-center">${item.fecha}</td>
                             <td class="text-center">${item.hora}</td>
-                            <td class="text-center">${verificacionPrevia[1] ? '✅' : '❌'}</td>
-                            <td class="text-center">${verificacionPrevia[2] ? '✅' : '❌'}</td>
-                            <td class="text-center">${verificacionPrevia[3] ? '✅' : '❌'}</td>
-                            <td class="text-center">${verificacionPrevia[4] ? '✅' : '❌'}</td>
+                            <td class="text-center">${verificacionPrevia[1] === true ? '✅' : (verificacionPrevia[1] === false ? '❌' : '')}</td>
+                            <td class="text-center">${verificacionPrevia[2] === true ? '✅' : (verificacionPrevia[2] === false ? '❌' : '')}</td>
+                            <td class="text-center">${verificacionPrevia[3] === true ? '✅' : (verificacionPrevia[3] === false ? '❌' : '')}</td>
+                            <td class="text-center">${verificacionPrevia[4] === true ? '✅' : (verificacionPrevia[4] === false ? '❌' : '')}</td>
                             <td class="text-center">${item.temperatura} °C</td>
                             <td class="text-center">${item.humedad} %</td>
                             <td class="text-center">${item.observaciones}</td>
@@ -102,6 +115,7 @@ function verDetallesCondicionesAmbientales(idcondicionambiental, detalle_area, m
             });
         });
 }
+
 
 function modificarEstadoAC(idAC) {
     var idcondicionambiental = document.getElementById('idcondicionambiental_hidden').value;

@@ -80,7 +80,7 @@ def registrar_condiciones_ambientales():
         idaccion_correctiva = None
         if accionesCorrectivas != "-":
             result_accion_correctiva = execute_query("INSERT INTO acciones_correctivas(detalle_accion_correctiva, estado) VALUES (%s,%s) RETURNING idaccion_correctiva", 
-                                                     (accionesCorrectivas, 'PENDIENTE'))
+                                                    (accionesCorrectivas, 'PENDIENTE'))
             idaccion_correctiva = result_accion_correctiva[0]['idaccion_correctiva']
 
         # Inserción de detalle_condiciones_ambientales
@@ -90,24 +90,23 @@ def registrar_condiciones_ambientales():
             VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING iddetalle_ca
         """
         result_detalle = execute_query(query_insert_detalle_CA, 
-                                       (fecha, hora, temperatura, humedadRelativa, observaciones, idaccion_correctiva, idcondicionambiental))
+                                    (fecha, hora, temperatura, humedadRelativa, observaciones, idaccion_correctiva, idcondicionambiental))
 
         id_detalle = result_detalle[0]['iddetalle_ca']
 
         # Inserciones para verificación previa
         if limpio:
-            
             execute_query("INSERT INTO asignacion_verificacion_previa_condicion_ambiental(fk_iddetalle_condicion_ambiental, fk_idverificacion_previa) VALUES (%s,%s)", 
-                          (id_detalle, 1))
+                        (id_detalle, 1))
         if ordenado:
             execute_query("INSERT INTO asignacion_verificacion_previa_condicion_ambiental(fk_iddetalle_condicion_ambiental, fk_idverificacion_previa) VALUES (%s,%s)", 
-                          (id_detalle, 2))
+                        (id_detalle, 2))
         if paletasLimpias:
             execute_query("INSERT INTO asignacion_verificacion_previa_condicion_ambiental(fk_iddetalle_condicion_ambiental, fk_idverificacion_previa) VALUES (%s,%s)", 
-                          (id_detalle, 3))
+                        (id_detalle, 3))
         if paletasBuenEstado:
             execute_query("INSERT INTO asignacion_verificacion_previa_condicion_ambiental(fk_iddetalle_condicion_ambiental, fk_idverificacion_previa) VALUES (%s,%s)", 
-                          (id_detalle, 4))
+                    (id_detalle, 4))
 
         return jsonify({'status': 'success', 'message': 'Se registró el control de condición ambiental correctamente.'}), 200
 
@@ -119,7 +118,11 @@ def registrar_condiciones_ambientales():
 
 @condiciones_ambientales.route('/detalles_condiciones_ambientales/<int:id_ca>', methods=['GET'])
 def detalles_condiciones_ambientales(id_ca):
-
+    
+    #Area
+    quer_area = execute_query("SELECT fk_idarea FROM condiciones_ambientales WHERE idcondicionambiental = %s", (id_ca,))
+    area = quer_area[0]['fk_idarea']
+    
     # Obtener los detalles de la condición ambiental
     query_detalle_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY iddetalle_ca DESC"
     detalle_CA = execute_query(query_detalle_CA, (id_ca,))
@@ -137,12 +140,18 @@ def detalles_condiciones_ambientales(id_ca):
         # Obtener las asignaciones de verificación previa para cada detalle
         query_asignaciones = "SELECT fk_idverificacion_previa FROM asignacion_verificacion_previa_condicion_ambiental WHERE fk_iddetalle_condicion_ambiental = %s"
         asignaciones = execute_query(query_asignaciones, (detalle['iddetalle_ca'],))
-
-        # Crear un diccionario con las verificaciones previas (1-4)
-        verificacion = {1: False, 2: False, 3: False, 4: False}
-        for asig in asignaciones:
-            if asig['fk_idverificacion_previa'] in verificacion:
-                verificacion[asig['fk_idverificacion_previa']] = True
+        
+        if area == 2 or area == 4:
+            verificacion = {1: False, 2: False, 3: None, 4: None}
+            for asig in asignaciones:
+                if asig['fk_idverificacion_previa'] in verificacion:
+                    verificacion[asig['fk_idverificacion_previa']] = True
+        else:
+            # Crear un diccionario con las verificaciones previas (1-4)
+            verificacion = {1: False, 2: False, 3: False, 4: False}
+            for asig in asignaciones:
+                if asig['fk_idverificacion_previa'] in verificacion:
+                    verificacion[asig['fk_idverificacion_previa']] = True
 
         # Añadir las asignaciones al detalle
         detalle['verificacion_previa'] = verificacion
