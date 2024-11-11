@@ -198,7 +198,7 @@ function verDetalleHistorial(idFormatos) {
                         <input type="date" id="filtroFecha" class="form-control" placeholder="Filtrar por fecha...">
                     </div>
                 </div>
-                <div class="table-responsive mt-5">
+                <div class="table-responsive mt-2">
                 <table class="table table-bordered" id="detalleTabla">
                     <thead style="background-color: #FF8C00; color: white;">
                         <tr>
@@ -320,4 +320,14 @@ function filtrarTablaDetalles() {
 $('#filtroTrabajadorDetalle, #filtroFechaDetalle').on('input change', filtrarTablaDetalles);
 
 
+function loadHistorialPage(page) {
+    fetch(`/higiene_personal/historial?page=` + page)
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector("#historialControlHigienePersonal .modal-body").innerHTML = html;
+        })
+        .catch(error => {
+            console.error("Error al cargar el historial:", error);
+        });
+}
 

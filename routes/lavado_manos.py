@@ -33,7 +33,7 @@ def lavado_Manos():
             page = request.args.get('page', 1, type=int)
             per_page = 5
             offset = (page - 1) * per_page
-            query_count = "SELECT COUNT(*) AS total FROM public.lavadosmanos"
+            query_count = "SELECT COUNT(*) AS total FROM public.lavadosmanos WHERE estado = 'CERRADO'"
             
             total_count = execute_query(query_count)[0]['total']
             total_pages = (total_count + per_page - 1) // per_page
@@ -85,7 +85,8 @@ def lavado_Manos():
         except Exception as e:
             print(f"Error al procesar la solicitud POST: {e}")
             return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el lavado de manos.'}), 500
-        
+
+
 @lavadoMano.route('/historial', methods=['GET'])
 def historial_lavado_manos():
     try:
@@ -108,6 +109,7 @@ def historial_lavado_manos():
     except Exception as e:
         print(f"Error al obtener datos: {e}")
         return jsonify({"error": "Error al obtener datos"}), 500
+
 
 @lavadoMano.route('/generar_formato_lavado', methods=['POST'])
 def generar_formato_lavado():

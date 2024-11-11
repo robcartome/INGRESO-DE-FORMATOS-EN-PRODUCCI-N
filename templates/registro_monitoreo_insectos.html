@@ -4,6 +4,110 @@
 
 {% block content %}
 
+<style>
+    /* Estilo para hacer el modal más ancho en pantallas grandes */
+    @media (min-width: 992px) { /* Para pantallas grandes como laptops y PC */
+        .modal-xl {
+            max-width: 90%; /* Ajusta el porcentaje según lo necesites */
+        }
+    }
+
+    /* Estilo para pantallas más pequeñas como tablets y móviles */
+    @media (max-width: 991px) {
+        .modal-dialog {
+            max-width: 100%; /* Mantiene el modal ajustado al ancho de la pantalla */
+            margin: 10px; /* Un poco de margen para que no toque los bordes */
+        }
+
+        .modal-content {
+            border-radius: 0.5rem; /* Bordes redondeados para una mejor estética */
+        }
+    }
+
+    /* Estilos adicionales para mejorar el diseño del modal */
+    .modal-lg {
+        max-width: 90%;
+    }
+
+    /* Sombra y borde de las tarjetas */
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    /* Botones de acción en la tabla */
+    .btn {
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #FFC107;
+        color: #000;
+    }
+
+    /* Filas de la tabla con efecto hover */
+    .table-hover tbody tr:hover {
+        background-color: #ffe3d8;
+    }
+
+    /* Estilos del encabezado de la tabla */
+    .table thead th {
+        font-size: 1rem;
+        font-weight: bold;
+        border: none;
+    }
+
+    /* Ajustes del filtro de fecha */
+    .input-container input[type="date"] {
+        transition: border-color 0.3s;
+    }
+
+    .input-container input[type="date"]:focus {
+        border-color: #FF5722;
+        box-shadow: 0 0 5px rgba(255, 87, 34, 0.5);
+    }
+
+    /* Botón colapsable personalizado */
+    .btn-link {
+        font-weight: bold;
+        color: #FF8C00;
+    }
+
+    .btn-link:hover {
+        color: #FF5722;
+        text-decoration: none;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .pagination .page-item .page-link {
+        color: #ff0000; /* Color principal */
+        border-color: #ff0000;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #ff0000; /* Fondo de la página activa */
+        border-color: #ff0000;
+        color: #fff;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #ff6666; /* Color de hover */
+        color: white;
+    }
+    
+    .pagination .page-link {
+        margin: 0 5px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+</style>
+
 <div class="container-fluid">
     <h1 class="mb-4 text-center" style="color: #FF8C00;">Registro y monitoreo de insectos</h1>
     
@@ -158,7 +262,6 @@
         </div>
     {% endif %}
     
-
     <!-- Modal para mostrar el historial de los registros de los formatos de lavado de manos -->
     <div class="modal fade" id="historialLavadoManos" tabindex="-1" role="dialog" aria-labelledby="historialLavadoManosLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg resizable-modal" role="document">
@@ -207,6 +310,64 @@
                                 {% endif %}
                             </tbody>
                         </table>
+                        <!-- Paginador -->
+                        <div class="pagination-container mt-4 d-flex justify-content-center">
+                            <ul class="pagination">
+                                <!-- Botón de página anterior -->
+                                {% if page > 1 %}
+                                    <li class="page-item">
+                                        <a href="#" onclick="loadHistorialPage('{{ page - 1 }}')" class="page-link">Anterior</a>
+                                    </li>
+                                {% endif %}
+                        
+                                <!-- Páginas iniciales -->
+                                {% if total_pages > 7 %}
+                                    {% for p in range(1, min(4, total_pages + 1)) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    
+                                    {% if page > 4 %}
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                    
+                                    <!-- Páginas alrededor de la página actual -->
+                                    {% for p in range(max(1, page - 2), min(page + 3, total_pages + 1)) %}
+                                        {% if p > 3 and p < total_pages - 2 %}
+                                            <li class="page-item {% if p == page %}active{% endif %}">
+                                                <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                        
+                                    {% if page < total_pages - 3 %}
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                    
+                                    <!-- Páginas finales -->
+                                    {% for p in range(max(total_pages - 2, 4), total_pages + 1) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- Si hay menos de 7 páginas, mostrar todas las páginas -->
+                                    {% for p in range(1, total_pages + 1) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                        
+                                <!-- Botón de página siguiente -->
+                                {% if page < total_pages %}
+                                    <li class="page-item">
+                                        <a href="#" onclick="loadHistorialPage('{{ page + 1 }}')" class="page-link">Siguiente</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -223,7 +384,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                     <div id="detalleContenido">
                         <!-- Aquí se mostrarán los detalles obtenidos de la consulta -->
                     </div>

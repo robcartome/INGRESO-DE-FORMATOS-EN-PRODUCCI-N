@@ -28,16 +28,55 @@ def higiene_personal():
         #Obtener la verifiacion el 
         query_verificacion_higiene_personal = "SELECT * FROM asignacion_verificacion_previa_higiene_personal"
         verificacion_higiene_personal = execute_query(query_verificacion_higiene_personal)
+        
+        #Paginación para el historial de higiene del personal
+        page = request.args.get('page', 1, type=int)
+        per_page = 5
+        offset = (page - 1) * per_page
+        query_count = "SELECT COUNT(*) AS total FROM public.v_historial_higiene_personal"
+        
+        total_count = execute_query(query_count)[0]['total']
+        total_pages = (total_count + per_page - 1) // per_page
 
         #Obtener el historial de los registros de controles ambientales
-        query_historial_higiene_personal = "SELECT * FROM v_historial_higiene_personal"
+        query_historial_higiene_personal = f"SELECT * FROM v_historial_higiene_personal LIMIT {per_page} OFFSET {offset}"
         historial_higiene_personal  = execute_query(query_historial_higiene_personal)
 
-        return render_template('higiene_personal.html', historial_higiene_personal=historial_higiene_personal, control_higiene_personal=control_higiene_personal, trabajador=trabajador, detalle_higiene_personal=detalle_higiene_personal, verificacion_higiene_personal=verificacion_higiene_personal)
+        return render_template('higiene_personal.html', 
+                                historial_higiene_personal=historial_higiene_personal, 
+                                control_higiene_personal=control_higiene_personal, 
+                                trabajador=trabajador, 
+                                detalle_higiene_personal=detalle_higiene_personal, 
+                                verificacion_higiene_personal=verificacion_higiene_personal,
+                                page=page,
+                                total_pages=total_pages)
     except Exception as e:
         print(f"Error al obtener datos: {e}")
         return render_template('higiene_personal.html')
+
+@higienePersona.route('/historial', methods=['GET'])
+def historial_higiene_personal():
+    try:
+        #Paginación para el historial de higiene del personal
+        page = request.args.get('page', 1, type=int)
+        per_page = 5
+        offset = (page - 1) * per_page
+        query_count = "SELECT COUNT(*) AS total FROM public.v_historial_higiene_personal"
         
+        total_count = execute_query(query_count)[0]['total']
+        total_pages = (total_count + per_page - 1) // per_page
+
+        #Obtener el historial de los registros de controles ambientales
+        query_historial_higiene_personal = f"SELECT * FROM v_historial_higiene_personal LIMIT {per_page} OFFSET {offset}"
+        historial_higiene_personal  = execute_query(query_historial_higiene_personal)
+
+        return render_template('partials/historial_higiene_personal.html', 
+                                historial_higiene_personal=historial_higiene_personal,
+                                page=page,
+                                total_pages=total_pages)
+    except Exception as e:
+        print(f"Error al obtener datos: {e}")
+        return jsonify({"error": "Error al obtener datos"}), 500
 
 @higienePersona.route('/generar_formato_higiene', methods=['POST'])
 def generar_formato_higiene():

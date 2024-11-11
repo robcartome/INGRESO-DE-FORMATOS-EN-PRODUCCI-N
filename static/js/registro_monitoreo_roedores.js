@@ -202,7 +202,7 @@ function verDetalleHistorial(idFormatos) {
             const verificaciones = data.verificaciones;
 
             let detallesHTML = `
-                <div class="table-responsive mt-5">
+                <div class="table-responsive mt-2">
                 <table class="table table-bordered" id="detalleTabla">
                     <thead style="background-color: #FF8C00; color: white;">
                         <tr>
@@ -333,4 +333,16 @@ function formatDate(dateString) {
 
     // Si el formato no es dd/mm/yyyy, devolver la fecha tal como está
     return dateString;
+}
+
+
+function loadHistorialPage(page) {
+    fetch(`/registro_monitoreo_roedores/historial?page=` + page)
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector("#historialLavadoManos .modal-body").innerHTML = html;
+        })
+        .catch(error => {
+            console.error("Error al cargar el historial:", error);
+        });
 }

@@ -25,10 +25,79 @@ def condicionesAmbientales():
             query_vista_condiciones_ambientales = "SELECT * FROM v_condiciones_ambientales WHERE estado = 'CREADO'"
             v_condiciones_ambientales = execute_query(query_vista_condiciones_ambientales)
 
-            query_ca_finalizados = "SELECT * FROM v_condiciones_ambientales WHERE estado = 'CERRADO' ORDER BY idcondicionambiental DESC"
-            v_finalizados_CA = execute_query(query_ca_finalizados)
+            #Paginador
+            page = request.args.get('page', 1, type=int)
+            per_page = 5
+            offset = (page - 1) * per_page
+            
+            # Obtener los parámetros de mes y año desde la URL
+            filter_mes = request.args.get('mes', None)
+            filter_anio = request.args.get('anio', None)
+            
+            # Construir condiciones de filtro
+            filter_conditions = "WHERE estado = 'CERRADO'"
+            if filter_mes and filter_anio:
+                # Si hay filtro de mes y año, solo obtenemos registros que coincidan
+                filter_conditions += f" AND mes = '{filter_mes}' AND anio = '{filter_anio}'"
+                limit_offset_clause = ""  # Sin paginación cuando hay un filtro
+            else:
+                # Usar paginación si no hay filtro de fecha
+                limit_offset_clause = f" LIMIT {per_page} OFFSET {offset}"
 
-            return render_template('control_condiciones_ambientales.html', areas=areas, v_condiciones_ambientales=v_condiciones_ambientales, v_finalizados_CA=v_finalizados_CA)
+            query_ca_finalizados = f"""
+                SELECT
+                    mes,
+                    anio,
+                    json_agg(json_build_object(
+                        'idcondicionambiental', idcondicionambiental,
+                        'mes', mes,
+                        'anio', anio,
+                        'estado', estado,
+                        'idarea', idarea,
+                        'detalle_area', detalle_area
+                    )) AS registros
+                FROM v_condiciones_ambientales
+                {filter_conditions}
+                GROUP BY mes, anio
+                ORDER BY 
+                    anio::INTEGER DESC,  
+                    CASE 
+                        WHEN mes = 'Enero' THEN 1
+                        WHEN mes = 'Febrero' THEN 2
+                        WHEN mes = 'Marzo' THEN 3
+                        WHEN mes = 'Abril' THEN 4
+                        WHEN mes = 'Mayo' THEN 5
+                        WHEN mes = 'Junio' THEN 6
+                        WHEN mes = 'Julio' THEN 7
+                        WHEN mes = 'Agosto' THEN 8
+                        WHEN mes = 'Septiembre' THEN 9
+                        WHEN mes = 'Octubre' THEN 10
+                        WHEN mes = 'Noviembre' THEN 11
+                        WHEN mes = 'Diciembre' THEN 12
+                    END DESC
+                {limit_offset_clause}
+            """
+
+            v_finalizados_CA = execute_query(query_ca_finalizados)
+            
+            # Si no hay filtro de fecha, contar el total de páginas
+            if not filter_mes and not filter_anio:
+                query_count = """SELECT COUNT(*) AS total
+                                FROM (SELECT DISTINCT mes, anio 
+                                    FROM v_condiciones_ambientales 
+                                    WHERE estado = 'CERRADO') AS distinct_months_years;"""
+                total_count = execute_query(query_count)[0]['total']
+                total_pages = (total_count + per_page - 1) // per_page
+            else:
+                total_pages = 1  # Solo una "página" si estamos en modo de filtro
+
+            return render_template('control_condiciones_ambientales.html',
+                                    areas=areas, 
+                                    v_condiciones_ambientales=v_condiciones_ambientales, 
+                                    v_finalizados_CA=v_finalizados_CA,
+                                    page=page,
+                                    total_pages=total_pages)
+            
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('control_condiciones_ambientales.html')
@@ -59,7 +128,7 @@ def condicionesAmbientales():
         except Exception as e:
             print(f"Error al crear el kardex: {e}")
             return jsonify({'status': 'error', 'message': 'Error al crear el Control de condiciones ambientales'}), 500
-        
+
 @condiciones_ambientales.route('/registrar_condiciones_ambientales', methods=['POST'])
 def registrar_condiciones_ambientales():
     try:

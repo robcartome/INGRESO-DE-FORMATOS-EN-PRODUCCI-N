@@ -128,8 +128,7 @@ function historialLavadoManos() {
     .then(response => response.json())
     .then(data => {
         var tableBody = document.getElementById('historialLavadoManosBody');
-        tableBody.innerHTML = '';  // Limpiar el contenido del cuerpo de la tabla
-        // Aquí puedes agregar el código para mostrar los datos en la tabla
+        tableBody.innerHTML = '';
     })
     .catch(error => {
         console.error('Error al obtener el historial:', error);
