@@ -1,6 +1,8 @@
 import os
+import io
+import zipfile
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from .utils.constans import BPM
 from .utils.helpers import image_to_base64
@@ -294,3 +296,92 @@ def historial_control_envasados():
     except Exception as e:
         print(f"Error al obtener datos: {e}")
         return jsonify({"error": "Error al obtener datos"}), 500
+
+@controlEnvasados.route('/download_formats', methods=['GET'])
+def download_formats():
+    try:
+        # Obtener mes y año desde los parámetros
+        mes = request.args.get('mes')
+        anio = request.args.get('anio')
+        
+        if not mes or not anio:
+            return jsonify({'status': 'error', 'message': 'Mes y año son requeridos.'}), 400
+        
+        # Obtener los registros correspondientes al mes y año
+        id_registro_control_envasados = execute_query(
+            "SELECT id_registro_control_envasados FROM v_historial_registros_controles_envasados WHERE month_name = %s AND anio = %s", 
+            (mes, anio)
+        )
+        
+        if not id_registro_control_envasados:
+            return jsonify({'status': 'error', 'message': 'No se encontraron registros.'}), 404
+
+        pdf_files = []
+        
+        # Generar PDFs para cada registro
+        for id in id_registro_control_envasados:
+            idCA = int(id['id_registro_control_envasados'])
+            cabecera = get_cabecera_formato("registros_controles_envasados", idCA)
+            
+            # Obtener datos del reporte
+            registros_controles_envasados = execute_query(
+                "SELECT * FROM registros_controles_envasados WHERE id_registro_control_envasados = %s", (idCA,)
+            )
+            
+            detalle_registros_controles_envasados = execute_query(
+                "SELECT * FROM v_registros_controles_envasados WHERE id_registro_control_envasados = %s", (idCA,)
+            )
+            
+            fecha_title = execute_query("SELECT date_insertion FROM v_registros_controles_envasados WHERE id_registro_control_envasados = %s", (idCA,))
+            ingresar_fecha = fecha_title[0]['date_insertion'].strftime('%d-%m-%Y')
+            
+            if not registros_controles_envasados or not detalle_registros_controles_envasados:
+                continue
+
+            info = {
+                'fecha': registros_controles_envasados[0]['fecha'].strftime('%d/%m/%Y'),
+                'detalle': detalle_registros_controles_envasados
+            }
+            
+            # Generar la plantilla HTML para el reporte
+            logo_path = os.path.join('static', 'img', 'logo.png')
+            logo_base64 = image_to_base64(logo_path)
+            title_report = cabecera[0]['nombreformato']
+            
+            template = render_template(
+                "reports/reporte_registro_control_envasados.html",
+                title_manual=BPM,
+                title_report=title_report,
+                format_code_report=cabecera[0]['codigo'],
+                frecuencia_registro=cabecera[0]['frecuencia'],
+                logo_base64=logo_base64,
+                info=info,
+                fecha_periodo=get_ultimo_dia_laboral_del_mes()
+            )
+            
+            file_name = f"{title_report} {ingresar_fecha}.pdf"
+            pdf_response = generar_reporte(template, file_name)
+            pdf_content = pdf_response.get_data()
+            pdf_files.append((file_name, pdf_content))
+        
+        if not pdf_files:
+            return jsonify({'status': 'error', 'message': 'No se generaron reportes.'}), 404
+
+        # Crear un archivo ZIP en memoria
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for file_name, pdf_data in pdf_files:
+                zip_file.writestr(file_name, pdf_data)
+        
+        zip_buffer.seek(0)
+        return send_file(
+            zip_buffer,
+            mimetype="application/zip",
+            as_attachment=True,
+            download_name=f"Control_Envasados_{mes}_{anio}.zip"
+        )
+
+    except Exception as e:
+        print(f"Error al generar los reportes: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al generar los reportes.'}), 500
+

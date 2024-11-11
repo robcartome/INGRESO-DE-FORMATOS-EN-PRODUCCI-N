@@ -119,10 +119,24 @@
                 <div id="accordionFinalizados">
                     {% for grupo in v_finalizados_CA %}
                     <div class="card mb-3">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
+                        <div class="card-header d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}" style="background-color: #FFD700; color: #000;">
                             <div>
                                 <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
                                     {{ grupo.mes }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)
+                                </button>
+                            </div>
+                            <div id="loaderGenerar_{{ grupo.anio }}_{{ grupo.mes }}" class="align-items-center justify-content-center p-2" style="display: none; border-radius: 2px;">
+                                <div class="spinner-border text-danger me-2" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+                                <small class="fw-bold text-dark p-2">Generando, descargando y empaquetando formatos... Por favor espere.</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <!-- Botón para descargar formatos -->
+                                <button 
+                                    type="button" 
+                                    class="btn btn-info btn-sm mr-2" 
+                                    style="background-color: #FF8C00;" 
+                                    onclick="downloadFormats('{{ grupo.anio }}', '{{ grupo.mes }}')">
+                                    <i class="fas fa-file-download"></i> Descargar Formatos
                                 </button>
                             </div>
                         </div>

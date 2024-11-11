@@ -105,6 +105,30 @@
         border-radius: 5px;
         transition: background-color 0.3s ease;
     }
+
+    .card-header {
+    background-color: #FFC107 !important;
+    border-radius: 8px;
+    padding: 10px 20px;
+    }
+
+    .btn-info {
+        color: white;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-info:hover {
+        background-color: #ff9900;
+    }
+
+    #loaderGenerar_ .spinner-border {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    #loaderGenerar_ small {
+        font-size: 0.9rem;
+    }
 </style>
 
 <div class="container-fluid">
@@ -296,12 +320,29 @@
                             <div id="accordionFinalizados">
                                 {% for grupo in finalizados_envasados %}
                                     <div class="card mb-3" style="border: none; border-radius: 8px;">
-                                        <div class="card-header" id="heading{{grupo.anio}}{{grupo.month_name}}" style="background: #FFC107; border-radius: 8px;">
+                                        <div class="card-header d-flex justify-content-between align-items-center bg-warning" id="heading{{grupo.anio}}{{grupo.month_name}}" style="border-radius: 8px;">
+                                            <!-- Botón de colapso para mostrar/ocultar registros -->
                                             <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{grupo.anio}}{{grupo.month_name}}" aria-expanded="true">
                                                 {{ grupo.month_name }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)
                                             </button>
+                                            
+                                            <!-- Contenedor para el loader y el botón -->
+                                            <div class="d-flex align-items-center">
+                                                <!-- Botón para descargar formatos -->
+                                                <button 
+                                                    type="button" 
+                                                    class="btn btn-info btn-sm" 
+                                                    style="background-color: #FF8C00; border: none; display: flex; align-items: center;"
+                                                    onclick="downloadFormats('{{ grupo.anio }}', '{{ grupo.month_name }}')">
+                                                    <i class="fas fa-download"></i> -   Descargar Formatos
+                                                </button>
+                                            </div>
+                                        </div>                                        
+                                        <!-- Loader específico para cada grupo -->
+                                        <div id="loaderGenerar_{{ grupo.anio }}_{{ grupo.month_name }}" class="align-items-center justify-content-center p-2 me-3" style="display: none; border-radius: 2px;">
+                                            <div class="spinner-border text-danger" role="status" style="width: 1.2rem; height: 1.2rem;"></div>
+                                            <small class="fw-bold text-dark ms-2">Generando, descargando y empaquetando formatos... Por favor espere.</small>
                                         </div>
-
                                         <div id="collapse{{ grupo.anio }}{{ grupo.month_name }}" class="collapse" aria-labelledby="heading{{ grupo.anio }}{{ grupo.month_name }}" data-parent="#accordionFinalizados">
                                             <div class="card-body">
                                                 <table class="table table-bordered table-hover">

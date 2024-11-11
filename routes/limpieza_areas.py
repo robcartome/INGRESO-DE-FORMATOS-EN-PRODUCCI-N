@@ -331,13 +331,15 @@ def download_formato():
 
     # Obtener el id del trabajador de los argumentos de la URL
     formato_id=1 # request.args.get('formato_id') # Por el momento cumple para todos los reportes
-    mes=request.args.get('mes') # 'Setiembre'
+    mes=request.args.get('mes')
+    anio=request.args.get('anio')
+
     cabecera=get_cabecera_formato("verificacion_limpieza_desinfeccion_areas", formato_id)
 
     # Realizar la consulta para todos los registros y controles de envasados finalizados
     registros = execute_query(f"""SELECT id_verificacion_limpieza_desinfeccion_area, detalle_area_produccion, id_area_produccion, mes, anio, estado
 	FROM public.v_verificacion_limpieza_desinfeccion_areas
-	WHERE mes = '{mes}' AND estado = 'CERRADO'""")
+	WHERE mes = '{mes}' AND anio = '{anio}' AND estado = 'CERRADO'""")
 
     # Crear un diccionario para mapear cada 'id_area_produccion' con su 'detalle_area_produccion'
     areas = {registro['id_area_produccion']: registro['detalle_area_produccion'] for registro in registros}

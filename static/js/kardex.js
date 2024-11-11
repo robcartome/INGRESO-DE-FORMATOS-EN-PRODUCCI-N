@@ -586,7 +586,7 @@ function agregarTodosPorductosKardex() {
                         icon: 'success',
                         title: '¡Proceso completado!',
                         text: data.message,
-                        timer: 2000,
+                        timer: 500,
                         showConfirmButton: false
                     });
 
@@ -619,6 +619,9 @@ function agregarTodosPorductosKardex() {
                         
                         document.getElementById('messagesExito').innerHTML = infoCard;
                     }
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -687,3 +690,50 @@ function finalizarTodosPorductosKardex(){
         }
     })
 };
+
+function downloadFormats(anio, mes) {
+    // Seleccionar el loader específico para el grupo
+    const loader = document.getElementById(`loaderGenerar_${anio}_${mes}`);
+    
+    // Mostrar el loader antes de iniciar la descarga
+    if (loader) {
+        loader.style.display = 'flex';
+    }
+
+    // Verificar que mes y año existan
+    if (!mes || !anio) {
+        console.error("Mes o año no especificados para la descarga.");
+        if (loader) loader.style.display = 'none';  // Ocultar loader en caso de error
+        return;
+    }
+
+    // Construir la URL con los parámetros mes y año
+    const url = `/kardex/download_formats?mes=${mes}&anio=${anio}`;
+
+    // Realizar la descarga del archivo ZIP
+    fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error("Error al descargar el archivo.");
+            return response.blob(); // Convertir la respuesta a blob
+        })
+        .then(blob => {
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `Kardex_${mes}_${anio}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        })
+        .catch(error => {
+            console.error("Error al descargar el archivo:", error);
+            alert("Hubo un problema al descargar el archivo.");
+        })
+        .finally(() => {
+            // Ocultar el loader después de completar o si ocurre un error
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        });
+}

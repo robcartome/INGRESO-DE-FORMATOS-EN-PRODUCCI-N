@@ -1,5 +1,6 @@
 import os
-
+import io
+import zipfile
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from datetime import datetime
@@ -401,3 +402,76 @@ def finalizar_todos_productos_kardex():
     except Exception as e:
         print(f"Error al finalizar el kardex: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al finalizar el kardex.'}), 500
+    
+@kardex.route('/download_formats', methods=['GET'])
+def download_formats():
+    try:
+        # Obtenemos el mes y año
+        mes = request.args.get('mes')
+        anio = request.args.get('anio')
+        
+        # Obtenemos el id_kardex de todos los formatos del mes y año que se quieren descargar
+        id_kardex_return = execute_query(f"SELECT idkardex FROM v_kardex WHERE mes = '{mes}' AND anio = '{anio}'")
+        
+        # Lista para almacenar los PDFs generados temporalmente
+        pdf_files = []
+        
+        # Recorremos cada id_kardex encontrado
+        for id in id_kardex_return:
+            id_kardex = int(id['idkardex'])
+            
+            # Obtenemos la cabecera y detalles
+            cabecera = get_cabecera_formato("kardex", id_kardex)
+            query_kardex = "SELECT * FROM v_kardex WHERE idkardex = %s"
+            kardex = execute_query(query_kardex, (id_kardex,))
+            query_detalle_kardex = "SELECT * FROM detalles_kardex WHERE fk_idkardex = %s"
+            detalle_kardex = execute_query(query_detalle_kardex, (id_kardex,))
+            
+            # Formateamos la fecha en los detalles
+            detalles_formateados = []
+            for detalle in detalle_kardex:
+                detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')
+                detalles_formateados.append(detalle)
+            
+            # Renderizamos la plantilla HTML
+            logo_path = os.path.join('static', 'img', 'logo.png')
+            logo_base64 = image_to_base64(logo_path)
+            title_report = cabecera[0]['nombreformato']
+            template = render_template(
+                "reports/reporte_kardex.html",
+                title_manual=BPM,
+                title_report=title_report,
+                format_code_report=cabecera[0]['codigo'],
+                frecuencia_registro=cabecera[0]['frecuencia'],
+                logo_base64=logo_base64,
+                info=detalles_formateados,
+                kardex=kardex[0],
+                fecha_periodo=get_ultimo_dia_laboral_del_mes()
+            )
+            
+            # Generamos el PDF usando la función generar_reporte
+            file_name = f"{title_report} - {kardex[0]['mes']} - {kardex[0]['descripcion_producto']}.pdf"
+            pdf_response = generar_reporte(template, file_name)
+            
+            # Extraemos el contenido del PDF de la respuesta
+            pdf_content = pdf_response.get_data()
+            pdf_files.append((file_name, pdf_content))
+        
+        # Crear un archivo ZIP en memoria
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for file_name, pdf_data in pdf_files:
+                zip_file.writestr(file_name, pdf_data)
+        
+        # Preparar el archivo ZIP para su descarga
+        zip_buffer.seek(0)
+        return send_file(
+            zip_buffer,
+            mimetype="application/zip",
+            as_attachment=True,
+            download_name=f"Kardex_{mes}_{anio}.zip"
+        )
+
+    except Exception as e:
+        print(f"Error al obtener los kardex: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al obtener los kardex.'}), 500

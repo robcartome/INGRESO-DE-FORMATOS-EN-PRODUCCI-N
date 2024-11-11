@@ -1,4 +1,6 @@
 import os
+import io
+import zipfile
 
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
@@ -310,3 +312,103 @@ def descargar_formato_CA(idCA):
     file_name=f"{title_report}"
     return generar_reporte(template, file_name)
 
+@condiciones_ambientales.route('/download_formats', methods=['GET'])
+def download_formats():
+    try:
+        # Obtener mes y año desde los parámetros
+        mes = request.args.get('mes')
+        anio = request.args.get('anio')
+        
+        if not mes or not anio:
+            return jsonify({'status': 'error', 'message': 'Mes y año son requeridos.'}), 400
+        
+        # Obtener el id_condicion_ambiental de todos los registros para el mes y año especificados
+        id_ca_return = execute_query(
+            "SELECT idcondicionambiental FROM v_condiciones_ambientales WHERE mes = %s AND anio = %s", 
+            (mes, anio)
+        )
+        
+        if not id_ca_return:
+            return jsonify({'status': 'error', 'message': 'No se encontraron registros.'}), 404
+
+        # Lista para almacenar los PDFs generados temporalmente
+        pdf_files = []
+        
+        # Recorremos cada id_condicion_ambiental encontrado
+        for id in id_ca_return:
+            idCA = int(id['idcondicionambiental'])
+            cabecera = get_cabecera_formato("condiciones_ambientales", idCA)
+            
+            # Obtener el nombre del formato
+            nom_format = execute_query("SELECT detalle_area FROM v_condiciones_ambientales WHERE idcondicionambiental = %s", (idCA,))
+            nombre_formato = nom_format[0]['detalle_area']
+            
+            # Consulta de detalles
+            query_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY fecha, hora ASC;"
+            ConsultCADetails = execute_query(query_CA, (idCA,))
+
+            if not ConsultCADetails:
+                continue
+
+            # Formatear la fecha para los detalles
+            detalles_formateados = []
+            for detalle in ConsultCADetails:
+                detalle['fecha'] = detalle['fecha'].strftime('%d/%m/%Y')
+                
+                # Obtener asignaciones de verificación previa
+                query_asignaciones = "SELECT fk_idverificacion_previa FROM asignacion_verificacion_previa_condicion_ambiental WHERE fk_iddetalle_condicion_ambiental = %s"
+                asignaciones = execute_query(query_asignaciones, (detalle['iddetalle_ca'],))
+
+                verificacion = {1: False, 2: False, 3: False, 4: False}
+                for asignacion in asignaciones:
+                    if asignacion['fk_idverificacion_previa'] in verificacion:
+                        verificacion[asignacion['fk_idverificacion_previa']] = True
+
+                detalle['verificacion_previa'] = verificacion
+                detalles_formateados.append(detalle)
+
+            # Generar el nombre del archivo basado en la cabecera
+            title_report = cabecera[0]['nombreformato']
+            file_name = f"{nombre_formato}-{mes}-{anio}.pdf"
+            
+            # Renderizar la plantilla HTML para el reporte
+            logo_path = os.path.join('static', 'img', 'logo.png')
+            logo_base64 = image_to_base64(logo_path)
+            template = render_template(
+                "reports/reporte_control_condiciones_ambientales.html",
+                title_manual=BPM,
+                title_report=title_report,
+                format_code_report=cabecera[0]['codigo'],
+                frecuencia_registro=cabecera[0]['frecuencia'],
+                logo_base64=logo_base64,
+                info=detalles_formateados,
+                mes=mes,
+                anio=anio,
+                fecha_periodo=get_ultimo_dia_laboral_del_mes()
+            )
+            
+            # Generar PDF
+            pdf_response = generar_reporte(template, file_name)
+            pdf_content = pdf_response.get_data()
+            pdf_files.append((file_name, pdf_content))
+        
+        if not pdf_files:
+            return jsonify({'status': 'error', 'message': 'No se generaron reportes.'}), 404
+
+        # Crear un archivo ZIP en memoria
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for file_name, pdf_data in pdf_files:
+                zip_file.writestr(file_name, pdf_data)
+        
+        zip_buffer.seek(0)
+        return send_file(
+            zip_buffer,
+            mimetype="application/zip",
+            as_attachment=True,
+            download_name=f"Condiciones_Ambientales_{mes}_{anio}.zip"
+        )
+
+    except Exception as e:
+        print(f"Error al obtener los formatos: {e}")
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error al generar los reportes.'}), 500
