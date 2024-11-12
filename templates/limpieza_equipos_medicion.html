@@ -138,7 +138,7 @@
             <div id="accordionFinalizados">
                 {% for grupo in historial_formatos_creado %}
                 <div class="card mb-2 card-mes" data-mes="{{ grupo.mes }}" data-anio="{{ grupo.anio }}">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
+                    <div class="card-header d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}" style="background-color: #FFD700; color: #000;">
                         <button class="btn btn-link text-dark font-weight-bold p-0" 
                                 data-toggle="collapse" 
                                 data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" 

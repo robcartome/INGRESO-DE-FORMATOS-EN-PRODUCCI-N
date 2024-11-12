@@ -143,7 +143,7 @@
                 <div id="accordionFinalizados">
                     {% for grupo in v_finalizados_LA %}
                     <div class="card mb-3">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}">
+                        <div class="card-header d-flex justify-content-between align-items-center" id="heading{{ grupo.anio }}{{ grupo.mes }}" style="background-color: #FFD700; color: #000;">
                             <div>
                                 <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{ grupo.anio }}{{ grupo.mes }}" aria-expanded="true" aria-controls="collapse{{ grupo.anio }}{{ grupo.mes }}">
                                     {{ grupo.mes }} del {{ grupo.anio }} ({{ grupo.registros | length }} Registros)

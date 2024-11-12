@@ -270,7 +270,11 @@ def descargar_formato_CA(idCA):
     _fecha = datetime.strptime(fecha, '%d/%m/%Y')
     mes=MESES_BY_NUM[_fecha.month].capitalize()
     anio=_fecha.year
-
+    
+    area = execute_query("SELECT fk_idarea FROM condiciones_ambientales WHERE idcondicionambiental = %s", (idCA, ))[0]['fk_idarea']
+    
+    nombre_area = execute_query("SELECT detalle_area FROM areas WHERE idarea = %s", (area,))[0]['detalle_area']
+    
     # Formatear la fecha en los detalles
     detalles_formateados = []
     for detalle in ConsultCADetails:
@@ -281,11 +285,17 @@ def descargar_formato_CA(idCA):
         query_asignaciones = "SELECT fk_idverificacion_previa FROM asignacion_verificacion_previa_condicion_ambiental WHERE fk_iddetalle_condicion_ambiental = %s"
         asignaciones = execute_query(query_asignaciones, (detalle['iddetalle_ca'],))
 
-        # Crear un diccionario con las verificaciones previas (1-4)
-        verificacion = {1: False, 2: False, 3: False, 4: False}
-        for asignacion in asignaciones:
-            if asignacion['fk_idverificacion_previa'] in verificacion:
-                verificacion[asignacion['fk_idverificacion_previa']] = True
+        if area == 2 or area == 4:
+            verificacion = {1: False, 2: False, 3: None, 4: None}
+            for asignacion in asignaciones:
+                if asignacion['fk_idverificacion_previa'] in verificacion:
+                    verificacion[asignacion['fk_idverificacion_previa']] = True
+        else:
+            # Crear un diccionario con las verificaciones previas (1-4)
+            verificacion = {1: False, 2: False, 3: False, 4: False}
+            for asignacion in asignaciones:
+                if asignacion['fk_idverificacion_previa'] in verificacion:
+                    verificacion[asignacion['fk_idverificacion_previa']] = True
 
         # Añadir las asignaciones al detalle
         detalle['verificacion_previa'] = verificacion
@@ -306,6 +316,7 @@ def descargar_formato_CA(idCA):
         info=detalles_formateados,
         mes=mes,
         anio=anio,
+        nombre_area=nombre_area,
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
@@ -346,6 +357,8 @@ def download_formats():
             # Consulta de detalles
             query_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY fecha, hora ASC;"
             ConsultCADetails = execute_query(query_CA, (idCA,))
+            
+            area = execute_query("SELECT fk_idarea FROM condiciones_ambientales WHERE idcondicionambiental = %s", (idCA, ))[0]['fk_idarea']
 
             if not ConsultCADetails:
                 continue
@@ -359,10 +372,17 @@ def download_formats():
                 query_asignaciones = "SELECT fk_idverificacion_previa FROM asignacion_verificacion_previa_condicion_ambiental WHERE fk_iddetalle_condicion_ambiental = %s"
                 asignaciones = execute_query(query_asignaciones, (detalle['iddetalle_ca'],))
 
-                verificacion = {1: False, 2: False, 3: False, 4: False}
-                for asignacion in asignaciones:
-                    if asignacion['fk_idverificacion_previa'] in verificacion:
-                        verificacion[asignacion['fk_idverificacion_previa']] = True
+                if area == 2 or area == 4:
+                    verificacion = {1: False, 2: False, 3: None, 4: None}
+                    for asignacion in asignaciones:
+                        if asignacion['fk_idverificacion_previa'] in verificacion:
+                            verificacion[asignacion['fk_idverificacion_previa']] = True
+                else:
+                    # Crear un diccionario con las verificaciones previas (1-4)
+                    verificacion = {1: False, 2: False, 3: False, 4: False}
+                    for asignacion in asignaciones:
+                        if asignacion['fk_idverificacion_previa'] in verificacion:
+                            verificacion[asignacion['fk_idverificacion_previa']] = True
 
                 detalle['verificacion_previa'] = verificacion
                 detalles_formateados.append(detalle)
@@ -382,6 +402,7 @@ def download_formats():
                 frecuencia_registro=cabecera[0]['frecuencia'],
                 logo_base64=logo_base64,
                 info=detalles_formateados,
+                nombre_area=nombre_formato,
                 mes=mes,
                 anio=anio,
                 fecha_periodo=get_ultimo_dia_laboral_del_mes()

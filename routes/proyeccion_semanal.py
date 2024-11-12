@@ -36,7 +36,7 @@ def proyeccion_semanal():
     # Obtener las proyecciones cerradas con paginación
     proyectEnd = execute_query("""
         SELECT * FROM proyeccion WHERE estado = 'CERRADO'
-        ORDER BY idprojection
+        ORDER BY idprojection DESC
         LIMIT %s OFFSET %s
     """, (items_per_page, offset)) or []
 
