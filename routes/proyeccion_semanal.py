@@ -136,7 +136,7 @@ def generar_proyeccion():
         print(f"Error al generar la proyección: {e}")
         return jsonify({'status': 'error', 'message': 'Hubo un error al generar la proyección'}), 500
 
-    
+
 @proyeccionsemanal.route('/quitar_proyeccion/<int:idproyeccion>', methods=['POST'])
 def quitar_proyeccion(idproyeccion):
     try:

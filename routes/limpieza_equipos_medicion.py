@@ -1,11 +1,9 @@
 import os
-import pprint
 
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
 from collections import defaultdict
 from datetime import datetime
-from datetime import time
 from .utils.constans import POES
 from .utils.constans import MESES
 from .utils.helpers import image_to_base64

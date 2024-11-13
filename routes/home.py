@@ -82,7 +82,7 @@ def descargar_inventario():
 
         # Enviar el archivo Excel al cliente
         return send_file(output, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                         download_name='inventario_productos.xlsx', as_attachment=True)
+                            download_name='Inventario de productos.xlsx', as_attachment=True)
     except Exception as e:
         print(f"Error al descargar el inventario: {e}")
         return jsonify({'status': 'error', 'message': 'Error al descargar el inventario.'}), 500

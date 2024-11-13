@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
 from datetime import datetime
 from .utils.constans import POES

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, make_response, send_file
+from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 import psycopg2
 import base64
