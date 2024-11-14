@@ -101,6 +101,17 @@
                         </a>
                     </div>
                 </li>
+                <li class="nav-item dropdown"> 
+                    <a class="nav-link dropdown-toggle" href="#" id="repositorioIFP" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #FF4500;">
+                        REPOSITORIO
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="proyectDropdown">
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('repositorio_IFP.repositorio_IFP') }}">
+                            <img src="{{ url_for('static', filename='img/repositorio.png') }}" alt="Repositorio" width="20" height="20" class="mr-2">
+                            Repositorio de documentos
+                        </a>
+                    </div>
+                </li>
             </ul>
             
             <form class="form-inline my-2 my-lg-0 ml-auto">

@@ -306,6 +306,6 @@ def download_formato():
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    filename=f"REPORTE DE LAVADO DE MANOS - {mes} - {anio}"
+    filename=f"REPORTE-DE-LAVADO-DE-MANOS--{mes}--{anio}--F"
     return generar_reporte(template, filename)
 

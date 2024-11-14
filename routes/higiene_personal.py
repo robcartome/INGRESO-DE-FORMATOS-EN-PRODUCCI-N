@@ -1,4 +1,6 @@
 import os
+import calendar
+import locale
 
 from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query
@@ -154,13 +156,13 @@ def registrar_higiene_personal():
         # Inserciones para verificación previa
         if correctaPresentacion:
             execute_query("INSERT INTO asignacion_verificacion_previa_higiene_personal(fk_iddetalle_control_higiene_personal, fk_idverificacion_previa) VALUES (%s,%s)",
-                          (id_detalle, 5))
+                        (id_detalle, 5))
         if limpiezaManos:
             execute_query("INSERT INTO asignacion_verificacion_previa_higiene_personal(fk_iddetalle_control_higiene_personal, fk_idverificacion_previa) VALUES (%s,%s)",
-                          (id_detalle, 6))
+                        (id_detalle, 6))
         if habitosHigiene:
             execute_query("INSERT INTO asignacion_verificacion_previa_higiene_personal(fk_iddetalle_control_higiene_personal, fk_idverificacion_previa) VALUES (%s,%s)",
-                          (id_detalle, 7))
+                        (id_detalle, 7))
 
         return jsonify({'status': 'success', 'message': 'Se registró el control de aseo e higiene del personal.'}), 200
 
@@ -226,6 +228,13 @@ def download_formato():
     # Realizar la consulta para el detalle de todos los registros y controles de envasados finalizados
     detalle_controles_higiene_personal = execute_query(f"SELECT * FROM v_detalle_higiene_personal WHERE fk_idcontrol_higiene_personal = {formato_lavado_id} ORDER BY fecha")
 
+    #Consultar el mes y año
+    fecha = execute_query(f"SELECT mes, anio FROM controles_higiene_personal WHERE id_control_higiene_personal = {formato_lavado_id}")
+    
+    mes = int(fecha[0]['mes'])
+    mes_nombre = calendar.month_name[mes]
+    anio = fecha[0]['anio']
+    
     # Obtener todas las verificaciones en una sola consulta
     query_verificacion_higiene_personal = "SELECT * FROM asignacion_verificacion_previa_higiene_personal"
     verificacion_higiene_personal = execute_query(query_verificacion_higiene_personal)
@@ -273,5 +282,5 @@ def download_formato():
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    file_name=f"{title_report}"
+    file_name=f"{title_report.replace(' ','-')}--{mes_nombre.strip().capitalize()}--{anio}--F"
     return generar_reporte(template, file_name)

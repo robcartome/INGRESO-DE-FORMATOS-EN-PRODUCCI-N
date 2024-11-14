@@ -394,7 +394,7 @@ def download_formato():
         anio=registros[0]['anio']
     )
 
-    file_name = f"{title_report} - {mes}"
+    file_name = f"{title_report.replace(' ','-')}--{mes}--{anio}--F"
     return generar_reporte(template, file_name)
 
 
@@ -405,6 +405,7 @@ def download_formato_obs():
     formato_id=1  # request.args.get('formato_id')
     nombre_mes=request.args.get('mes').lower()
     mes=MESES.get(nombre_mes, 0) # 9
+    anio=request.args.get('anio')
     # Validar que el mes sea correcto
     if mes == 0:
         raise ValueError(f"Nombre de mes inválido: {nombre_mes}")
@@ -424,6 +425,7 @@ def download_formato_obs():
     JOIN acciones_correctivas ac
         ON ac.idaccion_correctiva = o.fk_id_accion_correctiva
     WHERE EXTRACT(MONTH FROM o.fecha) = {mes}
+    AND EXTRACT(YEAR FROM o.fecha) = {anio}
     ORDER BY o.idmedidacorrectivaob, o.fecha DESC;""")
 
     # Generar Template para reporte
@@ -443,5 +445,5 @@ def download_formato_obs():
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    file_name = f"{title_report} - {mes}"
+    file_name = f"{title_report}--{nombre_mes}--{anio}--F"
     return generar_reporte(template, file_name)

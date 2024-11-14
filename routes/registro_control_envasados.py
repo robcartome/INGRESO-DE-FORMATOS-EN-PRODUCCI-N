@@ -1,7 +1,7 @@
 import os
 import io
 import zipfile
-
+import locale
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from .utils.constans import BPM
@@ -12,6 +12,8 @@ from .utils.helpers import get_ultimo_dia_laboral_del_mes
 from datetime import datetime
 
 ########## PARA REGISTRO Y CONTROL DE ENVASADOS ###################################################################################
+
+locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8') 
 
 controlEnvasados = Blueprint('control_envasados', __name__)
 
@@ -213,6 +215,7 @@ def obtener_detalle_envasados(id_formatos):
         return jsonify({'status': 'error', 'message': 'Hubo un error al obtener los detalles.'}), 500
     
 
+
 @controlEnvasados.route('/download_formato', methods=['GET'])
 def download_formato():
 
@@ -220,21 +223,31 @@ def download_formato():
     formato_lavado_id = request.args.get('formato_id')
     cabecera = get_cabecera_formato("registros_controles_envasados", formato_lavado_id)
 
-    #Realizar la consulta para todos los registros y controles de envasados finalizados
-    registros_controles_envasados = execute_query(f"SELECT * FROM registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}")
+    # Realizar la consulta para todos los registros y controles de envasados finalizados
+    registros_controles_envasados = execute_query(
+        f"SELECT * FROM registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}"
+    )
 
     # Realizar la consulta para el detalle de todos los registros y controles de envasados finalizados
-    detalle_registros_controles_envasados = execute_query(f"SELECT * FROM v_registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}")
+    detalle_registros_controles_envasados = execute_query(
+        f"SELECT * FROM v_registros_controles_envasados WHERE id_registro_control_envasados = {formato_lavado_id}"
+    )
+
+    # Extraer la fecha como un objeto datetime para poder separar día, mes y año
+    fecha_obj = registros_controles_envasados[0]['fecha']
+    mes_nombre = fecha_obj.strftime('%B')
+    anio = fecha_obj.strftime('%Y')
 
     # Crear info para el Template
-    info={}
-    info['fecha'] = registros_controles_envasados[0]['fecha'].strftime('%d/%m/%Y')
-    info['detalle'] = detalle_registros_controles_envasados
+    info = {
+        'fecha': fecha_obj.strftime('%d/%m/%Y'),
+        'detalle': detalle_registros_controles_envasados
+    }
 
     # Generar Template para reporte
     logo_path = os.path.join('static', 'img', 'logo.png')
     logo_base64 = image_to_base64(logo_path)
-    title_report=cabecera[0]['nombreformato']
+    title_report = cabecera[0]['nombreformato']
 
     # Renderiza la plantilla
     template = render_template(
@@ -248,7 +261,8 @@ def download_formato():
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    file_name=f"{title_report}"
+    # Generar el nombre del archivo usando las variables de fecha
+    file_name = f"{title_report.replace(' ', '-')}--{mes_nombre}--{anio}--{fecha_obj}--F"
     return generar_reporte(template, file_name)
 
 @controlEnvasados.route('/historial', methods=['GET'])
@@ -359,7 +373,7 @@ def download_formats():
                 fecha_periodo=get_ultimo_dia_laboral_del_mes()
             )
             
-            file_name = f"{title_report} {ingresar_fecha}.pdf"
+            file_name = f"{title_report.replace(' ', '-')}--{mes}--{anio}--{ingresar_fecha}--F.pdf"
             pdf_response = generar_reporte(template, file_name)
             pdf_content = pdf_response.get_data()
             pdf_files.append((file_name, pdf_content))
@@ -384,4 +398,3 @@ def download_formats():
     except Exception as e:
         print(f"Error al generar los reportes: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al generar los reportes.'}), 500
-

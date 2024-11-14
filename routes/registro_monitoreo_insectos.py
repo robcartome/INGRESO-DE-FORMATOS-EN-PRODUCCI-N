@@ -323,5 +323,5 @@ def download_formato():
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    file_name = f"{title_report} - {mes}"
+    file_name = f"{title_report.replace(' ','-')}--{mes.strip().capitalize()}--{anio}--F"
     return generar_reporte(template, file_name, orientation='landscape')

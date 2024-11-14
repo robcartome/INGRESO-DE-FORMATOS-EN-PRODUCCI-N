@@ -320,7 +320,7 @@ def descargar_formato_CA(idCA):
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    file_name=f"{title_report}"
+    file_name=f"{title_report.replace(' ','-')}--{mes}--{anio}--{nombre_area.replace(' ','-')}--F"
     return generar_reporte(template, file_name)
 
 @condiciones_ambientales.route('/download_formats', methods=['GET'])
@@ -389,7 +389,7 @@ def download_formats():
 
             # Generar el nombre del archivo basado en la cabecera
             title_report = cabecera[0]['nombreformato']
-            file_name = f"{nombre_formato}-{mes}-{anio}.pdf"
+            file_name = f"{title_report.replace(' ','-')}--{mes}--{anio}--{nombre_formato.replace(' ','-')}--F.pdf"
             
             # Renderizar la plantilla HTML para el reporte
             logo_path = os.path.join('static', 'img', 'logo.png')
