@@ -21,7 +21,7 @@ def condicionesAmbientales():
     if request.method == 'GET':
         try:
             # Obtener toas las áreas
-            query_areas = "SELECT * FROM areas"
+            query_areas = "SELECT * FROM areas WHERE idarea BETWEEN 1 AND 4;"
             areas = execute_query(query_areas)
 
             query_vista_condiciones_ambientales = "SELECT * FROM v_condiciones_ambientales WHERE estado = 'CREADO'"
@@ -195,7 +195,7 @@ def detalles_condiciones_ambientales(id_ca):
     area = quer_area[0]['fk_idarea']
     
     # Obtener los detalles de la condición ambiental
-    query_detalle_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY iddetalle_ca DESC"
+    query_detalle_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY fecha DESC"
     detalle_CA = execute_query(query_detalle_CA, (id_ca,))
 
     # Obtener las asignaciones de verificación previa para cada detalle

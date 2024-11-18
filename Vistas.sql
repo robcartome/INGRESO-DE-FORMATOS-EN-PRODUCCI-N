@@ -114,6 +114,8 @@ LEFT JOIN
 JOIN
     condiciones_ambientales ca ON ca.idcondicionambiental = d.fk_idcondicion_ambiental;
 
+SELECT * FROM v_detalle_control_CA
+
 -- REGISTRO Y CONTROL DE ENVASADOS
 
 CREATE OR REPLACE VIEW v_historial_registros_controles_envasados AS
@@ -461,11 +463,8 @@ JOIN
     productos p ON p.idproducto = m.fk_id_productos;
 
 
-DROP VIEW v_min_max
-
 SELECT * FROM v_min_max
 	
-
 
 CREATE OR REPLACE VIEW v_proyeccion_semanal AS
 SELECT
@@ -494,28 +493,6 @@ JOIN
     proyeccion proyect ON proyect.idprojection = p.fk_proyeccion
 ORDER BY
     p.idproyeccion;
-
-DROP VIEW v_proyeccion_semanal
-
-SELECT * FROM v_proyeccion_semanal
-
-
-SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = 20 AND date_insertion BETWEEN '2024-10-21' AND '2024-10-26'
-
-SELECT * FROM proyeccion WHERE estado = 'CERRADO'
-        ORDER BY idprojection
-
-SELECT * FROM v_proyeccion_semanal
-            WHERE estado = 'CERRADO'
-SELECT * FROM proyeccion WHERE estado = 'CREADO'
-
-SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = %s AND date_insertion BETWEEN %s AND %s
-
-SELECT * FROM v_historial_registros_controles_envasados WHERE fecha = '2024-10-31'
-
-SELECT * FROM public.detalles_kardex WHERE fecha= '31/10/2024'
-
-SELECT * FROM public.kardex
 
 SELECT COUNT(*) AS total
                         FROM (SELECT DISTINCT mes, anio 
@@ -555,5 +532,51 @@ FROM (SELECT DISTINCT mes, anio
 	FROM v_kardex 
 	WHERE estado = 'CERRADO') AS distinct_months_years;
 	
-SELECT * FROM public.lavadosmanos
-SELECT * FROM public.detalle_lavados_manos ORDER BY idmano
+SELECT * FROM detalles_controles_cloro_residual_agua
+
+CREATE OR REPLACE VIEW v_detalles_controles_cloro_residual_agua AS
+SELECT
+	d.id_detalle_control_cloro_residual_agua,
+	d.fecha,
+	d.hora,
+	d.lectura,
+	COALESCE(d.observacion, '-') AS observacion,
+	a.idaccion_correctiva,
+	COALESCE(a.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
+	COALESCE(a.estado, '-') AS estado_accion_correctiva,
+	h.id_header_format,
+	h.estado AS estado_formato
+FROM
+	detalles_controles_cloro_residual_agua d
+JOIN
+	headers_formats h ON h.id_header_format = d.fk_id_header_format
+LEFT JOIN
+	acciones_correctivas a ON a.idaccion_correctiva = d.fk_id_accion_correctiva;
+
+DROP VIEW v_detalles_controles_cloro_residual_agua
+
+SELECT fecha, hora, lectura, observacion, detalle_accion_correctiva, estado_Accion_correctiva 
+FROM v_detalles_controles_cloro_residual_agua 
+WHERE estado_formato = 'CREADO'
+
+CREATE OR REPLACE VIEW v_headers_formats_historial AS
+SELECT
+	f.id_header_format,
+    TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
+    f.anio,
+	f.fk_id_tipo_formatos
+FROM
+    headers_formats f
+WHERE 
+	estado = 'CERRADO'
+ORDER BY
+	f.anio DESC, f.mes DESC;
+
+SELECT id_header_format 
+FROM headers_formats 
+WHERE estado = 'CREADO' AND headers_formats.fk_id_tipo_formatos = 11
+
+SELECT * 
+FROM public.areas 
+WHERE idarea BETWEEN 1 AND 4;
+

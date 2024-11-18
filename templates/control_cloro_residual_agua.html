@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Control de cloro residual en agua{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Control de cloro residual en agua</h1>
+    {% if not formato_CCR %}
+    <!-- Generar el formato -->
+    <div class="form-row mb-4 text-center">
+        <div class="col-lg-6 col-md-6 mb-3">
+            <button type="button" class="btn btn-lg btn-block shadow-sm"
+                style="background-color: #FF7043; color: white; border-radius: 10px;"
+                onclick="generarFormatoCloroResidualAgua()">
+                <i class="fas fa-download fa-lg mr-2">
+                    GENERAR FORMATO
+                </i>
+            </button>
+        </div>
+
+        <!-- Botón de Historial -->
+        <div class="col-lg-6 col-md-6 mb-3">
+            <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                style="background-color: #FFDAB9; color: #FF8C00; border: 2px solid #FF8C00; border-radius: 10px;" 
+                data-toggle="modal" data-target="#historialCCAModal">
+                <i class="fas fa-history fa-lg mr-2"></i> HISTORIAL
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if formato_CCR %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header text-white" style="background-color: #FF8C00;">
+            <h5 class="mb-0">Formulario de registro</h5>
+        </div>
+        <div class="card-body">
+            <!-- Formulario para registrar el control de cloro residual -->
+            <form id="FormCCA" method="POST" action="{{ url_for('control_cloro_residual.control_cloro_residual') }}" enctype="multipart/form-data">
+                <div class="form-row mb-3">
+                    <div class="form-group col-lg-6 col-md-12">
+                        <label for="fechaCCA" class="font-weight-bold" style="color: #FF8C00;">Fecha</label>
+                        <input type="date" id="fechaCCA" class="form-control" name="fechaCCA" required>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-12">
+                        <label for="horaCCA" class="font-weight-bold" style="color: #FF8C00;">Hora</label>
+                        <input type="time" id="horaCCA" class="form-control" name="horaCCA" required>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-12">
+                        <label for="lecturaCCA" class="font-weight-bold" style="color: #FF8C00;">Lectura</label>
+                        <input type="number" id="lecturaCCA" class="form-control" name="lecturaCCA" step="any" placeholder="Ingresa la lectura del control de cloro residual en agua" required>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-12">
+                        <label for="observacionCCA" class="font-weight-bold" style="color: #FF8C00;">Observaciones</label>
+                        <input type="text" id="observacionCCA" class="form-control" name="observacionCCA" placeholder="Ingresa las observaciones presentadas">
+                    </div>
+                    <div class="form-group col-lg-12 col-md-12">
+                        <label for="acCCA" class="font-weight-bold" style="color: #FF8C00;">Accciones Correctivas</label>
+                        <input type="text" class="form-control" id="acCCA" name="acCCA" placeholder="Ingrese la acción correctiva correspondiente">
+                    </div>
+                </div>
+                <button type="submit" class="btn d-block w-100 mb-4" style="background-color: #FF8C00; color: white;"><i class="fas fa-plus-circle"></i> AGREGAR REGISTRO</button>
+            </form>
+
+            <!-- Botones de Historial y Finalizar Registro -->
+            <div class="form-row mb-4">
+                <div class="form-group col-lg-6 col-md-6">
+                    <button type="button" class="btn d-block w-100" style="background-color: #FFDAB9; color: #FF8C00; border: 1px solid #FF8C00;" data-toggle="modal" data-target="#historialCCAModal">
+                        <i class="fas fa-history"></i> HISTORIAL
+                    </button>
+                </div>
+                <div class="form-group col-lg-6 col-md-6">
+                    <button type="button" class="btn d-block w-100" style="background-color: #FFC107; color: white;" onclick="finalizarRegistroCCA()"><i class="fas fa-check-circle"></i> FINALIZAR REGISTRO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="container-fluid mt-4">
+                <!-- Título centrado -->
+                <h3 class="text-center text-uppercase fw-bold text-warning">Registros de Control de Cloro Residual en Agua</h3>
+                
+                <!-- Filtro de fecha -->
+                <div class="row mb-3">
+                    <div class="col-md-6 col-sm-12">
+                        <label for="filterFechaDetalleCCA" class="text-warning fw-bold">Filtrar por fecha:</label>
+                        <input type="date" id="filterFechaDetalleCCA" class="form-control" name="filterFechaDetalleCCA" onchange="filterTableDetalleCCA()" />
+                    </div>
+                </div>
+    
+                <!-- Tabla -->
+                <div class="table-responsive mt-2">
+                    <table id="detalleCCATable" class="table table-bordered table-hover text-center align-middle">
+                        <thead class="bg-warning text-white">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Lectura</th>
+                                <th>Observaciones</th>
+                                <th>Acciones Correctivas</th>
+                                <th>Validar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in detalle_CCA %}
+                            <tr>
+                                <td>{{ d.fecha }}</td>
+                                <td>{{ d.hora }}</td>
+                                <td>{{ d.lectura }} ppm</td>
+                                <td>{{ d.observacion }}</td>
+                                <td style="{% if d.estado_accion_correctiva == 'PENDIENTE' %} color: red; {% elif d.estado_accion_correctiva == 'SOLUCIONADO' %} color: green; {% endif %}">
+                                    {{ d.detalle_accion_correctiva }}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-warning w-100" onclick="modificarEstadoAC('{{ d.idaccion_correctiva }}')">
+                                        <i class="fas fa-check-circle"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+
+    <!-- Modal para mostrar el historial de los registros de los formatos de lavado de manos -->
+    <div class="modal fade" id="historialCCAModal" tabindex="-1" role="dialog" aria-labelledby="historialCCALabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg resizable-modal" role="document">
+            <div class="modal-content">
+                <!-- Cambiado el fondo de la cabecera a #FF8C00 y el texto a blanco -->
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="labelHistorialLavadoMano">Historial de control de cloro residual en agua</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead style="background-color: #FFC107; color: black;">
+                                <tr>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Ver</th>
+                                    <th class="text-center">Descargar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if historialCCA %}
+                                    {% for hl in historialCCA %}
+                                        <tr>
+                                            <td class="text-center">{{ hl.mes }} del {{ hl.anio }} </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm" onclick="verDetalleHistorial('{{ hl.id_header_format }}')" style="background-color: #FFC107;">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('control_cloro_residual.download_formato', formato_id=hl.id_header_format) }}"
+                                                    class="btn btn-warning btn-sm btn-block mb-2" style="background-color: #FF8C00; color: white;">
+                                                    <i class="fas fa-download"></i> Descargar Formato
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay registros disponibles.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        <!-- Paginador -->
+                        <div class="pagination-container mt-4 d-flex justify-content-center">
+                            <ul class="pagination">
+                                <!-- Botón de página anterior -->
+                                {% if page > 1 %}
+                                    <li class="page-item">
+                                        <a href="#" onclick="loadHistorialPage('{{ page - 1 }}')" class="page-link">Anterior</a>
+                                    </li>
+                                {% endif %}
+                        
+                                <!-- Páginas iniciales -->
+                                {% if total_pages > 7 %}
+                                    {% for p in range(1, min(4, total_pages + 1)) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    
+                                    {% if page > 4 %}
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                    
+                                    <!-- Páginas alrededor de la página actual -->
+                                    {% for p in range(max(1, page - 2), min(page + 3, total_pages + 1)) %}
+                                        {% if p > 3 and p < total_pages - 2 %}
+                                            <li class="page-item {% if p == page %}active{% endif %}">
+                                                <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                        
+                                    {% if page < total_pages - 3 %}
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% endif %}
+                                    
+                                    <!-- Páginas finales -->
+                                    {% for p in range(max(total_pages - 2, 4), total_pages + 1) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- Si hay menos de 7 páginas, mostrar todas las páginas -->
+                                    {% for p in range(1, total_pages + 1) %}
+                                        <li class="page-item {% if p == page %}active{% endif %}">
+                                            <a href="#" onclick="loadHistorialPage('{{ p }}')" class="page-link">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                        
+                                <!-- Botón de página siguiente -->
+                                {% if page < total_pages %}
+                                    <li class="page-item">
+                                        <a href="#" onclick="loadHistorialPage('{{ page + 1 }}')" class="page-link">Siguiente</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar los detalles del registro de lavado de manos -->
+    <div class="modal fade" id="detalleCCA" tabindex="-1" role="dialog" aria-labelledby="detalleLavadoManosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #FF8C00; color: white;">
+                    <h5 class="modal-title" id="detalleLavadoManosLabel">Detalle del Lavado de Manos</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div id="detalleContenido">
+                        <!-- Aquí se mostrarán los detalles obtenidos de la consulta -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/control_cloro_residual_agua.js') }}"></script>
+
+{% endblock %}

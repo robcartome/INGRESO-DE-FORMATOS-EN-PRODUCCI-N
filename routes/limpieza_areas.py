@@ -234,8 +234,10 @@ def registrar_fecha_limpieza():
 def obtener_fechas_limpieza(id_verificacion,id_area):
     try:
         query_fechas = """SELECT * 
-                                FROM v_detalles_verificacion_limpieza_desinfeccion_areas 
-                                WHERE id_verificacion_limpieza_desinfeccion_area = %s AND id_categorias_limpieza_desinfeccion = %s"""
+                        FROM v_detalles_verificacion_limpieza_desinfeccion_areas 
+                        WHERE id_verificacion_limpieza_desinfeccion_area = %s 
+                        AND id_categorias_limpieza_desinfeccion = %s
+                        ORDER BY fecha DESC"""
         fechas = execute_query(query_fechas, (id_verificacion,id_area,))
         return jsonify({'status': 'success', 'fechas': fechas}), 200
     except Exception as e:
