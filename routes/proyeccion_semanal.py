@@ -10,66 +10,38 @@ def proyeccion_semanal():
     proyeccion = execute_query("""SELECT * 
                                     FROM v_proyeccion_semanal 
                                     WHERE estado = 'CREADO' 
-                                    ORDER BY 
-                                        CASE 
-                                            WHEN dia = 'Lunes' THEN 1
-                                            WHEN dia = 'Martes' THEN 2
-                                            WHEN dia = 'Miércoles' THEN 3
-                                            WHEN dia = 'Jueves' THEN 4
-                                            WHEN dia = 'Viernes' THEN 5
-                                            WHEN dia = 'Sábado' THEN 6
-                                            WHEN dia = 'Domingo' THEN 7
-                                        END,
-                                        idproyeccion;""") or []
+                                    ORDER BY idproyeccion DESC""") or []
     
     productos = execute_query("SELECT * FROM productos ORDER BY idproducto")
 
-    # Paginación para el historial de proyecciones finalizadas
-    page = int(request.args.get('page', 1))  # Página actual
-    items_per_page = 5  # Elementos por página
-    offset = (page - 1) * items_per_page
-
+    # Parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1) * per_page
+    
+    #contruimos la consulta para obtener los registros finalizados
+    query_finalizados = f"""
+                    SELECT * FROM v_proyeccion_semanal
+                    WHERE estado = 'CERRADO'
+                    ORDER BY idproyeccion DESC
+                    LIMIT {per_page} OFFSET {offset}
+                    """
+    proyectEndDetalles = execute_query(query_finalizados) or []
+    
     # Contar el total de proyecciones finalizadas
-    total_proyecciones = execute_query("SELECT COUNT(*) FROM proyeccion WHERE estado = 'CERRADO'")[0]['count']
-    total_pages = ceil(total_proyecciones / items_per_page)
-
-    # Obtener las proyecciones cerradas con paginación
-    proyectEnd = execute_query("""
-        SELECT * FROM proyeccion WHERE estado = 'CERRADO'
-        ORDER BY idprojection DESC
-        LIMIT %s OFFSET %s
-    """, (items_per_page, offset)) or []
+    query_count = "SELECT COUNT(*) AS total FROM v_proyeccion_semanal WHERE estado = 'CERRADO'"
+    total_count = execute_query(query_count)[0]['total']
+    total_pages = (total_count + per_page - 1) // per_page
 
     # Obtener los detalles correspondientes para las proyecciones en esta página
-    proyectEndIds = [p['idprojection'] for p in proyectEnd]
-    if proyectEndIds:
-        format_ids = ','.join(map(str, proyectEndIds))
-        proyectEndDetalles = execute_query(f"""
-            SELECT * FROM v_proyeccion_semanal
-            WHERE estado = 'CERRADO' AND idprojection IN ({format_ids})
-            ORDER BY 
-            CASE 
-                WHEN dia = 'Lunes' THEN 1
-                WHEN dia = 'Martes' THEN 2
-                WHEN dia = 'Miércoles' THEN 3
-                WHEN dia = 'Jueves' THEN 4
-                WHEN dia = 'Viernes' THEN 5
-                WHEN dia = 'Sábado' THEN 6
-                WHEN dia = 'Domingo' THEN 7
-            END,
-            idproyeccion;
-        """) or []
-    else:
-        proyectEndDetalles = []
 
     return render_template(
         'proyeccion_semanal.html',
         proyeccion=proyeccion,
         productos=productos,
-        proyectEnd=proyectEnd,
         proyectEndDetalles=proyectEndDetalles,
-        current_page=page,
-        total_pages=total_pages,
+        page=page,
+        total_pages=total_pages
     )
 
 
@@ -174,17 +146,10 @@ def AgregarProducto():
         else:
             proyeccion = 0
 
-        # Obtener la proyección activa con estado 'CREADO'
-        fk_proyeccion = execute_query("SELECT idprojection FROM proyeccion WHERE estado = 'CREADO'")
-        if not fk_proyeccion:
-            return jsonify({'status': 'error', 'message': 'No existe una proyección activa con estado CREADO.'}), 400
-
-        id_proyeccion = fk_proyeccion[0]['idprojection']
-
         # Verificar si el producto ya tiene una proyección en `proyeccion_semanal` para el `id_proyeccion` actual
         producto_existente = execute_query(
-            "SELECT 1 FROM proyeccion_semanal WHERE fk_id_productos = %s AND fk_proyeccion = %s",
-            (idproducto, id_proyeccion)
+            "SELECT 1 FROM proyeccion_semanal WHERE fk_id_productos = %s AND estado = %s",
+            (idproducto, 'CREADO')
         )
 
         if producto_existente:
@@ -192,8 +157,8 @@ def AgregarProducto():
 
         # Insertar la proyección en la base de datos si no existe
         execute_query(
-            "INSERT INTO proyeccion_semanal(proyeccion, fk_id_productos, fk_proyeccion) VALUES (%s, %s, %s);",
-            (proyeccion, idproducto, id_proyeccion)
+            "INSERT INTO proyeccion_semanal(proyeccion, fk_id_productos, estado) VALUES (%s, %s, %s);",
+            (proyeccion, idproducto, 'CREADO')
         )
 
         return jsonify({'status': 'success', 'message': 'Proyección agregada correctamente'}), 200
@@ -208,13 +173,15 @@ def guardar_proyeccion():
         cambios = request.get_json()
 
         for cambio in cambios:
-            query = """
-                UPDATE proyeccion_semanal
-                SET proyeccion = %s, dia = %s
-                WHERE idproyeccion = %s
-            """
-            params = (cambio['proyeccion_register'], cambio['selectSemana'], cambio['idproyeccion'])
-            execute_query(query, params)
+            if cambio['inicioFecha'] and cambio['finFecha']:
+                print(cambio['inicioFecha'], cambio['finFecha'])
+                query = """
+                    UPDATE proyeccion_semanal
+                    SET proyeccion = %s, inicio_date = %s, fin_date = %s
+                    WHERE idproyeccion = %s
+                """
+                params = (cambio['proyeccion_register'], cambio['inicioFecha'], cambio['finFecha'], cambio['idproyeccion'])
+                execute_query(query, params)
 
         return jsonify({'status': 'success', 'message': 'Proyección guardada correctamente'}), 200
 
@@ -246,7 +213,6 @@ def finalizar_proyeccion():
         for proyection in fk_proyeccion:
             cantidad_producida = obtener_producido(lunes, sabado, proyection['idproducto'])
             execute_query("UPDATE proyeccion_semanal SET producido = %s WHERE fk_id_productos = %s AND fk_proyeccion = %s", (cantidad_producida, proyection['idproducto'], id_proyeccion,))
-
 
         # Actualizar el estado de la proyección a 'CERRADO'
         execute_query("UPDATE proyeccion SET estado = 'CERRADO' WHERE idprojection = %s", (id_proyeccion, ))

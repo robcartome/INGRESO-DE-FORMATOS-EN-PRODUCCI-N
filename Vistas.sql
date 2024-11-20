@@ -465,6 +465,7 @@ JOIN
 
 SELECT * FROM v_min_max
 	
+SELECT * FROM public.proyeccion_semanal
 
 CREATE OR REPLACE VIEW v_proyeccion_semanal AS
 SELECT
@@ -474,30 +475,34 @@ SELECT
     pro.idproducto,
     pro.descripcion_producto,
     pro.stock,
+	m.minimo_und,
+	m.maximo_und,
     CEIL(CAST(m.equivalencia AS NUMERIC) * CAST(p.proyeccion AS NUMERIC))::TEXT || ' ' || m.unidad_equivalencia AS equivalencia_unidades,
     CAST(m.conversion_und AS NUMERIC) AS kgs,
     m.equivalencia,
     CAST(m.unidades_por_equivalencia AS NUMERIC) AS unidades,
 	CEIL((CAST(m.equivalencia AS NUMERIC) * CAST(p.proyeccion AS NUMERIC))) AS equivalenciauni,
-    proyect.idprojection,
-    proyect.estado,
-    proyect.semana,
-	p.dia
+	p.dia,
+	p.inicio_date,
+	p.fin_date,
+	p.estado
 FROM
     proyeccion_semanal p
 JOIN
     productos pro ON pro.idproducto = p.fk_id_productos
 JOIN
     min_max m ON pro.idproducto = m.fk_id_productos
-JOIN
-    proyeccion proyect ON proyect.idprojection = p.fk_proyeccion
 ORDER BY
     p.idproyeccion;
 
+SELECT * FROM v_proyeccion_semanal
+
+DROP VIEW v_proyeccion_semanal
+
 SELECT COUNT(*) AS total
-                        FROM (SELECT DISTINCT mes, anio 
-                            FROM v_historial_registros_controles_envasados 
-                            WHERE estado = 'CERRADO') AS distinct_months_years
+FROM (SELECT DISTINCT mes, anio 
+	FROM v_historial_registros_controles_envasados 
+	WHERE estado = 'CERRADO') AS distinct_months_years
 
 SELECT 
 	mes, 
@@ -580,3 +585,6 @@ SELECT *
 FROM public.areas 
 WHERE idarea BETWEEN 1 AND 4;
 
+SELECT * FROM detalles_controles_cloro_residual_agua 
+WHERE fk_id_header_format = %s
+ORDER BY fecha DESC LIMIT 1

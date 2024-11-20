@@ -225,12 +225,14 @@ function GuardarProyeccion() {
         let row = rows[i];
         let id = row.getAttribute('data-id');
         let proyeccion_register = row.querySelector('input[name="proyeccion_register"]').value;
-        let selectSemana = row.querySelector('select[name="selectSemana"]').value;
+        let inicio = row.querySelector('input[name="fechaInicio"]').value;
+        let fin = row.querySelector('input[name="fechaFin"]').value;
 
         cambios.push({
             idproyeccion: id,
             proyeccion_register: proyeccion_register,
-            selectSemana: selectSemana
+            inicioFecha : inicio,
+            finFecha : fin
         });
     }
 
@@ -313,62 +315,3 @@ function formatDateToISO(dateStr) {
     let [day, month, year] = dateStr.split('/');
     return `${year}-${month}-${day}`;
 }
-
-
-
-const itemsPerPage = 5; // Número de semanas por página
-        let currentPage = 1;
-    
-        // Función para cargar las semanas paginadas
-        function loadHistoryPage(page = 1) {
-            currentPage = page;
-            fetch(`/proyeccion_semanal/historial?page=${page}&itemsPerPage=${itemsPerPage}`)
-                .then(response => response.json())
-                .then(data => {
-                    renderHistory(data.weeks);
-                    renderPagination(data.totalPages, page);
-                });
-        }
-    
-        // Renderizar la lista de semanas
-        function renderHistory(weeks) {
-            const container = document.getElementById('acordionProyeccionesFinalizadas');
-            container.innerHTML = '';
-            weeks.forEach((week, index) => {
-                container.innerHTML += `
-                    <div class="card mb-3">
-                        <div class="card-header bg-warning" id="heading${index}">
-                            <h6 class="mb-0">
-                                <button class="btn btn-link text-white p-0 font-weight-bold" onclick="loadWeekDetails(${week.id})">
-                                    Proyección de la Semana: ${week.semana}
-                                </button>
-                            </h6>
-                        </div>
-                    </div>`;
-            });
-        }
-    
-        // Renderizar los controles de paginación
-        function renderPagination(totalPages, currentPage) {
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                pagination.innerHTML += `
-                    <li class="page-item ${i === currentPage ? 'active' : ''}">
-                        <a class="page-link" href="javascript:loadHistoryPage(${i})">${i}</a>
-                    </li>`;
-            }
-        }
-    
-        // Cargar detalles de una semana en el modal
-        function loadWeekDetails(weekId) {
-            fetch(`/proyeccion_semanal/detalle/${weekId}`)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('detalleSemanaContent').innerHTML = data;
-                    $('#detalleSemanaModal').modal('show');
-                });
-        }
-    
-        // Cargar la primera página al iniciar
-        loadHistoryPage();

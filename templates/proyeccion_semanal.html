@@ -4,45 +4,9 @@
 
 {% block content %}
 
-<style>
-    /* Efecto de oscurecimiento */
-    .btn-hover-darken:hover {
-        filter: brightness(0.9); /* Oscurece el botón un poco */
-        transition: 0.2s ease-in-out; /* Efecto de transición suave */
-    }
-    .card-header-custom {
-        color: white;
-        font-weight: bold;
-    }
-
-    /* Colores para cada día */
-    .dia-lunes { background-color: #f8d7da; }      /* Rojo claro */
-    .dia-martes { background-color: #d1ecf1; }     /* Azul claro */
-    .dia-miercoles { background-color: #d4edda; }  /* Verde claro */
-    .dia-jueves { background-color: #fff3cd; }     /* Amarillo claro */
-    .dia-viernes { background-color: #d6d8d9; }    /* Gris claro */
-    .dia-sabado { background-color: #fce5cd; }     /* Naranja claro */
-
-    .pagination .page-link {
-        color: #FF8C00; /* Color de los enlaces */
-        transition: background-color 0.3s ease;
-    }
-
-    .pagination .page-link:hover {
-        background-color: #FFD700; /* Color al hacer hover */
-        color: white;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #FF4500; /* Color de la página activa */
-        border-color: #FF4500;
-        color: white;
-    }
-
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_proyeccion.css') }}">
 
 <div class="container-fluid py-4">
-
     <!-- Acciones de Proyección -->
     <div class="card shadow-sm mb-4">
         <div class="card-header card-header-custom" style="background-color: #FFC107">
@@ -50,23 +14,20 @@
         </div>
         <div class="card-body">
             <div class="row align-items-end">
-                
-                <!-- Botón Generar Proyección -->
-                <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
+                <!-- <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
                     <button type="button" class="btn btn-secondary w-100 btn-hover-darken" style="background-color: #FF8C00;" onclick="GenerarProyeccion()">
                         <i class="fas fa-chart-line"></i> Generar Proyección
                     </button>
                 </div>
 
-                <!-- Botón Finalizar Proyección -->
                 <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
                     <button type="button" class="btn btn-danger w-100 btn-hover-darken" onclick="FinalizarProyeccion()">
                         <i class="fas fa-check-circle"></i> Finalizar Proyección
                     </button>
-                </div>
+                </div> -->
 
                 <!-- Selección de Producto -->
-                <div class="form-group col-lg-6 col-md-8">
+                <div class="form-group col-lg-10 col-md-8">
                     <label for="selectProducto" class="font-weight-bold">Producto</label>
                     <select id="selectProducto" class="form-control" name="selectProducto">
                         <option value="">Seleccione el Producto</option>
@@ -78,11 +39,23 @@
 
                 <!-- Botón Agregar Producto -->
                 <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
-                    <button type="button" class="btn btn-secondary text-white w-100 btn-hover-darken" style="background-color: #FFC107;" onclick="AgregarProducto()">
-                        <i class="fas fa-plus-circle"></i> Agregar producto
+                    <button type="button" class="button-add-product" onclick="AgregarProducto()">
+                        <span class="button_text_add_producto">Agregar</span>
+                        <span class="button_icon_add_producto">
+                            <svg class="svg-add-product" 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="24" viewBox="0 0 24 24" 
+                                stroke-width="2" 
+                                stroke-linejoin="round" 
+                                stroke-linecap="round" 
+                                stroke="currentColor"
+                                height="24" fill="none">
+                                <line y2="19" y1="5" x2="12" x1="12"></line>
+                                <line y2="12" y1="12" x2="19" x1="5"></line>
+                            </svg>
+                        </span>
                     </button>
                 </div>
-                
             </div>
         </div>
     </div>
@@ -113,14 +86,30 @@
                 {% endif %}
             </h5>
         </div>
+
         <div class="card-body">
             <div class="row align-items-end">
-                <div class="form-group col-lg-10 col-md-10">
+                <div class="form-group col-lg-10 col-md-8">
                     <input type="text" id="filtrarProducto" class="form-control" name="filtrarProducto" placeholder="Filtrar producto por nombre" onkeyup="filterOpenProduct()" autocomplete="off">
                 </div>
-                <div class="form-group col-lg-2 col-md-4 col-sm-4 text-md-right">
-                    <button type="button" class="btn btn-danger w-100 btn-hover-darken" onclick="GuardarProyeccion()">
-                        <i class="fas fa-save"></i> Guardar
+                <div class="form-group col-lg-2 col-md-4 col-sm-12 text-md-right">
+                    <button class="guardar-button" onclick="GuardarProyeccion()">
+                        <div class="svg-wrapper-1">
+                            <div class="svg-wrapper">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    width="30"
+                                    height="30"
+                                    class="icon"
+                                >
+                                    <path
+                                        d="M22,15.04C22,17.23 20.24,19 18.07,19H5.93C3.76,19 2,17.23 2,15.04C2,13.07 3.43,11.44 5.31,11.14C5.28,11 5.27,10.86 5.27,10.71C5.27,9.33 6.38,8.2 7.76,8.2C8.37,8.2 8.94,8.43 9.37,8.8C10.14,7.05 11.13,5.44 13.91,5.44C17.28,5.44 18.87,8.06 18.87,10.83C18.87,10.94 18.87,11.06 18.86,11.17C20.65,11.54 22,13.13 22,15.04Z"
+                                    ></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <span>Guardar</span>
                     </button>
                 </div>
             </div>
@@ -136,29 +125,27 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="TableOpen">
+                <table class="table table-bordered" id="TableOpen">
                     <thead style="background-color: #FF8C00; color: white;">
                         <tr class="text-center">
                             <th>Producto</th>
                             <th>Stock</th>
                             <th>Proyección</th>
                             <th>Equivalencia</th>
-                            <th>Día</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
                             <th>Quitar</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for p in proyeccion %}
-                        <!-- Aplicar clase de color de fondo dependiendo del valor de `p.dia` -->
+                        <!-- Aplicar clase de color de fondo dependiendo del stock y la cantidad producida -->
                         <tr class="text-center 
-                                {% if p.dia == 'Lunes' %} dia-lunes 
-                                {% elif p.dia == 'Martes' %} dia-martes 
-                                {% elif p.dia == 'Miércoles' %} dia-miercoles 
-                                {% elif p.dia == 'Jueves' %} dia-jueves 
-                                {% elif p.dia == 'Viernes' %} dia-viernes 
-                                {% elif p.dia == 'Sábado' %} dia-sabado 
-                                {% endif %}" data-id="{{ p.idproyeccion }}">
-                            
+                            {% if p.minimo_und | int > p.stock | int %} por-debajo-minimo 
+                            {% elif p.minimo_und | int <= p.stock | int and p.maximo_und | int > p.stock | int %} dentro-rango 
+                            {% else %} por-arriba-maximo 
+                            {% endif %}"
+                            data-id="{{ p.idproyeccion }}">
                             <td>{{ p.descripcion_producto }}</td>
                             <td>{{ p.stock }}</td>
                             <td>
@@ -166,19 +153,44 @@
                             </td>
                             <td>Produce {{ (p.unidades | float * p.equivalenciauni | float) | round | int }} und. utilizando {{ p.equivalencia_unidades }} de materia prima.<br> Equivalente a {{ (p.kgs | float * (p.unidades | float * p.equivalenciauni | float)) | round(2) }} KG.</td>
                             <td>
-                                <select class="form-control" name="selectSemana" required>
-                                    <option value="" {% if not p.dia %}selected{% endif %}>Seleccione...</option>
-                                    <option value="Lunes" {% if p.dia == "Lunes" %}selected{% endif %}>Lunes</option>
-                                    <option value="Martes" {% if p.dia == "Martes" %}selected{% endif %}>Martes</option>
-                                    <option value="Miércoles" {% if p.dia == "Miércoles" %}selected{% endif %}>Miércoles</option>
-                                    <option value="Jueves" {% if p.dia == "Jueves" %}selected{% endif %}>Jueves</option>
-                                    <option value="Viernes" {% if p.dia == "Viernes" %}selected{% endif %}>Viernes</option>
-                                    <option value="Sábado" {% if p.dia == "Sábado" %}selected{% endif %}>Sábado</option>
-                                </select>
+                                <input type="date" id="fechaInicio" class="form-control" name="fechaInicio" value="{{ p.inicio_date }}">
                             </td>
                             <td>
-                                <button type="button" class="btn btn-danger text-white w-100" onclick="QuitarProyeccion('{{ p.idproyeccion }}')">
-                                    <i class="fas fa-trash"></i> Quitar
+                                <input type="date" id="fechaFin" class="form-control" name="fechaFin" value="{{ p.fin_date }}">
+                            </td>
+                            <td>
+                                <!-- Botón "Quitar" -->
+                                <button class="bin-button" onclick="QuitarProyeccion('{{ p.idproyeccion }}')">
+                                    <svg
+                                        class="bin-top"
+                                                viewBox="0 0 39 7"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                    <line y1="5" x2="39" y2="5" stroke="white" stroke-width="4"></line>
+                                    <line
+                                        x1="12"
+                                        y1="1.5"
+                                        x2="26.0357"
+                                        y2="1.5"
+                                        stroke="white"
+                                        stroke-width="3"
+                                    ></line>
+                                    </svg>
+                                    <svg class="bin-bottom" viewBox="0 0 33 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <mask id="path-1-inside-1_8_19" fill="white">
+                                            <path
+                                                d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z"
+                                            ></path>
+                                        </mask>
+                                        <path
+                                            d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z"
+                                            fill="white"
+                                            mask="url(#path-1-inside-1_8_19)"
+                                        ></path>
+                                        <path d="M12 6L12 29" stroke="white" stroke-width="4"></path>
+                                        <path d="M21 6V29" stroke="white" stroke-width="4"></path>
+                                    </svg>
                                 </button>
                             </td>
                         </tr>
@@ -208,83 +220,92 @@
                 <input type="date" class="form-control" id="filter" onchange="filterHistory()">
             </div>
 
-            <!-- Acordeón para mostrar el historial de proyecciones finalizadas -->
-            <div id="acordionProyeccionesFinalizadas">
-                {% for pe in proyectEnd %}
-                        <div class="card mb-3">
-                            <div class="card-header bg-warning d-flex justify-content-between align-items-center" id="heading{{ loop.index }}">
-                                <h6 class="mb-0 font-weight-bold text-white">
-                                    <button class="btn btn-link text-white p-0 font-weight-bold" data-toggle="collapse" data-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
-                                        Proyección de la Semana: {{ pe.semana }}
-                                    </button>
-                                </h6>
-                            </div>
-                            <div id="collapse{{ loop.index }}" class="collapse" aria-labelledby="heading{{ loop.index }}" data-parent="#acordionProyeccionesFinalizadas">
-                                <!-- Tabla de registros -->
-                                <div class="table-responsive mt-3">
-                                    <table class="table table-bordered table-hover">
-                                        <thead class="text-white text-center" style="background-color: #FF8C00;">
-                                            <tr>
-                                                <th>Producto</th>
-                                                <th>Proyección</th>
-                                                <th>Producido</th>
-                                                <th>Día</th>
-                                            </tr>
-                                        </thead>
-                                    <tbody>
-                                        {% for de in proyectEndDetalles %}
-                                            {% if pe.idprojection == de.idprojection %}
-                                                <tr class="text-center">
-                                                    <td>{{ de.descripcion_producto }}</td>
-                                                    <td>Se proyecto producir {{ (de.unidades | float * de.equivalenciauni | float) | round | int }} und. utilizando {{ de.equivalencia_unidades }} de materia prima. <br> Equivalente a {{ (de.kgs | float * (de.unidades | float * de.equivalenciauni | float)) | round(2) }} KG. </td>
-                                                    <td style="color: {% if de.producido < (de.unidades | float * de.equivalenciauni | float) %}red{% else %}green{% endif %};">
-                                                        {{ de.producido }}
-                                                    </td>
-                                                    <td>{{ de.dia }}</td>
-                                                </tr>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+            <!-- Tabla de registros -->
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered table-hover">
+                    <thead class="text-white text-center" style="background-color: #FF8C00;">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Proyección</th>
+                            <th>Producido</th>
+                            <th>Día</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for de in proyectEndDetalles %}
+                        <tr class="text-center">
+                            <td>{{ de.descripcion_producto }}</td>
+                            <td>Se proyecto producir {{ (de.unidades | float * de.equivalenciauni | float) | round | int }} und. utilizando {{ de.equivalencia_unidades }} de materia prima. <br> Equivalente a {{ (de.kgs | float * (de.unidades | float * de.equivalenciauni | float)) | round(2) }} KG. </td>
+                            <td style="color: {% if de.producido < (de.unidades | float * de.equivalenciauni | float) %} red {% else %} green {% endif %};">
+                                {{ de.producido }}
+                            </td>
+                            <td>{{ de.dia }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-
-            <!-- Controles de Paginación -->
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center mt-3">
-                <!-- Botón "Anterior" -->
-                <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=current_page-1) }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                    <span class="sr-only">Anterior</span>
-                    </a>
-                </li>
+            <!-- Paginador -->
+            <div class="pagination-container mt-4 d-flex justify-content-center">
+                <ul class="pagination">
+                    <!-- Botón de página anterior -->
+                    {% if page > 1 %}
+                        <li class="page-item">
+                            <a href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=page - 1) }}" class="page-link">Anterior</a>
+                        </li>
+                    {% endif %}
             
-                <!-- Números de página -->
-                {% for page in range(1, total_pages + 1) %}
-                    <li class="page-item {% if page == current_page %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=page) }}">{{ page }}</a>
-                    </li>
-                {% endfor %}
+                    <!-- Páginas iniciales -->
+                    {% if total_pages > 7 %}
+                        {% for p in range(1, min(4, total_pages + 1)) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=p) }}" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        {% if page > 4 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                        
+                        <!-- Páginas alrededor de la página actual -->
+                        {% for p in range(max(1, page - 2), min(page + 3, total_pages + 1)) %}
+                            {% if p > 3 and p < total_pages - 2 %}
+                                <li class="page-item {% if p == page %}active{% endif %}">
+                                    <a href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=p) }}" class="page-link">{{ p }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
             
-                <!-- Botón "Siguiente" -->
-                <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=current_page+1) }}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                    <span class="sr-only">Siguiente</span>
-                    </a>
-                </li>
+                        {% if page < total_pages - 3 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                        
+                        <!-- Páginas finales -->
+                        {% for p in range(max(total_pages - 2, 4), total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=p) }}" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Si hay menos de 7 páginas, mostrar todas las páginas -->
+                        {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=p) }}" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+            
+                    <!-- Botón de página siguiente -->
+                    {% if page < total_pages %}
+                        <li class="page-item">
+                            <a href="{{ url_for('proyeccion_semanal.proyeccion_semanal', page=page + 1) }}" class="page-link">Siguiente</a>
+                        </li>
+                    {% endif %}
                 </ul>
-            </nav>
-  
+            </div>
         </div>
     </div>
-
 </div>
-
 
 
 <script src="{{ url_for('static', filename='js/proyeccion_semanal.js') }}"></script>
