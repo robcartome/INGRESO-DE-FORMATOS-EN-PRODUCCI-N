@@ -223,7 +223,7 @@ SELECT
     d.observaciones,
 	ac.idaccion_correctiva,
     COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
-	ac.estado AS estado_medida_correctiva,
+	COALESCE(ac.estado, '-') AS estado_medida_correctiva,
     d.fk_idcontrol_higiene_personal,
 	hp.estado
 FROM
@@ -235,6 +235,7 @@ JOIN
 JOIN
     controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
 
+select * from v_detalle_higiene_personal
 -- << PARA LIMPIEZA Y DESINFECCIÓN DE LAS ÁREAS >> --
 
 CREATE OR REPLACE VIEW v_verificacion_limpieza_desinfeccion_areas AS
@@ -456,13 +457,14 @@ SELECT
 	m.unidad_equivalencia,
     p.idproducto,
     p.descripcion_producto,
+	p.stock,
 	m.unidades_por_equivalencia
 FROM
     min_max m
 JOIN
     productos p ON p.idproducto = m.fk_id_productos;
 
-
+DROP VIEW v_min_max
 SELECT * FROM v_min_max
 	
 SELECT * FROM public.proyeccion_semanal
@@ -485,7 +487,10 @@ SELECT
 	p.dia,
 	p.inicio_date,
 	p.fin_date,
-	p.estado
+	p.estado,
+	p.producido_en_periodo,
+	p.producido_fuera_periodo,
+	p.observacion
 FROM
     proyeccion_semanal p
 JOIN

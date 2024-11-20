@@ -315,3 +315,60 @@ function formatDateToISO(dateStr) {
     let [day, month, year] = dateStr.split('/');
     return `${year}-${month}-${day}`;
 }
+
+function registerObservation(idproyeccion){
+    Swal.fire({
+        title: 'Registrar Observación',
+        input: 'textarea',
+        inputLabel: 'Describe la observación correspondiente',
+        inputPlaceholder: 'Por favor, redacta aquí la observación. Asegurate de incluir el motivo por el cual se produjo fuera del periodo correspondiente si es el caso.',
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: (observacion) => {
+            if (!observacion) {
+                Swal.showValidationMessage('Por favor, ingresa una observación para continuar');
+                return false;
+            }
+            return observacion;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const observacion = result.value;
+            fetch(`/proyeccion_semanal/register_observation/${idproyeccion}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    observacion: observacion
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire(
+                        'Guardado',
+                        'La observación ha sido registrada con éxito.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error',
+                        data.message || 'Hubo un error al registrar la observación. Por favor, inténtelo nuevamente.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                Swal.fire(
+                    'Error',
+                    'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                    'error'
+                );
+            });
+        }
+    });
+}

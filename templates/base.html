@@ -61,6 +61,10 @@
                             <img src="{{ url_for('static', filename='img/control_agua.png') }}" alt="Control de cloro residual en agua" width="20" height="20" class="mr-2">
                             Control de cloro residual en agua
                         </a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('control_cloro_residual.control_cloro_residual') }}">
+                            <img src="{{ url_for('static', filename='img/vehiculo.png') }}" alt="Control de cloro residual en agua" width="20" height="20" class="mr-2">
+                            Control de las condiciones sanitarias de los vehículos de transporte
+                        </a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -101,7 +105,7 @@
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('proyeccion_semanal.proyeccion_semanal') }}">
                             <img src="{{ url_for('static', filename='img/proyeccion.png') }}" alt="Proyección Semanal" width="20" height="20" class="mr-2">
-                            Proyección semanal
+                            Proyecciones
                         </a>
                     </div>
                 </li>

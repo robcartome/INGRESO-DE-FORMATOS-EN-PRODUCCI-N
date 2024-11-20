@@ -78,7 +78,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-header card-header-custom" style="background-color: #FF8C00;">
             <h5 class="mb-0 text-center">
-                Proyección semanal
+                Proyección
                 {% if proyeccion %}
                     {{ proyeccion[0].semana }}
                 {% else %}
@@ -134,6 +134,7 @@
                             <th>Equivalencia</th>
                             <th>Inicio</th>
                             <th>Fin</th>
+                            <th>Obs.</th>
                             <th>Quitar</th>
                         </tr>
                     </thead>
@@ -153,10 +154,36 @@
                             </td>
                             <td>Produce {{ (p.unidades | float * p.equivalenciauni | float) | round | int }} und. utilizando {{ p.equivalencia_unidades }} de materia prima.<br> Equivalente a {{ (p.kgs | float * (p.unidades | float * p.equivalenciauni | float)) | round(2) }} KG.</td>
                             <td>
-                                <input type="date" id="fechaInicio" class="form-control" name="fechaInicio" value="{{ p.inicio_date }}">
+                                <input type="date" id="fechaInicio" class="form-control" name="fechaInicio"  value="{{ p.inicio_date if p.inicio_date else '' }}">
                             </td>
                             <td>
-                                <input type="date" id="fechaFin" class="form-control" name="fechaFin" value="{{ p.fin_date }}">
+                                <input type="date" id="fechaFin" class="form-control" name="fechaFin" value="{{ p.fin_date if p.fin_date else '' }}">
+                            </td>
+                            <td>
+                                <!-- Botón "Ojo" -->
+                                <button class="eye-button" onclick="registerObservation('{{ p.idproyeccion }}')">
+                                    <svg
+                                        class="eye-icon"
+                                        viewBox="0 0 64 64"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <!-- Contorno del ojo -->
+                                        <path
+                                            d="M32 10C18 10 6 32 6 32C6 32 18 54 32 54C46 54 58 32 58 32C58 32 46 10 32 10Z"
+                                            stroke="black"
+                                            stroke-width="3"
+                                            fill="#F0F0F0"
+                                        ></path>
+                                        <!-- Iris -->
+                                        <circle cx="32" cy="32" r="10" fill="#803619"></circle>
+                                        <!-- Pupila -->
+                                        <circle cx="32" cy="32" r="6" fill="black"></circle>
+                                        <!-- Brillo en la pupila -->
+                                        <circle cx="34" cy="30" r="2" fill="white"></circle>
+                                    </svg>
+
+                                </button>
                             </td>
                             <td>
                                 <!-- Botón "Quitar" -->
@@ -228,7 +255,9 @@
                             <th>Producto</th>
                             <th>Proyección</th>
                             <th>Producido</th>
-                            <th>Día</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Obs.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -236,15 +265,27 @@
                         <tr class="text-center">
                             <td>{{ de.descripcion_producto }}</td>
                             <td>Se proyecto producir {{ (de.unidades | float * de.equivalenciauni | float) | round | int }} und. utilizando {{ de.equivalencia_unidades }} de materia prima. <br> Equivalente a {{ (de.kgs | float * (de.unidades | float * de.equivalenciauni | float)) | round(2) }} KG. </td>
-                            <td style="color: {% if de.producido < (de.unidades | float * de.equivalenciauni | float) %} red {% else %} green {% endif %};">
-                                {{ de.producido }}
+                            <td>
+                                <span 
+                                    class="{% if de.producido < (de.unidades | float * de.equivalenciauni | float) %} text-danger {% else %} text-success {% endif %}">
+                                    {{ de.producido }}
+                                </span>
+                                {% if de.producido_fuera_periodo %}
+                                    <div class="small mt-1">
+                                        <span class="text-success">Dentro del periodo: {{ de.producido_en_periodo }}</span><br>
+                                        <span class="text-danger">Fuera del periodo: {{ de.producido_fuera_periodo }}</span>
+                                    </div>
+                                {% endif %}
                             </td>
-                            <td>{{ de.dia }}</td>
+                            <td>{{ de.inicio_date }}</td>
+                            <td>{{ de.fin_date }}</td>
+                            <td>{{ de.observacion }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
             <!-- Paginador -->
             <div class="pagination-container mt-4 d-flex justify-content-center">
                 <ul class="pagination">
