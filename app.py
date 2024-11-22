@@ -16,6 +16,7 @@ from routes.min_max import minmax
 from routes.proyeccion_semanal import proyeccionsemanal
 from routes.repositorio import repositorioIFP
 from routes.control_cloro_residual_agua import controlCloroResidual
+from routes.condiciones_sanitarias_vehiculos import condiciones_sanitarias_vehiculos
 
 app = Flask(__name__)
 
@@ -35,6 +36,7 @@ app.register_blueprint(minmax, url_prefix = '/min_max')
 app.register_blueprint(proyeccionsemanal, url_prefix = '/proyeccion_semanal')
 app.register_blueprint(repositorioIFP, url_prefix = '/repositorio_IFP')
 app.register_blueprint(controlCloroResidual, url_prefix = '/control_cloro_residual')
+app.register_blueprint(condiciones_sanitarias_vehiculos, url_prefix = '/condiciones_sanitarias_vehiculos')
 
 # Definiendo la ruta por defecto
 @app.route('/')

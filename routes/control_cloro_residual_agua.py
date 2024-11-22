@@ -10,7 +10,7 @@ def control_cloro_residual():
     if request.method == 'GET':
         try:
             # Obtener el formato creado con el id de formato 11
-            formato_CCR = execute_query("SELECT * FROM public.headers_formats WHERE estado = 'CREADO' AND fk_id_tipo_formatos = 11")
+            formato_CCR = execute_query("SELECT * FROM public.headers_formats WHERE estado = 'CREADO' AND fk_idtipoformatos = 11")
             
             # Obtener el detalle del formato creado
             detalle_CCA = execute_query("""SELECT 
@@ -58,15 +58,20 @@ def control_cloro_residual():
             page = request.args.get('page', 1, type=int)
             per_page = 5
             offset = (page - 1) * per_page
-            query_count = "SELECT COUNT(*) AS total FROM public.headers_formats WHERE estado = 'CERRADO' AND fk_id_tipo_formatos = 11"
+            query_count = "SELECT COUNT(*) AS total FROM public.headers_formats WHERE estado = 'CERRADO' AND fk_idtipoformatos = 11"
             
             total_count = execute_query(query_count)[0]['total']
             total_pages = (total_count + per_page - 1) // per_page
             
             query_historialCCA = f"""
-                                    SELECT * FROM 
-                                    v_headers_formats_historial
-                                    WHERE fk_id_tipo_formatos = 11
+                                    SELECT 
+                                        id_header_format,
+                                        mes,
+                                        anio
+                                    FROM
+                                    v_headers_formats
+                                    WHERE fk_idtipoformatos = 11
+                                    AND estado = 'CERRADO'
                                     LIMIT {per_page} OFFSET {offset}
                                 """
             historial_CCA = execute_query(query_historialCCA)
@@ -93,7 +98,7 @@ def control_cloro_residual():
             print(fecha, hora, lectura, observacion, accion_correctiva)
 
             # Verificar si hay un formato 'CREADO' para el tipo de formato 11
-            formato_CCR = execute_query("SELECT id_header_format FROM public.headers_formats WHERE estado = 'CREADO' AND fk_id_tipo_formatos = 11")
+            formato_CCR = execute_query("SELECT id_header_format FROM public.headers_formats WHERE estado = 'CREADO' AND fk_idtipoformatos = 11")
 
             print(formato_CCR)
             
@@ -133,15 +138,16 @@ def historial():
         page = request.args.get('page', 1, type=int)
         per_page = 5
         offset = (page - 1) * per_page
-        query_count = "SELECT COUNT(*) AS total FROM public.headers_formats WHERE estado = 'CERRADO' AND fk_id_tipo_formatos = 11"
+        query_count = "SELECT COUNT(*) AS total FROM public.headers_formats WHERE estado = 'CERRADO' AND fk_idtipoformatos = 11"
         
         total_count = execute_query(query_count)[0]['total']
         total_pages = (total_count + per_page - 1) // per_page
         
         query_historialCCA = f"""
                                 SELECT * FROM 
-                                v_headers_formats_historial
-                                WHERE fk_id_tipo_formatos = 11
+                                v_headers_formats
+                                WHERE fk_idtipoformatos = 11
+                                AND estado = 'CERRADO'
                                 LIMIT {per_page} OFFSET {offset}
                             """
         historial_CCA = execute_query(query_historialCCA)
@@ -164,7 +170,7 @@ def generar_formato_CCA():
         anio = fecha_actual.year
         
         #Generando un nuevo formato
-        execute_query("INSERT INTO headers_formats (mes, anio, estado, fk_id_tipo_formatos) VALUES (%s,%s,%s,%s)", (mes, anio, 'CREADO', 11 ))
+        execute_query("INSERT INTO headers_formats (mes, anio, estado, fk_idtipoformatos) VALUES (%s,%s,%s,%s)", (mes, anio, 'CREADO', 11 ))
         return jsonify({'status': 'success', 'message': 'Se genero el formato.'}), 200
     except Exception as e:
         print(f"Error al generar formato: {e}")
@@ -214,7 +220,7 @@ def download_formato():
 def finalizar_registro_CCA():
     try:
         # Obtener el id del formato
-        id_formato = execute_query("SELECT id_header_format FROM public.headers_formats WHERE estado = 'CREADO' AND fk_id_tipo_formatos = 11")[0]['id_header_format']
+        id_formato = execute_query("SELECT id_header_format FROM public.headers_formats WHERE estado = 'CREADO' AND fk_idtipoformatos = 11")[0]['id_header_format']
 
         # Actualizar el estado del formato a 'CERRADO'
         execute_query("UPDATE headers_formats SET estado = %s WHERE id_header_format = %s", ('CERRADO', id_formato))

@@ -99,7 +99,7 @@ def condicionesAmbientales():
                                     v_finalizados_CA=v_finalizados_CA,
                                     page=page,
                                     total_pages=total_pages)
-            
+        
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('control_condiciones_ambientales.html')
@@ -185,7 +185,6 @@ def registrar_condiciones_ambientales():
         print(f"Error al agregar detalle de condiciones ambientales: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el control de condición ambiental.'}), 500
 
-    
 
 @condiciones_ambientales.route('/detalles_condiciones_ambientales/<int:id_ca>', methods=['GET'])
 def detalles_condiciones_ambientales(id_ca):

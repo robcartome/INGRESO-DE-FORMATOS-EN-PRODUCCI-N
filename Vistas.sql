@@ -490,7 +490,7 @@ SELECT
 	p.estado,
 	p.producido_en_periodo,
 	p.producido_fuera_periodo,
-	p.observacion
+	COALESCE(p.observacion, ' ') AS observacion
 FROM
     proyeccion_semanal p
 JOIN
@@ -563,33 +563,99 @@ JOIN
 LEFT JOIN
 	acciones_correctivas a ON a.idaccion_correctiva = d.fk_id_accion_correctiva;
 
-DROP VIEW v_detalles_controles_cloro_residual_agua
+drop view v_proyeccion_semanal
 
 SELECT fecha, hora, lectura, observacion, detalle_accion_correctiva, estado_Accion_correctiva 
 FROM v_detalles_controles_cloro_residual_agua 
 WHERE estado_formato = 'CREADO'
 
-CREATE OR REPLACE VIEW v_headers_formats_historial AS
+CREATE OR REPLACE VIEW v_headers_formats AS
 SELECT
 	f.id_header_format,
     TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
     f.anio,
-	f.fk_id_tipo_formatos
+	f.estado,
+	f.fk_idtipoformatos,
+	f.empresa_monitoreo_calidad_agua,
+	f.fk_idarea,
+	a.detalle_area
 FROM
     headers_formats f
-WHERE 
-	estado = 'CERRADO'
+LEFT JOIN
+	areas a ON f.fk_idarea = a.idarea
 ORDER BY
 	f.anio DESC, f.mes DESC;
 
+SELECT * FROM motivos_sanitarios_vehiculos
+
+SELECT * FROM v_headers_formats
+
+SELECT COUNT(*) AS total
+FROM (SELECT DISTINCT mes, anio 
+	FROM v_headers_formats 
+	WHERE estado = 'CERRADO' AND fk_idtipoformatos = 12) AS distinct_months_years
+	
+SELECT * FROM public.detalles_condiciones_sanitarias_vehiculos_transporte
+
+-- VISTA PARA LAS CONDICIONE SANITARIAS DE VEHICULOS DE TRANSPORTE
+CREATE OR REPLACE VIEW v_detalle_condiciones_vehiculos AS
+SELECT
+	dv.id_detalle_condicion_sanitaria_vehiculo_transporte,
+	dv.fecha,
+	mv.detalle_motivo_vehiculo,
+	dv.documento_referencia,
+	dv.total_bultos,
+	tv.detalle_tipo_vehiculo,
+	dv.num_placa_vehiculo,
+	dv.fk_id_header_format,
+	COALESCE(dv.observacion, '-') AS observacion,
+	ac.idaccion_correctiva,
+	COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
+	ac.estado AS estado_ac
+FROM
+	detalles_condiciones_sanitarias_vehiculos_transporte dv
+JOIN
+	motivos_sanitarios_vehiculos mv ON mv.id_motivo_sanitario_vehiculo = dv.fk_id_motivo_sanitario_vehiculo
+JOIN
+	tipos_vehiculos tv ON tv.id_tipo_vehiculo = dv.fk_id_tipo_vehiculo
+LEFT JOIN
+	acciones_correctivas ac ON ac.idaccion_correctiva = dv.fk_id_accion_correctiva;
+
+DROP VIEW v_detalle_condiciones_vehiculos
+
+SELECT * FROM v_detalle_condiciones_vehiculos
+
+SELECT * FROM public.verificaciones_vehiculos
+
+SELECT * FROM public.headers_formats
+	
+SELECT * FROM detalles_condiciones_sanitarias_vehiculos_transporte
+
+SELECT * FROM v_detalle_condiciones_vehiculos 
+SELECT * FROM asignacion_detalles_condiciones_sanitarias_vehiculos
+
 SELECT id_header_format 
 FROM headers_formats 
-WHERE estado = 'CREADO' AND headers_formats.fk_id_tipo_formatos = 11
+WHERE estado = 'CREADO' AND headers_formats.fk_idtipoformatos = 11
+	
+SELECT
+	mes,
+	anio,
+	json_agg(json_build_object(
+		'id_header_format', id_header_format,
+		'mes', mes,
+		'anio', anio,
+		'estado', estado,
+		'fk_idarea', fk_idarea,
+		'detalle_area', detalle_area
+	)) AS registros
+FROM v_headers_formats
+GROUP BY mes, anio
+SELECT * FROM v_headers_formats
 
-SELECT * 
-FROM public.areas 
-WHERE idarea BETWEEN 1 AND 4;
-
-SELECT * FROM detalles_controles_cloro_residual_agua 
-WHERE fk_id_header_format = %s
-ORDER BY fecha DESC LIMIT 1
+SELECT fecha FROM detalles_controles_cloro_residual_agua
+SELECT * FROM detalles_kardex
+	
+SELECT SUM(salida) AS total_salidas
+FROM public.detalles_kardex
+WHERE fecha = '2024-11-21'::date;
