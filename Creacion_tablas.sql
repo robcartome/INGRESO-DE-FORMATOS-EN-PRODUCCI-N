@@ -420,3 +420,20 @@ CREATE TABLE IF NOT EXISTS asignacion_detalles_condiciones_sanitarias_vehiculos 
 	fk_id_verificion_vehiculos INT REFERENCES verificaciones_vehiculos(id_verificion_vehiculos) NOT NULL
 );
 
+-- Para el formato "Monitoreo de la calidad de agua"
+
+CREATE TABLE IF NOT EXISTS tipos_controles_calidad_agua (
+	id_tipo_Control_calidad_agua SERIAL PRIMARY KEY,
+	detalle_control VARCHAR(45) NOT NULL,
+	unidad VARCHAR(10) NOT NULL,
+	detection_limit DOUBLE PRECISION NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS detalles_monitoreos_calidad_agua (
+	idDetalle_monitoreo_calidad_agua SERIAL PRIMARY KEY,
+	Resultado DOUBLE PRECISION NOT NULL,
+	observaciones VARCHAR(80) NULL,
+	fk_id_tipo_Control_calidad_agua INT REFERENCES tipos_controles_calidad_agua(id_tipo_Control_calidad_agua) NOT NULL,
+	fk_id_header_format INT REFERENCES public.headers_formats(id_header_format) NOT NULL
+);
+

@@ -17,6 +17,7 @@ from routes.proyeccion_semanal import proyeccionsemanal
 from routes.repositorio import repositorioIFP
 from routes.control_cloro_residual_agua import controlCloroResidual
 from routes.condiciones_sanitarias_vehiculos import condiciones_sanitarias_vehiculos
+from routes.monitoreo_calidad_agua import monitoreoAgua
 
 app = Flask(__name__)
 
@@ -37,6 +38,7 @@ app.register_blueprint(proyeccionsemanal, url_prefix = '/proyeccion_semanal')
 app.register_blueprint(repositorioIFP, url_prefix = '/repositorio_IFP')
 app.register_blueprint(controlCloroResidual, url_prefix = '/control_cloro_residual')
 app.register_blueprint(condiciones_sanitarias_vehiculos, url_prefix = '/condiciones_sanitarias_vehiculos')
+app.register_blueprint(monitoreoAgua, url_prefix = '/monitoreo_agua')
 
 # Definiendo la ruta por defecto
 @app.route('/')

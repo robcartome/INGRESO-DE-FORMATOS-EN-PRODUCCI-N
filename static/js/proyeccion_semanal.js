@@ -273,7 +273,6 @@ function GuardarProyeccion() {
     });
 }
 
-// Función de filtro para el historial de proyecciones
 function filterHistory() {
     // Obtener la fecha seleccionada en el input de tipo date
     let input = document.getElementById("filter").value;
@@ -282,38 +281,51 @@ function filterHistory() {
     // Convertir la fecha seleccionada al formato "yyyy-mm-dd" para la comparación
     let filterDate = new Date(input).toISOString().split('T')[0];
 
-    // Obtener todas las cards en el acordeón
-    let cards = document.getElementById("acordionProyeccionesFinalizadas").getElementsByClassName("card");
+    // Obtener la tabla específica usando su ID
+    let table = document.getElementById("productionTable");
 
-    for (let i = 0; i < cards.length; i++) {
-        let btn = cards[i].getElementsByTagName("button")[0];
-        if (btn) {
-            // Obtener las fechas de inicio y fin en el formato "dd/mm/yyyy - dd/mm/yyyy"
-            let text = btn.textContent || btn.innerText;
-            let dateRange = text.match(/\d{2}\/\d{2}\/\d{4}/g);
-
-            if (dateRange) {
-                // Convertir las fechas de rango a "yyyy-mm-dd" para comparar
-                let startDate = formatDateToISO(dateRange[0]);
-                let endDate = formatDateToISO(dateRange[1]);
-
-                // Verificar si la fecha seleccionada está dentro del rango
-                if (filterDate >= startDate && filterDate <= endDate) {
-                    cards[i].style.display = "";
-                } else {
-                    cards[i].style.display = "none";
-                }
-            } else {
-                cards[i].style.display = "none"; // Si no hay fechas, ocultar el card
-            }
-        }
+    // Verificar si la tabla existe
+    if (!table) {
+        console.error("No se encontró la tabla con el ID 'productionTable'.");
+        return;
     }
+
+    // Obtener todas las filas del cuerpo de la tabla
+    let rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+        // Obtener las celdas de las fechas de inicio y fin
+        let startDateCell = row.querySelector("td:nth-child(4)"); // Columna de inicio
+        let endDateCell = row.querySelector("td:nth-child(5)");   // Columna de fin
+
+        if (startDateCell && endDateCell) {
+            // Extraer y convertir las fechas a formato "yyyy-mm-dd"
+            let startDate = formatDateToISO(startDateCell.textContent.trim());
+            let endDate = formatDateToISO(endDateCell.textContent.trim());
+
+            // Verificar si la fecha seleccionada está dentro del rango
+            if (filterDate >= startDate && filterDate <= endDate) {
+                row.style.display = ""; // Mostrar fila
+            } else {
+                row.style.display = "none"; // Ocultar fila
+            }
+        } else {
+            row.style.display = "none"; // Si no hay fechas, ocultar la fila
+        }
+    });
 }
 
-// Función para convertir "dd/mm/yyyy" a "yyyy-mm-dd" para la comparación
-function formatDateToISO(dateStr) {
-    let [day, month, year] = dateStr.split('/');
-    return `${year}-${month}-${day}`;
+
+// Función auxiliar para convertir fechas en formato "dd/mm/yyyy" a "yyyy-mm-dd"
+function formatDateToISO(dateString) {
+    // Si la fecha ya está en formato "yyyy-mm-dd", devolverla directamente
+    if (dateString.includes("-")) {
+        return dateString;
+    }
+
+    // Dividir la fecha en día, mes y año
+    let [day, month, year] = dateString.split("/");
+    return `${year}-${month}-${day}`; // Retornar en formato "yyyy-mm-dd"
 }
 
 function registerObservation(idproyeccion){

@@ -19,7 +19,6 @@
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
-
 <body>
 
     <!-- Header con Navbar fija en la parte superior -->
@@ -62,8 +61,12 @@
                             Control de cloro residual en agua
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('condiciones_sanitarias_vehiculos.condicionesSanitariasVehiculos') }}">
-                            <img src="{{ url_for('static', filename='img/vehiculo.png') }}" alt="Control de cloro residual en agua" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/vehiculo.png') }}" alt="Control de las condiciones sanitarias de los vehículos de transporte" width="20" height="20" class="mr-2">
                             Control de las condiciones sanitarias de los vehículos de transporte
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('monitoreoAgua.monitoreo_agua') }}">
+                            <img src="{{ url_for('static', filename='img/monitoreo_agua.png')}}" alt="Monitoreo de la calidad de agua" width="20" height="20" class="mr-2">
+                            Monitoreo de la calidad de agua
                         </a>
                     </div>
                 </li>

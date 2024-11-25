@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Proyección semanal{% endblock %}
+{% block title %}Proyección por periodos{% endblock %}
 
 {% block content %}
 
@@ -74,16 +74,11 @@
         <p>Finalizando proyección semanal, por favor espera...</p>
     </div>
 
-    <!-- Proyección Semanal -->
+    <!-- Proyección por periodos -->
     <div class="card shadow-sm mb-4">
         <div class="card-header card-header-custom" style="background-color: #FF8C00;">
             <h5 class="mb-0 text-center">
-                Proyección
-                {% if proyeccion %}
-                    {{ proyeccion[0].semana }}
-                {% else %}
-                    (Sin proyección generada para esta semana)
-                {% endif %}
+                Proyección por periodos
             </h5>
         </div>
 
@@ -249,7 +244,7 @@
 
             <!-- Tabla de registros -->
             <div class="table-responsive mt-3">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered" id="productionTable">
                     <thead class="text-white text-center" style="background-color: #FF8C00;">
                         <tr>
                             <th>Producto</th>

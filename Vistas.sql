@@ -621,23 +621,54 @@ JOIN
 LEFT JOIN
 	acciones_correctivas ac ON ac.idaccion_correctiva = dv.fk_id_accion_correctiva;
 
-DROP VIEW v_detalle_condiciones_vehiculos
-
-SELECT * FROM v_detalle_condiciones_vehiculos
-
-SELECT * FROM public.verificaciones_vehiculos
-
-SELECT * FROM public.headers_formats
-	
-SELECT * FROM detalles_condiciones_sanitarias_vehiculos_transporte
-
-SELECT * FROM v_detalle_condiciones_vehiculos 
-SELECT * FROM asignacion_detalles_condiciones_sanitarias_vehiculos
-
 SELECT id_header_format 
 FROM headers_formats 
 WHERE estado = 'CREADO' AND headers_formats.fk_idtipoformatos = 11
 	
+SELECT SUM(salida) AS total_salidas
+FROM public.detalles_kardex
+WHERE fecha = '2024-11-21'::date;
+
+CREATE OR REPLACE VIEW v_detalles_monitoreos_calidad_agua AS
+SELECT
+	mc.iddetalle_monitoreo_calidad_agua,
+	mc.resultado,
+	COALESCE(mc.observaciones, '-') AS observaciones,
+	mc.fk_id_tipo_control_calidad_agua,
+	tc.detalle_control,
+	tc.unidad,
+	tc.detection_limit,
+	hf.id_header_format,
+	hf.estado,
+	hf.fecha
+FROM
+	detalles_monitoreos_calidad_agua mc
+JOIN
+	headers_formats hf ON mc.fk_id_header_format = hf.id_header_format
+JOIN
+	public.tipos_controles_calidad_agua tc ON mc.fk_id_tipo_control_calidad_agua = tc.id_tipo_control_calidad_agua;
+
+DROP VIEW v_detalles_monitoreos_calidad_agua
+
+SELECT * FROM detalles_monitoreos_calidad_agua
+	
+SELECT
+    fecha,
+    estado,
+    json_agg(
+        json_build_object(
+            'iddetalle_monitoreo_calidad_agua', iddetalle_monitoreo_calidad_agua,
+            'detalle_control', detalle_control,
+            'unidad', unidad,
+            'detection_limit', detection_limit,
+            'resultado', resultado
+        )
+    ) AS registros
+FROM v_detalles_monitoreos_calidad_agua
+WHERE estado = 'FINALIZADO'
+GROUP BY fecha, estado
+ORDER BY fecha;
+
 SELECT
 	mes,
 	anio,
@@ -651,11 +682,12 @@ SELECT
 	)) AS registros
 FROM v_headers_formats
 GROUP BY mes, anio
-SELECT * FROM v_headers_formats
 
-SELECT fecha FROM detalles_controles_cloro_residual_agua
-SELECT * FROM detalles_kardex
+SELECT * FROM v_headers_formats
 	
-SELECT SUM(salida) AS total_salidas
-FROM public.detalles_kardex
-WHERE fecha = '2024-11-21'::date;
+SELECT COUNT(*) AS total
+FROM (SELECT DISTINCT fecha 
+	FROM v_detalles_monitoreos_calidad_agua
+	WHERE estado = 'CERRADO') AS distinct_date;
+
+select * from public.headers_formats
