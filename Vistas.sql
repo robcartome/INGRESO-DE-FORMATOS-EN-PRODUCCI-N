@@ -665,23 +665,9 @@ SELECT
         )
     ) AS registros
 FROM v_detalles_monitoreos_calidad_agua
-WHERE estado = 'FINALIZADO'
+WHERE estado = 'CERRADO'
 GROUP BY fecha, estado
 ORDER BY fecha;
-
-SELECT
-	mes,
-	anio,
-	json_agg(json_build_object(
-		'id_header_format', id_header_format,
-		'mes', mes,
-		'anio', anio,
-		'estado', estado,
-		'fk_idarea', fk_idarea,
-		'detalle_area', detalle_area
-	)) AS registros
-FROM v_headers_formats
-GROUP BY mes, anio
 
 SELECT * FROM v_headers_formats
 	
