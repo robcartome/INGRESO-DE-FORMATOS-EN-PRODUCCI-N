@@ -21,7 +21,7 @@ def condicionesAmbientales():
     if request.method == 'GET':
         try:
             # Obtener toas las áreas
-            query_areas = "SELECT * FROM areas"
+            query_areas = "SELECT * FROM areas WHERE idarea BETWEEN 1 AND 4;"
             areas = execute_query(query_areas)
 
             query_vista_condiciones_ambientales = "SELECT * FROM v_condiciones_ambientales WHERE estado = 'CREADO'"
@@ -99,7 +99,7 @@ def condicionesAmbientales():
                                     v_finalizados_CA=v_finalizados_CA,
                                     page=page,
                                     total_pages=total_pages)
-            
+        
         except Exception as e:
             print(f"Error al obtener datos: {e}")
             return render_template('control_condiciones_ambientales.html')
@@ -185,7 +185,6 @@ def registrar_condiciones_ambientales():
         print(f"Error al agregar detalle de condiciones ambientales: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al registrar el control de condición ambiental.'}), 500
 
-    
 
 @condiciones_ambientales.route('/detalles_condiciones_ambientales/<int:id_ca>', methods=['GET'])
 def detalles_condiciones_ambientales(id_ca):
@@ -195,7 +194,7 @@ def detalles_condiciones_ambientales(id_ca):
     area = quer_area[0]['fk_idarea']
     
     # Obtener los detalles de la condición ambiental
-    query_detalle_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY iddetalle_ca DESC"
+    query_detalle_CA = "SELECT * FROM v_detalle_control_CA WHERE idcondicionambiental = %s ORDER BY fecha DESC"
     detalle_CA = execute_query(query_detalle_CA, (id_ca,))
 
     # Obtener las asignaciones de verificación previa para cada detalle
@@ -320,7 +319,7 @@ def descargar_formato_CA(idCA):
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    file_name=f"{title_report}"
+    file_name=f"{title_report.replace(' ','-')}--{mes}--{anio}--{nombre_area.replace(' ','-')}--F"
     return generar_reporte(template, file_name)
 
 @condiciones_ambientales.route('/download_formats', methods=['GET'])
@@ -389,7 +388,7 @@ def download_formats():
 
             # Generar el nombre del archivo basado en la cabecera
             title_report = cabecera[0]['nombreformato']
-            file_name = f"{nombre_formato}-{mes}-{anio}.pdf"
+            file_name = f"{title_report.replace(' ','-')}--{mes}--{anio}--{nombre_formato.replace(' ','-')}--F.pdf"
             
             # Renderizar la plantilla HTML para el reporte
             logo_path = os.path.join('static', 'img', 'logo.png')

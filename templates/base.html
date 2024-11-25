@@ -19,7 +19,6 @@
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
-
 <body>
 
     <!-- Header con Navbar fija en la parte superior -->
@@ -42,20 +41,32 @@
                             Lavado de manos
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('limpieza_areas.limpiezaAreas') }}">
-                            <img src="{{ url_for('static', filename='img/limpieza.png') }}" alt="Lavado de manos" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/limpieza.png') }}" alt="Limpieza y desinfección de las áreas" width="20" height="20" class="mr-2">
                             Limpieza y desinfección de las áreas
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('limpieza_equipos_medicion.limpiezaEquiposMedicion') }}">
-                            <img src="{{ url_for('static', filename='img/medicion.png') }}" alt="Lavado de manos" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/medicion.png') }}" alt="Limpieza y desinfección de equipos de medición" width="20" height="20" class="mr-2">
                             Limpieza y desinfección de equipos de medición
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('registro_monitoreo_insectos.registroMonitoreoInsectos') }}">
-                            <img src="{{ url_for('static', filename='img/insectos.png') }}" alt="Lavado de manos" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/insectos.png') }}" alt="Registro y monitoreo de insectos" width="20" height="20" class="mr-2">
                             Registro y monitoreo de insectos
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('registro_monitoreo_roedores.registroMonitoreoRoedores') }}">
-                            <img src="{{ url_for('static', filename='img/roedores.png') }}" alt="Lavado de manos" width="20" height="20" class="mr-2">
+                            <img src="{{ url_for('static', filename='img/roedores.png') }}" alt="Registro y monitoreo de roedores" width="20" height="20" class="mr-2">
                             Registro y monitoreo de roedores
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('control_cloro_residual.control_cloro_residual') }}">
+                            <img src="{{ url_for('static', filename='img/control_agua.png') }}" alt="Control de cloro residual en agua" width="20" height="20" class="mr-2">
+                            Control de cloro residual en agua
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('condiciones_sanitarias_vehiculos.condicionesSanitariasVehiculos') }}">
+                            <img src="{{ url_for('static', filename='img/vehiculo.png') }}" alt="Control de las condiciones sanitarias de los vehículos de transporte" width="20" height="20" class="mr-2">
+                            Control de las condiciones sanitarias de los vehículos de transporte
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('monitoreoAgua.monitoreo_agua') }}">
+                            <img src="{{ url_for('static', filename='img/monitoreo_agua.png')}}" alt="Monitoreo de la calidad de agua" width="20" height="20" class="mr-2">
+                            Monitoreo de la calidad de agua
                         </a>
                     </div>
                 </li>
@@ -97,7 +108,18 @@
                         </a>
                         <a class="dropdown-item d-flex align-items-center" href="{{ url_for('proyeccion_semanal.proyeccion_semanal') }}">
                             <img src="{{ url_for('static', filename='img/proyeccion.png') }}" alt="Proyección Semanal" width="20" height="20" class="mr-2">
-                            Proyección semanal
+                            Proyecciones
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown"> 
+                    <a class="nav-link dropdown-toggle" href="#" id="repositorioIFP" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #FF4500;">
+                        REPOSITORIO
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="proyectDropdown">
+                        <a class="dropdown-item d-flex align-items-center" href="{{ url_for('repositorio_IFP.repositorio_IFP') }}">
+                            <img src="{{ url_for('static', filename='img/repositorio.png') }}" alt="Repositorio" width="20" height="20" class="mr-2">
+                            Repositorio de documentos
                         </a>
                     </div>
                 </li>

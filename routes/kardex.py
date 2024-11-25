@@ -322,7 +322,7 @@ def descargar_formato_kardex(id_kardex):
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    file_name=f"{title_report} - {kardex[0]['mes']} - {kardex[0]['descripcion_producto']}"
+    file_name=f"{title_report}--{kardex[0]['mes']}--{kardex[0]['anio']}--{kardex[0]['descripcion_producto'].replace(' ', '-')}--F"
     return generar_reporte(template, file_name)
 
 
@@ -402,7 +402,7 @@ def finalizar_todos_productos_kardex():
     except Exception as e:
         print(f"Error al finalizar el kardex: {e}")
         return jsonify({'status': 'error', 'message': 'Ocurrió un error al finalizar el kardex.'}), 500
-    
+
 @kardex.route('/download_formats', methods=['GET'])
 def download_formats():
     try:
@@ -450,7 +450,7 @@ def download_formats():
             )
             
             # Generamos el PDF usando la función generar_reporte
-            file_name = f"{title_report} - {kardex[0]['mes']} - {kardex[0]['descripcion_producto']}.pdf"
+            file_name=f"{title_report}--{kardex[0]['mes']}--{kardex[0]['anio']}--{kardex[0]['descripcion_producto'].replace(' ', '-')}--F.pdf"
             pdf_response = generar_reporte(template, file_name)
             
             # Extraemos el contenido del PDF de la respuesta

@@ -20,7 +20,10 @@ def lavado_Manos():
     if request.method == 'GET':
         try:
             # Obtener los registros necesarios
-            query_lavado_manos = """SELECT * FROM v_lavados_manos WHERE estado = 'CREADO' ORDER BY idmano DESC"""
+            query_lavado_manos = """SELECT * 
+                                    FROM v_lavados_manos 
+                                    WHERE estado = 'CREADO' 
+                                    ORDER BY fecha DESC, hora DESC;"""
             lavado_manos = execute_query(query_lavado_manos)
 
             query_trabajadores = "SELECT idtrabajador, CONCAT(nombres, ' ', apellidos) AS nombres FROM trabajadores WHERE estado_trabajador = 'ACTIVO'"
@@ -40,8 +43,6 @@ def lavado_Manos():
             
             query_historialLavadoMano = f"SELECT * FROM v_historial_lavado_manos ORDER BY idlavadomano DESC LIMIT {per_page} OFFSET {offset}"
             historialLavadoMano = execute_query(query_historialLavadoMano)
-            
-            print(historialLavadoMano)
 
             return render_template('lavado_manos.html', 
                                     formatos=formatos, 
@@ -306,6 +307,6 @@ def download_formato():
         fecha_periodo=get_ultimo_dia_laboral_del_mes()
     )
 
-    filename=f"REPORTE DE LAVADO DE MANOS - {mes} - {anio}"
+    filename=f"REPORTE-DE-LAVADO-DE-MANOS--{mes}--{anio}--F"
     return generar_reporte(template, filename)
 

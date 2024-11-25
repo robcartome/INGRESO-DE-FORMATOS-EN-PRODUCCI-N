@@ -114,6 +114,8 @@ LEFT JOIN
 JOIN
     condiciones_ambientales ca ON ca.idcondicionambiental = d.fk_idcondicion_ambiental;
 
+SELECT * FROM v_detalle_control_CA
+
 -- REGISTRO Y CONTROL DE ENVASADOS
 
 CREATE OR REPLACE VIEW v_historial_registros_controles_envasados AS
@@ -221,7 +223,7 @@ SELECT
     d.observaciones,
 	ac.idaccion_correctiva,
     COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
-	ac.estado AS estado_medida_correctiva,
+	COALESCE(ac.estado, '-') AS estado_medida_correctiva,
     d.fk_idcontrol_higiene_personal,
 	hp.estado
 FROM
@@ -233,6 +235,7 @@ JOIN
 JOIN
     controles_higiene_personal hp ON hp.id_control_higiene_personal = d.fk_idcontrol_higiene_personal;
 
+select * from v_detalle_higiene_personal
 -- << PARA LIMPIEZA Y DESINFECCIÓN DE LAS ÁREAS >> --
 
 CREATE OR REPLACE VIEW v_verificacion_limpieza_desinfeccion_areas AS
@@ -454,18 +457,17 @@ SELECT
 	m.unidad_equivalencia,
     p.idproducto,
     p.descripcion_producto,
+	p.stock,
 	m.unidades_por_equivalencia
 FROM
     min_max m
 JOIN
     productos p ON p.idproducto = m.fk_id_productos;
 
-
 DROP VIEW v_min_max
-
 SELECT * FROM v_min_max
 	
-
+SELECT * FROM public.proyeccion_semanal
 
 CREATE OR REPLACE VIEW v_proyeccion_semanal AS
 SELECT
@@ -475,52 +477,37 @@ SELECT
     pro.idproducto,
     pro.descripcion_producto,
     pro.stock,
+	m.minimo_und,
+	m.maximo_und,
     CEIL(CAST(m.equivalencia AS NUMERIC) * CAST(p.proyeccion AS NUMERIC))::TEXT || ' ' || m.unidad_equivalencia AS equivalencia_unidades,
     CAST(m.conversion_und AS NUMERIC) AS kgs,
     m.equivalencia,
     CAST(m.unidades_por_equivalencia AS NUMERIC) AS unidades,
 	CEIL((CAST(m.equivalencia AS NUMERIC) * CAST(p.proyeccion AS NUMERIC))) AS equivalenciauni,
-    proyect.idprojection,
-    proyect.estado,
-    proyect.semana,
-	p.dia
+	p.dia,
+	p.inicio_date,
+	p.fin_date,
+	p.estado,
+	p.producido_en_periodo,
+	p.producido_fuera_periodo,
+	COALESCE(p.observacion, ' ') AS observacion
 FROM
     proyeccion_semanal p
 JOIN
     productos pro ON pro.idproducto = p.fk_id_productos
 JOIN
     min_max m ON pro.idproducto = m.fk_id_productos
-JOIN
-    proyeccion proyect ON proyect.idprojection = p.fk_proyeccion
 ORDER BY
     p.idproyeccion;
 
+SELECT * FROM v_proyeccion_semanal
+
 DROP VIEW v_proyeccion_semanal
 
-SELECT * FROM v_proyeccion_semanal
-
-
-SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = 20 AND date_insertion BETWEEN '2024-10-21' AND '2024-10-26'
-
-SELECT * FROM proyeccion WHERE estado = 'CERRADO'
-        ORDER BY idprojection
-
-SELECT * FROM v_proyeccion_semanal
-            WHERE estado = 'CERRADO'
-SELECT * FROM proyeccion WHERE estado = 'CREADO'
-
-SELECT SUM(cantidad_producida) FROM v_registros_controles_envasados WHERE idproducto = %s AND date_insertion BETWEEN %s AND %s
-
-SELECT * FROM v_historial_registros_controles_envasados WHERE fecha = '2024-10-31'
-
-SELECT * FROM public.detalles_kardex WHERE fecha= '31/10/2024'
-
-SELECT * FROM public.kardex
-
 SELECT COUNT(*) AS total
-                        FROM (SELECT DISTINCT mes, anio 
-                            FROM v_historial_registros_controles_envasados 
-                            WHERE estado = 'CERRADO') AS distinct_months_years
+FROM (SELECT DISTINCT mes, anio 
+	FROM v_historial_registros_controles_envasados 
+	WHERE estado = 'CERRADO') AS distinct_months_years
 
 SELECT 
 	mes, 
@@ -555,5 +542,152 @@ FROM (SELECT DISTINCT mes, anio
 	FROM v_kardex 
 	WHERE estado = 'CERRADO') AS distinct_months_years;
 	
-SELECT * FROM public.lavadosmanos
-SELECT * FROM public.detalle_lavados_manos ORDER BY idmano
+SELECT * FROM detalles_controles_cloro_residual_agua
+
+CREATE OR REPLACE VIEW v_detalles_controles_cloro_residual_agua AS
+SELECT
+	d.id_detalle_control_cloro_residual_agua,
+	d.fecha,
+	d.hora,
+	d.lectura,
+	COALESCE(d.observacion, '-') AS observacion,
+	a.idaccion_correctiva,
+	COALESCE(a.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
+	COALESCE(a.estado, '-') AS estado_accion_correctiva,
+	h.id_header_format,
+	h.estado AS estado_formato
+FROM
+	detalles_controles_cloro_residual_agua d
+JOIN
+	headers_formats h ON h.id_header_format = d.fk_id_header_format
+LEFT JOIN
+	acciones_correctivas a ON a.idaccion_correctiva = d.fk_id_accion_correctiva;
+
+drop view v_proyeccion_semanal
+
+SELECT fecha, hora, lectura, observacion, detalle_accion_correctiva, estado_Accion_correctiva 
+FROM v_detalles_controles_cloro_residual_agua 
+WHERE estado_formato = 'CREADO'
+
+CREATE OR REPLACE VIEW v_headers_formats AS
+SELECT
+	f.id_header_format,
+    TO_CHAR(TO_DATE(f.mes || ' ' || f.anio, 'MM YYYY'), 'TMMonth') AS mes,
+    f.anio,
+	f.estado,
+	f.fk_idtipoformatos,
+	f.empresa_monitoreo_calidad_agua,
+	f.fk_idarea,
+	a.detalle_area
+FROM
+    headers_formats f
+LEFT JOIN
+	areas a ON f.fk_idarea = a.idarea
+ORDER BY
+	f.anio DESC, f.mes DESC;
+
+SELECT * FROM motivos_sanitarios_vehiculos
+
+SELECT * FROM v_headers_formats
+
+SELECT COUNT(*) AS total
+FROM (SELECT DISTINCT mes, anio 
+	FROM v_headers_formats 
+	WHERE estado = 'CERRADO' AND fk_idtipoformatos = 12) AS distinct_months_years
+	
+SELECT * FROM public.detalles_condiciones_sanitarias_vehiculos_transporte
+
+-- VISTA PARA LAS CONDICIONE SANITARIAS DE VEHICULOS DE TRANSPORTE
+CREATE OR REPLACE VIEW v_detalle_condiciones_vehiculos AS
+SELECT
+	dv.id_detalle_condicion_sanitaria_vehiculo_transporte,
+	dv.fecha,
+	mv.detalle_motivo_vehiculo,
+	dv.documento_referencia,
+	dv.total_bultos,
+	tv.detalle_tipo_vehiculo,
+	dv.num_placa_vehiculo,
+	dv.fk_id_header_format,
+	COALESCE(dv.observacion, '-') AS observacion,
+	ac.idaccion_correctiva,
+	COALESCE(ac.detalle_accion_correctiva, '-') AS detalle_accion_correctiva,
+	ac.estado AS estado_ac
+FROM
+	detalles_condiciones_sanitarias_vehiculos_transporte dv
+JOIN
+	motivos_sanitarios_vehiculos mv ON mv.id_motivo_sanitario_vehiculo = dv.fk_id_motivo_sanitario_vehiculo
+JOIN
+	tipos_vehiculos tv ON tv.id_tipo_vehiculo = dv.fk_id_tipo_vehiculo
+LEFT JOIN
+	acciones_correctivas ac ON ac.idaccion_correctiva = dv.fk_id_accion_correctiva;
+
+SELECT id_header_format 
+FROM headers_formats 
+WHERE estado = 'CREADO' AND headers_formats.fk_idtipoformatos = 11
+	
+SELECT SUM(salida) AS total_salidas
+FROM public.detalles_kardex
+WHERE fecha = '2024-11-21'::date;
+
+CREATE OR REPLACE VIEW v_detalles_monitoreos_calidad_agua AS
+SELECT
+	mc.iddetalle_monitoreo_calidad_agua,
+	mc.resultado,
+	COALESCE(mc.observaciones, '-') AS observaciones,
+	mc.fk_id_tipo_control_calidad_agua,
+	tc.detalle_control,
+	tc.unidad,
+	tc.detection_limit,
+	hf.id_header_format,
+	hf.estado,
+	hf.fecha
+FROM
+	detalles_monitoreos_calidad_agua mc
+JOIN
+	headers_formats hf ON mc.fk_id_header_format = hf.id_header_format
+JOIN
+	public.tipos_controles_calidad_agua tc ON mc.fk_id_tipo_control_calidad_agua = tc.id_tipo_control_calidad_agua;
+
+DROP VIEW v_detalles_monitoreos_calidad_agua
+
+SELECT * FROM detalles_monitoreos_calidad_agua
+	
+SELECT
+    fecha,
+    estado,
+    json_agg(
+        json_build_object(
+            'iddetalle_monitoreo_calidad_agua', iddetalle_monitoreo_calidad_agua,
+            'detalle_control', detalle_control,
+            'unidad', unidad,
+            'detection_limit', detection_limit,
+            'resultado', resultado
+        )
+    ) AS registros
+FROM v_detalles_monitoreos_calidad_agua
+WHERE estado = 'FINALIZADO'
+GROUP BY fecha, estado
+ORDER BY fecha;
+
+SELECT
+	mes,
+	anio,
+	json_agg(json_build_object(
+		'id_header_format', id_header_format,
+		'mes', mes,
+		'anio', anio,
+		'estado', estado,
+		'fk_idarea', fk_idarea,
+		'detalle_area', detalle_area
+	)) AS registros
+FROM v_headers_formats
+GROUP BY mes, anio
+
+SELECT * FROM v_headers_formats
+	
+SELECT COUNT(*) AS total
+FROM (SELECT DISTINCT fecha 
+	FROM v_detalles_monitoreos_calidad_agua
+	WHERE estado = 'CERRADO') AS distinct_date;
+
+select * from public.headers_formats

@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Monitoreo de la calidad de agua{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Monitoreo de la calidad de agua</h1>
+
+    <!-- Botón de Generar Formato -->
+    {% if not formato_MCA %}
+    <!-- Generar el formato -->
+    <form enctype="multipart/form-data">
+        <div class="form-row mb-4 text-center">
+            <div class="col-lg-6 col-md-6 mb-3">
+                <label for="LaboratorioRegister" class="font-weight-bold" style="color: #FF8C00;">Ingrese el laboratorio:</label>
+                <input type="text" class="form-control" id="LaboratorioRegister" name="LaboratorioRegister" placeholder="Ingrese el laboratorio" required>
+            </div>
+            <div class="col-lg-6 col-md-6 mb-3">
+                <label for="fecha_format_creation" class="font-weight-bold" style="color: #FF8C00;">Ingrese la fecha para la creación del formato:</label>
+                <input type="date" class="form-control" name="fecha_format_creation" id="fecha_format_creation" required>
+            </div>
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm"
+                    style="background-color: #FF7043; color: white; border-radius: 10px;"
+                    onclick="generarFormatoMCA()">
+                    <i class="fas fa-download fa-lg mr-2">
+                        GENERAR FORMATO
+                    </i>
+                </button>
+            </div>
+            <!-- Botón de Historial -->
+            <div class="col-lg-6 col-md-6 mb-3">
+                <button type="button" class="btn btn-lg btn-block shadow-sm" 
+                    style="background-color: #FFDAB9; color: #FF8C00; border: 2px solid #FF8C00; border-radius: 10px;" 
+                    data-toggle="modal" data-target="#historialMCAModal">
+                    <i class="fas fa-history fa-lg mr-2"></i> HISTORIAL
+                </button>
+            </div>
+        </div>
+    </form>
+    {% endif %}
+
+    {% if formato_MCA %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header text-white" style="background-color: #FF8C00;">
+            <h5 class="mb-0">Registro de Control de Monitoreo de la Calidad de Agua</h5>
+        </div>
+        <div class="card-body">
+
+            
+            <!-- Botón de Registro -->
+            <div class="mb-3 text-end">
+                <button type="button" class="btn btn-lg shadow-sm" 
+                    style="background-color: #FFC107; color: white; border-radius: 10px;" 
+                    onclick="registrarFormatoCalidadAgua()">
+                    <i class="fas fa-save fa-lg me-2"></i> Registrar
+                </button>
+                <button type="button" class="btn btn-lg shadow-sm" 
+                    style="background-color: #FF7043; color: white; border-radius: 10px;" 
+                    onclick="finalizarRegistro()">
+                    <i class="fas fa-check-circle fa-lg me-2"></i> Finalizar
+                </button>
+            </div>
+
+            <!-- Loader -->
+            <div id="loader" class="text-center" style="display: none;">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="sr-only">Actualizando...</span>
+                </div>
+                <p>Guardando cambios, por favor espera...</p>
+            </div>
+            
+            <!-- Tabla -->
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" id="TableMCA">
+                    <thead style="background-color: #FF8C00; color: white;">
+                        <tr class="text-center">
+                            <th>Descripción</th>
+                            <th>Unidad</th>
+                            <th>Límite de detección</th>
+                            <th>Resultado</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Iterar sobre cada tipo de control -->
+                        {% for t in tipos_controles %}
+                        <tr data-id="{{ t.id_tipo_control_calidad_agua }}">
+                            <td class="text-center">{{ t.detalle_control }}</td>
+                            <td class="text-center">{{ t.unidad }}</td>
+                            <td class="text-center">{{ t.detection_limit }}</td>
+                            {% set detalle = detalles | selectattr('fk_id_tipo_control_calidad_agua', 'equalto', t.id_tipo_control_calidad_agua) | list %}
+                            <td>
+                                <input
+                                    type="number" 
+                                    name="resultado_register" 
+                                    class="form-control form-control-sm text-center {% if detalle and detalle[0].resultado > t.detection_limit %}text-danger{% endif %}" 
+                                    placeholder="Registra el resultado"
+                                    step="0.01"
+                                    value="{{ detalle[0].resultado if detalle else '' }}"
+                                />
+                            </td>
+                            <td>
+                                <input 
+                                    type="text" 
+                                    name="observaciones_register" 
+                                    class="form-control form-control-sm text-center" 
+                                    placeholder="Añadir observaciones"
+                                    value="{{ detalle[0].observaciones if detalle else '' }}"
+                                />
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>                       
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Selección para mostrar los registros ya finalizados -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header text-white" style="background-color: #ff0000;">
+            <h5 class="mb-0">Historial de los registros finalizados de monitoreo de calidad de agua</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label for="filtrarCACLOSE" class="text-warning">Filtrar por mes:</label>
+                    <input type="date" id="filtrarCACLOSE" class="form-control" onchange="filterByDate()">
+                </div>
+            </div>            
+            <div id="accordionFinalizados">
+                {% for grupo in finalizados%}
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center" id="heading{{ grupo.fecha }}" style="background-color: #FFD700; color: #000;">
+                        <div>
+                            <button class="btn btn-link text-dark font-weight-bold" data-toggle="collapse" data-target="#collapse{{ grupo.fecha }}" aria-expanded="true" aria-controls="collapse{{ grupo.fecha }}">
+                                Registro de la fecha {{ grupo.fecha }}
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <!-- Botón para descargar formatos -->
+                            <button 
+                                type="button" 
+                                class="btn btn-info btn-sm mr-2" 
+                                style="background-color: #FF8C00;" 
+                                onclick="downloadFormats('{{ grupo.fecha }}')">
+                                <i class="fas fa-file-download"></i> Descargar formato
+                            </button>
+                        </div>
+                    </div>
+                    <div id="collapse{{ grupo.fecha }}" class="collapse" aria-labelledby="heading{{ grupo.fecha }}" data-parent="#accordionFinalizados">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="tableCloseCA_{{ grupo.anio }}_{{ grupo.mes }}">
+                                <thead style="background-color: #ff0000; color: white;">
+                                    <tr class="text-center">
+                                        <th>Descripción</th>
+                                        <th>Unidad</th>
+                                        <th>Límite de detección</th>
+                                        <th>Resultado</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ca in grupo.registros %}
+                                    <tr class="text-center">
+                                        <td>{{ ca.detalle_control }}</td>
+                                        <td>{{ ca.unidad }}</td>
+                                        <td>{{ ca.detection_limit }}</td>
+                                        <td>{{ ca.resultado }}</td>
+                                        <td>{{ ca.observaciones }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Paginador -->
+            <div class="pagination-container mt-4 d-flex justify-content-center">
+                <ul class="pagination">
+                    <!-- Botón de página anterior -->
+                    {% if page > 1 %}
+                        <li class="page-item">
+                            <a href="{{ url_for('monitoreoAgua.monitoreo_agua', page=page - 1) }}" class="page-link">Anterior</a>
+                        </li>
+                    {% endif %}
+                    <!-- Páginas iniciales -->
+                    {% if total_pages > 7 %}
+                        {% for p in range(1, min(4, total_pages + 1)) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="{{ url_for('monitoreoAgua.monitoreo_agua', page=p) }}" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        {% if page > 4 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                        
+                        <!-- Páginas alrededor de la página actual -->
+                        {% for p in range(max(1, page - 2), min(page + 3, total_pages + 1)) %}
+                            {% if p > 3 and p < total_pages - 2 %}
+                                <li class="page-item {% if p == page %}active{% endif %}">
+                                    <a href="{{ url_for('monitoreoAgua.monitoreo_agua', page=p) }}" class="page-link">{{ p }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+            
+                        {% if page < total_pages - 3 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                        
+                        <!-- Páginas finales -->
+                        {% for p in range(max(total_pages - 2, 4), total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="{{ url_for('monitoreoAgua.monitoreo_agua', page=p) }}" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Si hay menos de 7 páginas, mostrar todas las páginas -->
+                        {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a href="{{ url_for('monitoreoAgua.monitoreo_agua', page=p) }}" class="page-link">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+            
+                    <!-- Botón de página siguiente -->
+                    {% if page < total_pages %}
+                        <li class="page-item">
+                            <a href="{{ url_for('monitoreoAgua.monitoreo_agua', page=page + 1) }}" class="page-link">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/monitoreo_calidad_agua.js') }}"></script>
+
+{% endblock %}

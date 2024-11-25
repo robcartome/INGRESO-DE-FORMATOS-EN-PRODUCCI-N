@@ -225,12 +225,14 @@ function GuardarProyeccion() {
         let row = rows[i];
         let id = row.getAttribute('data-id');
         let proyeccion_register = row.querySelector('input[name="proyeccion_register"]').value;
-        let selectSemana = row.querySelector('select[name="selectSemana"]').value;
+        let inicio = row.querySelector('input[name="fechaInicio"]').value;
+        let fin = row.querySelector('input[name="fechaFin"]').value;
 
         cambios.push({
             idproyeccion: id,
             proyeccion_register: proyeccion_register,
-            selectSemana: selectSemana
+            inicioFecha : inicio,
+            finFecha : fin
         });
     }
 
@@ -271,7 +273,6 @@ function GuardarProyeccion() {
     });
 }
 
-// Función de filtro para el historial de proyecciones
 function filterHistory() {
     // Obtener la fecha seleccionada en el input de tipo date
     let input = document.getElementById("filter").value;
@@ -280,95 +281,106 @@ function filterHistory() {
     // Convertir la fecha seleccionada al formato "yyyy-mm-dd" para la comparación
     let filterDate = new Date(input).toISOString().split('T')[0];
 
-    // Obtener todas las cards en el acordeón
-    let cards = document.getElementById("acordionProyeccionesFinalizadas").getElementsByClassName("card");
+    // Obtener la tabla específica usando su ID
+    let table = document.getElementById("productionTable");
 
-    for (let i = 0; i < cards.length; i++) {
-        let btn = cards[i].getElementsByTagName("button")[0];
-        if (btn) {
-            // Obtener las fechas de inicio y fin en el formato "dd/mm/yyyy - dd/mm/yyyy"
-            let text = btn.textContent || btn.innerText;
-            let dateRange = text.match(/\d{2}\/\d{2}\/\d{4}/g);
-
-            if (dateRange) {
-                // Convertir las fechas de rango a "yyyy-mm-dd" para comparar
-                let startDate = formatDateToISO(dateRange[0]);
-                let endDate = formatDateToISO(dateRange[1]);
-
-                // Verificar si la fecha seleccionada está dentro del rango
-                if (filterDate >= startDate && filterDate <= endDate) {
-                    cards[i].style.display = "";
-                } else {
-                    cards[i].style.display = "none";
-                }
-            } else {
-                cards[i].style.display = "none"; // Si no hay fechas, ocultar el card
-            }
-        }
+    // Verificar si la tabla existe
+    if (!table) {
+        console.error("No se encontró la tabla con el ID 'productionTable'.");
+        return;
     }
-}
 
-// Función para convertir "dd/mm/yyyy" a "yyyy-mm-dd" para la comparación
-function formatDateToISO(dateStr) {
-    let [day, month, year] = dateStr.split('/');
-    return `${year}-${month}-${day}`;
-}
+    // Obtener todas las filas del cuerpo de la tabla
+    let rows = table.querySelectorAll("tbody tr");
 
+    rows.forEach(row => {
+        // Obtener las celdas de las fechas de inicio y fin
+        let startDateCell = row.querySelector("td:nth-child(4)"); // Columna de inicio
+        let endDateCell = row.querySelector("td:nth-child(5)");   // Columna de fin
 
+        if (startDateCell && endDateCell) {
+            // Extraer y convertir las fechas a formato "yyyy-mm-dd"
+            let startDate = formatDateToISO(startDateCell.textContent.trim());
+            let endDate = formatDateToISO(endDateCell.textContent.trim());
 
-const itemsPerPage = 5; // Número de semanas por página
-        let currentPage = 1;
-    
-        // Función para cargar las semanas paginadas
-        function loadHistoryPage(page = 1) {
-            currentPage = page;
-            fetch(`/proyeccion_semanal/historial?page=${page}&itemsPerPage=${itemsPerPage}`)
-                .then(response => response.json())
-                .then(data => {
-                    renderHistory(data.weeks);
-                    renderPagination(data.totalPages, page);
-                });
+            // Verificar si la fecha seleccionada está dentro del rango
+            if (filterDate >= startDate && filterDate <= endDate) {
+                row.style.display = ""; // Mostrar fila
+            } else {
+                row.style.display = "none"; // Ocultar fila
+            }
+        } else {
+            row.style.display = "none"; // Si no hay fechas, ocultar la fila
         }
-    
-        // Renderizar la lista de semanas
-        function renderHistory(weeks) {
-            const container = document.getElementById('acordionProyeccionesFinalizadas');
-            container.innerHTML = '';
-            weeks.forEach((week, index) => {
-                container.innerHTML += `
-                    <div class="card mb-3">
-                        <div class="card-header bg-warning" id="heading${index}">
-                            <h6 class="mb-0">
-                                <button class="btn btn-link text-white p-0 font-weight-bold" onclick="loadWeekDetails(${week.id})">
-                                    Proyección de la Semana: ${week.semana}
-                                </button>
-                            </h6>
-                        </div>
-                    </div>`;
+    });
+}
+
+
+// Función auxiliar para convertir fechas en formato "dd/mm/yyyy" a "yyyy-mm-dd"
+function formatDateToISO(dateString) {
+    // Si la fecha ya está en formato "yyyy-mm-dd", devolverla directamente
+    if (dateString.includes("-")) {
+        return dateString;
+    }
+
+    // Dividir la fecha en día, mes y año
+    let [day, month, year] = dateString.split("/");
+    return `${year}-${month}-${day}`; // Retornar en formato "yyyy-mm-dd"
+}
+
+function registerObservation(idproyeccion){
+    Swal.fire({
+        title: 'Registrar Observación',
+        input: 'textarea',
+        inputLabel: 'Describe la observación correspondiente',
+        inputPlaceholder: 'Por favor, redacta aquí la observación. Asegurate de incluir el motivo por el cual se produjo fuera del periodo correspondiente si es el caso.',
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: (observacion) => {
+            if (!observacion) {
+                Swal.showValidationMessage('Por favor, ingresa una observación para continuar');
+                return false;
+            }
+            return observacion;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const observacion = result.value;
+            fetch(`/proyeccion_semanal/register_observation/${idproyeccion}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    observacion: observacion
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire(
+                        'Guardado',
+                        'La observación ha sido registrada con éxito.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error',
+                        data.message || 'Hubo un error al registrar la observación. Por favor, inténtelo nuevamente.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                Swal.fire(
+                    'Error',
+                    'Hubo un error al procesar la solicitud. Por favor, inténtelo nuevamente.',
+                    'error'
+                );
             });
         }
-    
-        // Renderizar los controles de paginación
-        function renderPagination(totalPages, currentPage) {
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                pagination.innerHTML += `
-                    <li class="page-item ${i === currentPage ? 'active' : ''}">
-                        <a class="page-link" href="javascript:loadHistoryPage(${i})">${i}</a>
-                    </li>`;
-            }
-        }
-    
-        // Cargar detalles de una semana en el modal
-        function loadWeekDetails(weekId) {
-            fetch(`/proyeccion_semanal/detalle/${weekId}`)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('detalleSemanaContent').innerHTML = data;
-                    $('#detalleSemanaModal').modal('show');
-                });
-        }
-    
-        // Cargar la primera página al iniciar
-        loadHistoryPage();
+    });
+}

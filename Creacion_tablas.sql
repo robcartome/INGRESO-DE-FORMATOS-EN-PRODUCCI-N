@@ -359,3 +359,81 @@ CREATE TABLE IF NOT EXISTS proyeccion_semanal (
 	fk_proyeccion INT REFERENCES public.proyeccion(idprojection) NOT NULL
 );
 
+-- CREACIÓN DE UNA CABECERA PARA LOS NUEVOS FORMATOS
+CREATE TABLE IF NOT EXISTS headers_formats (
+	id_header_format SERIAL PRIMARY KEY,
+	mes VARCHAR(2) NOT NULL,
+	anio VARCHAR(4) NOT NULL,
+	estado VARCHAR(20) NOT NULL,
+	fk_id_tipo_formato INT REFERENCES public.tiposformatos(idtipoformato) NOT NULL,
+	empresa_monitoreo_calidad_agua VARCHAR(30) NULL
+);
+
+CREATE TABLE IF NOT EXISTS detalles_controles_cloro_residual_agua (
+	id_detalle_control_cloro_residual_agua SERIAL PRIMARY KEY,
+	fecha DATE NOT NULL,
+	hora TIME NOT NULL,
+	lectura DOUBLE PRECISION NOT NULL,
+	Observacion VARCHAR(50) NULL,
+	fk_id_accion_correctiva INT REFERENCES public.acciones_correctivas(idaccion_correctiva) NULL,
+	fk_id_header_format INT REFERENCES public.headers_formats(id_header_format) NOT NULL,
+	fk_idarea INT REFERENCES public.areas(idarea) NULL
+);
+
+ALTER TABLE public.headers_formats
+ADD COLUMN fk_idarea INT REFERENCES public.areas(idarea) NULL;
+
+
+-- PARA EL FORMATO DE CONDICIONES SANITARIAS DE VEHÍCULOS DE TRANSPORTE
+
+CREATE TABLE IF NOT EXISTS motivos_sanitarios_vehiculos (
+	id_motivo_sanitario_vehiculo SERIAL PRIMARY KEY,
+	detalle_motivo_vehiculo VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tipos_vehiculos (
+	id_tipo_vehiculo SERIAL PRIMARY KEY,
+	detalle_tipo_vehiculo VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS verificaciones_vehiculos (
+	id_verificion_vehiculos SERIAL PRIMARY KEY,
+	detalle_verificacion_vehiculos VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS detalles_condiciones_sanitarias_vehiculos_transporte (
+	id_detalle_condicion_sanitaria_vehiculo_transporte SERIAL PRIMARY KEY,
+	fecha DATE NOT NULL,
+	fk_id_motivo_sanitario_vehiculo INT REFERENCES motivos_sanitarios_vehiculos(id_motivo_sanitario_vehiculo) NOT NULL,
+	documento_referencia VARCHAR(30) NOT NULL,
+	total_bultos DOUBLE PRECISION NOT NULL,
+	fk_id_tipo_vehiculo INT REFERENCES tipos_vehiculos(id_tipo_vehiculo) NOT NULL,
+	num_placa_vehiculo VARCHAR(10) NOT NULL,
+	fk_id_header_format INT REFERENCES public.headers_formats(id_header_format) NOT NULL,
+	observacion VARCHAR(80) NULL,
+	fk_id_accion_correctiva INT REFERENCES public.acciones_correctivas(idaccion_correctiva) NULL
+);
+
+CREATE TABLE IF NOT EXISTS asignacion_detalles_condiciones_sanitarias_vehiculos (
+	id_asignacion_detalle_condicion_sanitaria_vehiculo SERIAL PRIMARY KEY,
+	fk_id_detalle_condicion_sanitaria_vehiculo INT REFERENCES detalles_condiciones_sanitarias_vehiculos_transporte(id_detalle_condicion_sanitaria_vehiculo_transporte) NOT NULL,
+	fk_id_verificion_vehiculos INT REFERENCES verificaciones_vehiculos(id_verificion_vehiculos) NOT NULL
+);
+
+-- Para el formato "Monitoreo de la calidad de agua"
+
+CREATE TABLE IF NOT EXISTS tipos_controles_calidad_agua (
+	id_tipo_Control_calidad_agua SERIAL PRIMARY KEY,
+	detalle_control VARCHAR(45) NOT NULL,
+	unidad VARCHAR(10) NOT NULL,
+	detection_limit DOUBLE PRECISION NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS detalles_monitoreos_calidad_agua (
+	idDetalle_monitoreo_calidad_agua SERIAL PRIMARY KEY,
+	Resultado DOUBLE PRECISION NOT NULL,
+	observaciones VARCHAR(80) NULL,
+	fk_id_tipo_Control_calidad_agua INT REFERENCES tipos_controles_calidad_agua(id_tipo_Control_calidad_agua) NOT NULL,
+	fk_id_header_format INT REFERENCES public.headers_formats(id_header_format) NOT NULL
+);
+

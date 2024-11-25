@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Repositorio IFP{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilo para resaltar cada elemento del acordeón al pasar el cursor */
+    .accordion-item-hover:hover {
+        border-left: 4px solid #ff0000; /* Color y tamaño de la línea guía */
+        background-color: #fffbd5; /* Fondo para que se destaque */
+        padding-left: 8px; /* Alinea el contenido al agregar el borde */
+        transition: background-color 0.1s ease, border-color 0.3s ease; /* Suaviza el efecto */
+    }
+</style>
+
+<div class="container-fluid mt-1">
+    <h1 class="mb-4 text-center" style="color: #FF8C00;">Repositorio de documentos del IFP</h1>
+
+    <!-- Cargar documentos firmados -->
+    <div id="cargaDocumentosIFP">
+        <div class="card mb-4 shadow-sm" style="border-radius: 10px; background-color: #f9f9f9;">
+            <div class="card-header bg-warning text-white" style="border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="mb-0 text-center">Carga documentos firmados para el repositorio</h5>
+            </div>
+            <div class="card-body">
+                <form id="formCargaDocumento" enctype="multipart/form-data">
+                    <div class="d-flex align-items-center justify-content-center gap-3">
+                        <!-- Input para selección de múltiples archivos PDF -->
+                        <div class="form-group flex-grow-1">
+                            <label for="archivosPDF" class="form-label fw-bold">Seleccione los documentos PDF firmados:</label>
+                            <input type="file" class="form-control" id="archivosPDF" name="archivosPDF" accept=".pdf" multiple required>
+                        </div>
+                        <!-- Botón de carga -->
+                        <button type="button" class="btn btn-success d-flex align-items-center px-4 py-2" style="border-radius: 50px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);" onclick="sendFileIFP()">
+                            <i class="fas fa-upload me-2"></i> Cargar Documentos
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div id="loagDocument" class="align-items-center justify-content-center p-2" style="display: none; border-radius: 2px;">
+                <div class="spinner-border text-danger me-2" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+                <small class="fw-bold text-dark p-2">Subiendo archivos al repositorio... Por favor espere.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Repositorio de Documentos -->
+    <div class="card mb-4 shadow-sm" style="border-radius: 10px; background-color: #f9f9f9;">
+        <div class="container-fluid mt-5">
+            <div class="card-header text-white text-center" style="background-color: #FF8C00; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h2>Repositorio de Documentos</h2>
+            </div>
+            <!-- Filtro de selección de mes y año -->
+            <div class="row justify-content-center my-4">
+                <div class="col-md-4">
+                    <label for="mesAnioFiltro" class="form-label fw-bold">Seleccione el Mes y Año:</label>
+                    <input type="month" class="form-control" id="mesAnioFiltro">
+                </div>
+                <div class="col-md-2 d-flex align-items-center justify-content-center">
+                    <button id="filterButton" class="btn btn-warning mt-3 px-4 py-2" style="border-radius: 50px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">Cargar documentos</button>
+                </div>
+            </div>
+
+            <div id="loagDocumentSubidos" class="align-items-center justify-content-center p-2" style="display: none; border-radius: 2px;">
+                <div class="spinner-border text-danger me-2" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+                <small class="fw-bold text-dark p-2">Cargando documentos... Por favor espere.</small>
+            </div>
+
+            <!-- Lista de documentos agrupados en un acordeón -->
+            <div id="accordionDocumentos" class="accordion mt-4">
+                <!-- Se cargará de manera dinamica según corresponda -->
+            </div>
+
+            <!-- Modal para previsualizar documentos -->
+            <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content" style="max-height: 100vh; display: flex; flex-direction: column;">
+                        <div class="modal-header bg-warning text-white">
+                            <h5 class="modal-title" id="previewModalLabel">Previsualización del Documento</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-0" style="height: calc(85vh - 56px);">
+                            <iframe id="pdfViewer" src="" width="100%" height="100%"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/repositorio.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+{% endblock %}

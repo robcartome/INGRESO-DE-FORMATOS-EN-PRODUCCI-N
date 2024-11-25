@@ -1,0 +1,227 @@
+/* Efecto de oscurecimiento */
+.btn-hover-darken:hover {
+    filter: brightness(0.9); /* Oscurece el botón un poco */
+    transition: 0.2s ease-in-out; /* Efecto de transición suave */
+}
+.card-header-custom {
+    color: white;
+    font-weight: bold;
+}
+
+/* Colores para verificar el estado del producto */
+.por-debajo-minimo {
+    background-color: #ffcccc; /* Rosa pálido */
+    color: #991f1f; /* Rojo oscuro para texto */
+}
+
+.dentro-rango {
+    background-color: #fff4cc; /* Amarillo pálido */
+    color: #996c1f; /* Marrón cálido para texto */
+}
+
+.por-arriba-maximo {
+    background-color: #ccffe5; /* Verde menta */
+    color: #1f664d; /* Verde oscuro para texto */
+}
+
+.guardar-button {
+    font-family: inherit;
+    font-size: 16px; /* Reducir tamaño de fuente */
+    background: #ffd043;
+    color: white;
+    fill: white;
+    padding: 0.5em 0.8em; /* Reducir padding */
+    padding-left: 0.7em;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centrar contenido */
+    cursor: pointer;
+    border: none;
+    border-radius: 12px; /* Ajustar borde redondeado */
+    font-weight: 700; /* Reducir peso */
+    width: 200px; /* Ajusta el ancho del botón */
+}
+
+.guardar-button span {
+    display: block;
+    margin-left: 0.2em; /* Reducir margen */
+    transition: all 0.3s ease-in-out;
+}
+
+.guardar-button svg {
+    display: block;
+    width: 25px; /* Reducir tamaño del ícono */
+    height: 25px; /* Reducir tamaño del ícono */
+    transform-origin: center center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.guardar-button:hover {
+    background: #FFC107;
+}
+
+.guardar-button:hover .svg-wrapper {
+    transform: scale(1.25);
+    transition: 0.5s linear;
+}
+
+.guardar-button:hover svg {
+    transform: translateX(1.8em) scale(1.1); /* Ajuste menor al movimiento */
+    fill: #fff;
+}
+
+.guardar-button:hover span {
+    opacity: 0;
+    transition: 0.5s linear;
+}
+
+.guardar-button:active {
+    transform: scale(0.95);
+}
+
+.guardar-button:active svg {
+    transform: translateX(0) scale(1); /* Centrar nube */
+    fill: white; /* Asegurar el color de la nube */
+}
+
+/* PAra el boton de agregar producto */
+.button-add-product {
+    position: relative;
+    width: 200px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border: 1px solid #10df1a;
+    background-color: #41ff07;
+    border-radius: 12px;
+}
+
+.button-add-product, .button_icon_add_producto, .button_text_add_producto {
+    transition: all 0.3s;
+}
+
+.button-add-product .button_text_add_producto {
+    transform: translateX(60px);
+    color: #fff;
+    font-weight: 600;
+}
+
+.button-add-product .button_icon_add_producto {
+    position: absolute;
+    transform: translateX(155px);
+    height: 100%;
+    width: 39px;
+    background-color: #10df1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: width 0.3s, transform 0.3s;
+}
+
+.button-add-product .svg-add-product {
+    width: 80px;
+    stroke: #fff;
+    transition: transform 0.3s; /* Agrega la transición de escala */
+}
+
+.button-add-product:hover {
+    background: #10df1a;
+}
+
+.button-add-product:hover .button_text_add_producto {
+    color: transparent;
+}
+
+.button-add-product:hover .button_icon_add_producto {
+    width: 180px;
+    transform: translateX(0);
+}
+
+.button-add-product:hover .svg-add-product {
+    transform: scale(1.5); /* Escala el icono al 130% de su tamaño */
+}
+
+.button-add-product:active .button_icon_add_producto {
+    background-color: #10df1a;
+}
+
+.button-add-product:active {
+    border: 1px solid #10df1a;
+}
+
+/* Estilo del botón "Quitar" */
+.bin-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 55px;
+    height: 55px;
+    border-radius: 15px;
+    background-color: rgb(255, 95, 95);
+    cursor: pointer;
+    border: 3px solid rgb(255, 201, 201);
+    transition-duration: 0.3s;
+}
+
+.bin-bottom {
+    width: 15px;
+}
+
+.bin-top {
+    width: 17px;
+    transform-origin: right;
+    transition-duration: 0.3s;
+}
+
+.bin-button:hover .bin-top {
+    transform: rotate(45deg);
+}
+
+.bin-button:hover {
+    background-color: rgb(255, 0, 0);
+}
+
+.bin-button:active {
+    transform: scale(0.9);
+}
+
+
+/* Estilo del botón "Ojo" */
+.eye-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    background-color: #ff8c00ad;
+    cursor: pointer;
+    border: 3px solid #FF8C00;
+    transition-duration: 0.3s;
+    overflow: hidden;
+    position: relative;
+}
+
+.eye-icon {
+    width: 40px;
+    height: 40px;
+    transition: transform 0.3s ease, scale 0.3s ease;
+}
+
+/* Animación al pasar el ratón */
+.eye-button:hover .eye-icon {
+    transform: scale(1.2); /* Agrandar el ojo */
+}
+
+.eye-button:hover {
+    background-color: #FF8C00;
+    box-shadow: 0 0 8px #a15900;
+}
+
+.eye-button:active {
+    transform: scale(0.9);
+    background-color: #f7e817;
+}
