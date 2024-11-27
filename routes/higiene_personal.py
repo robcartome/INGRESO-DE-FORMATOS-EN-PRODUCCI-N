@@ -1,6 +1,5 @@
 import os
 import calendar
-import locale
 
 from flask import Blueprint, render_template, request, jsonify
 from connection.database import execute_query

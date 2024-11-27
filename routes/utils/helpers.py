@@ -2,6 +2,7 @@ import base64
 import pdfkit
 import calendar
 import shutil
+import os
 
 from flask import make_response
 from connection.database import execute_query
@@ -62,49 +63,62 @@ def generar_reporte(template, filename_report='Reporte_sin_nombre', orientation=
 
     Args:
         template (str): El contenido HTML de la plantilla a renderizar.
-        orientation (str): La orientación del PDF ('portrait' para vertical, 'landscape' para horizontal).
+        filename_report (str): El nombre del archivo PDF a generar (sin extensión).
+        orientation (str): La orientación del PDF ('portrait' o 'landscape').
 
     Returns:
         Flask Response: Una respuesta HTTP con el contenido del PDF generado.
     """
     try:
+        # Validar entrada
+        if not template or not isinstance(template, str):
+            raise ValueError("El contenido HTML de la plantilla no puede estar vacío y debe ser una cadena válida.")
 
         # Configuración de pdfkit con la ruta del ejecutable wkhtmltopdf WINDOWS
-        wkhtmltopdf_path = "tools/wkhtmltox/bin/wkhtmltopdf.exe"
+        # wkhtmltopdf_path = os.path.join('tools', 'wkhtmltox', 'bin', 'wkhtmltopdf.exe')
 
-        # Detecta automáticamente la ruta de wkhtmltopdf en docker
+        # Detectar ruta de wkhtmltopdf, # Detecta automáticamente la ruta de wkhtmltopdf en docker
         wkhtmltopdf_path = shutil.which("wkhtmltopdf")
-
         if wkhtmltopdf_path is None:
-            raise FileNotFoundError("No se encontró wkhtmltopdf en el sistema.")
+            raise FileNotFoundError("No se encontró wkhtmltopdf en el sistema. Por favor, instálalo o verifica su ruta.")
 
-        # Definir opciones para la generación del PDF
+        # footer_path = os.path.join('templates', 'reports', 'footer_template.html')
+
+        # Configuración de opciones para pdfkit
         options = {
             'page-size': 'A4',
             'margin-top': '0.4cm',
             'margin-right': '0.4cm',
-            'margin-bottom': '1cm',
+            'margin-bottom': '2cm',
             'margin-left': '0.4cm',
             'encoding': 'UTF-8',
-            'enable-local-file-access': None,
-            'orientation': 'landscape' if orientation.lower() == 'landscape' else 'portrait'
+            'enable-local-file-access': None,  # Requerido en entornos Docker
+            'orientation': 'landscape' if orientation.lower() == 'landscape' else 'portrait',
+            # 'footer-html': footer_path
         }
 
-        # Configuración de pdfkit con la ruta detectada
+        # Configuración del ejecutable wkhtmltopdf
         config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
-        # Generar el PDF en memoria desde la cadena HTML de la plantilla
-        pdf_content = pdfkit.from_string(
-            template, False, configuration=config, options=options)
+        pdf_content = pdfkit.from_string(template, False, configuration=config, options=options)
 
-        # Crear la respuesta HTTP con el contenido PDF
+        # Crear respuesta HTTP con el contenido PDF
         response = make_response(pdf_content)
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'attachment; filename={filename_report}.pdf'
         return response
+
+    except FileNotFoundError as fnfe:
+        print(f"Error: {fnfe}")
+        return make_response("Error: wkhtmltopdf no está instalado o no se encuentra disponible.", 500)
+
+    except ValueError as ve:
+        print(f"Error de validación: {ve}")
+        return make_response("Error: el contenido de la plantilla HTML es inválido.", 400)
+
     except Exception as e:
-        print(f"Error al generar el reporte: {e}")
-        return make_response("Error al generar el reporte.", 500)
+        print(f"Error inesperado al generar el reporte: {e}")
+        return make_response("Error inesperado al generar el reporte.", 500)
 
 
 def get_ultimo_dia_laboral_del_mes(mes=None, año=None):

@@ -1,7 +1,7 @@
 import os
 import io
 import zipfile
-import locale
+
 from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from .utils.constans import BPM
@@ -13,7 +13,6 @@ from datetime import datetime
 
 ########## PARA REGISTRO Y CONTROL DE ENVASADOS ###################################################################################
 
-locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8') 
 
 controlEnvasados = Blueprint('control_envasados', __name__)
 
