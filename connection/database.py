@@ -5,9 +5,7 @@ import os
 def get_db_connection():
     try:
         host = os.getenv('host')
-        # database = os.getenv('database')
-        # database = 'PruebasProduccion'
-        database = 'IngresoFormatosProduccion'
+        database = os.getenv('database')
         user = os.getenv('user')
         password = os.getenv('password')
         port = os.getenv('port')
