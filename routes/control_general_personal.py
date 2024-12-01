@@ -7,11 +7,12 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image, Spacer, Frame, PageTemplate, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+from auth.auth import login_require
 import io
 
 
 controlGeneral = Blueprint('control_general', __name__)
-
+@login_require
 @controlGeneral.route('/', methods=['GET', 'POST'])
 def control_general():
     if request.method == 'GET':

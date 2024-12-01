@@ -9,11 +9,13 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
+from auth.auth import login_require
 
 
 registro_monitoreo_roedores = Blueprint('registro_monitoreo_roedores', __name__)
 
 @registro_monitoreo_roedores.route('/', methods=['GET'])
+@login_require
 def registroMonitoreoRoedores():
     try:
         # Obtener las verificaciones en estado creado

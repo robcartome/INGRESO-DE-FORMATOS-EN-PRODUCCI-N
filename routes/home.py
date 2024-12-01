@@ -2,10 +2,12 @@ from flask import Blueprint, render_template, jsonify, request, send_file
 import pandas as pd
 from io import BytesIO
 from connection.database import execute_query
+from auth.auth import login_require
 
 home = Blueprint('home', __name__)
 
 @home.route('/', methods=['GET'])
+@login_require
 def principal():
     productos = execute_query("""SELECT 
                                     ROW_NUMBER() OVER (ORDER BY idproducto) AS contador,
@@ -90,6 +92,7 @@ def descargar_inventario():
 
 
 @home.route('/update', methods=['POST'])
+@login_require
 def update_product():
     try:
         # Obtener datos del formulario

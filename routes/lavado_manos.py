@@ -10,12 +10,14 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
+from auth.auth import login_require
 
 ########## PARA LAVADO_MANOS.HTML ###################################################################################
 
 lavadoMano = Blueprint('lavado_Manos', __name__)
 
 @lavadoMano.route('/', methods=['GET', 'POST'])
+@login_require
 def lavado_Manos():
     if request.method == 'GET':
         try:

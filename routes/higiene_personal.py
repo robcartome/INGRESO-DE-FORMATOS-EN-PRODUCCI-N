@@ -9,11 +9,13 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
+from auth.auth import login_require
 
 
 higienePersona = Blueprint('higiene_personal', __name__)
 
 @higienePersona.route('/', methods=['GET'])
+@login_require
 def higiene_personal():
     try:
         #Obtener si existe el registro de control de envasados creado

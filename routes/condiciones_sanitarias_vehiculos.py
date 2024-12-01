@@ -2,10 +2,13 @@ from flask import Blueprint, render_template, request, jsonify, send_file
 from connection.database import execute_query
 from datetime import datetime
 from datetime import time
+from auth.auth import login_require
+
 
 condiciones_sanitarias_vehiculos = Blueprint('condiciones_sanitarias_vehiculos', __name__)
 
 @condiciones_sanitarias_vehiculos.route('/', methods=['GET', 'POST'])
+@login_require
 def condicionesSanitariasVehiculos():
     if request.method == 'GET':
         try:

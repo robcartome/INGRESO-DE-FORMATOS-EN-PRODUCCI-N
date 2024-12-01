@@ -9,10 +9,12 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
+from auth.auth import login_require
 
 kardex = Blueprint('kardex', __name__)
 
 @kardex.route('/', methods=['GET', 'POST'])
+@login_require
 def kardex_info():
     if request.method == 'GET':
         try:

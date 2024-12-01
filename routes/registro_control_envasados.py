@@ -10,6 +10,7 @@ from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
 from datetime import datetime
+from auth.auth import login_require
 
 ########## PARA REGISTRO Y CONTROL DE ENVASADOS ###################################################################################
 
@@ -17,6 +18,7 @@ from datetime import datetime
 controlEnvasados = Blueprint('control_envasados', __name__)
 
 @controlEnvasados.route('/', methods=['GET'])
+@login_require
 def control_envasados():
     try:
         # Obtener datos principales

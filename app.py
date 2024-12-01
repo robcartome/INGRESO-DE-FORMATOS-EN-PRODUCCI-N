@@ -1,4 +1,6 @@
+import os
 from flask import Flask, redirect
+from dotenv import load_dotenv
 
 # Rutas
 from routes.home import home
@@ -18,10 +20,13 @@ from routes.repositorio import repositorioIFP
 from routes.control_cloro_residual_agua import controlCloroResidual
 from routes.condiciones_sanitarias_vehiculos import condiciones_sanitarias_vehiculos
 from routes.monitoreo_calidad_agua import monitoreoAgua
+from auth.auth import auth_bp
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
 
 # Llamar a las rutas
+app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(home, url_prefix="/home")
 app.register_blueprint(lavadoMano, url_prefix = "/lavado_Manos")
 app.register_blueprint(controlGeneral, url_prefix='/control_general')
@@ -46,5 +51,5 @@ def default():
     return redirect('/home')
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run()
+    app.run(host='0.0.0.0', port=5001, debug=True)
+    # app.run()

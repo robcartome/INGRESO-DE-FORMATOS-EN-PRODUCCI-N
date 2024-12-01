@@ -10,11 +10,13 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
+from auth.auth import login_require
 
 
 limpieza_equipos_medicion = Blueprint('limpieza_equipos_medicion', __name__)
 
 @limpieza_equipos_medicion.route('/', methods=['GET'])
+@login_require
 def limpiezaEquiposMedicion():
     try:
         # Obtener las verificaciones en estado creado

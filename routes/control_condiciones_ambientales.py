@@ -12,11 +12,12 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
-
+from auth.auth import login_require
 
 condiciones_ambientales = Blueprint('condiciones_ambientales', __name__)
 
 @condiciones_ambientales.route('/', methods=['GET', 'POST'])
+@login_require
 def condicionesAmbientales():
     if request.method == 'GET':
         try:

@@ -133,6 +133,16 @@
                     </div>
                 </div>
             </form>
+
+        <!-- Contenedor para usuario y sesión -->
+        <div class="d-flex align-items-center ml-4">
+            {% if g.user %}
+                <span class="text-white mr-2">USER: {{ g.user }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
+                    Cerrar sesión
+                </a>
+            {% endif %}
+        </div>
         </div>
     </nav>
 
@@ -169,5 +179,8 @@
 <!-- JS de Select2 -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename = 'js/toasts.js') }}"></script>
+{% block script %}
+{% endblock %}
 </body>
 </html>

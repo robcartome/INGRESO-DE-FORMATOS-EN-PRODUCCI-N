@@ -11,11 +11,13 @@ from .utils.helpers import image_to_base64
 from .utils.helpers import generar_reporte
 from .utils.helpers import get_cabecera_formato
 from .utils.helpers import get_ultimo_dia_laboral_del_mes
+from auth.auth import login_require
 
 
 limpieza_areas = Blueprint('limpieza_areas', __name__)
 
 @limpieza_areas.route('/', methods=['GET'])
+@login_require
 def limpiezaAreas():
     try:
         # Obtener todas las áreas
